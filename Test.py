@@ -2,63 +2,59 @@ import numpy as np
 from matplotlib import pyplot as plt
 from pyESN import ESN
 
-# train_ctrl, train_output = frequency_control[:traintest_cutoff], frequency_output[:traintest_cutoff]
-# test_ctrl, test_output = frequency_control[traintest_cutoff:], frequency_output[traintest_cutoff:]
-
-input_size = 1000
+# train_epoch >> 1 + input_size + reservoir_size
+input_size = 10000
 delay_time = 1
-input_signal_raw = np.random.randint(0, 2, input_size).reshape(1, input_size)
+input_signal_raw = np.random.randint(0, 2, input_size).reshape(input_size, 1)
 y_train_signal = input_signal_raw
-if delay_time != 0:
-    for i2 in range(1, delay_time + 1):
-        temp_var1 = np.array(list(input_signal_raw)[-int(i2):] + list(input_signal_raw)[0:-i2])
+if int(delay_time) != 0:
+    for i2 in range(1, int(delay_time) + 1):
+        temp_var1 = np.array(list(input_signal_raw)[-int(i2):] + list(input_signal_raw)[0:-int(i2)])
         y_train_signal = temp_var1 + y_train_signal
         y_train_signal[y_train_signal == 2] = 0
-# y_train_signal = y_train_signal.reshape(input_size, 1)
-#
-input_size = 100
-input_signal_test = np.random.randint(0, 2, input_size)
-y_test_signal = input_signal_test
-if delay_time != 0:
-    for i2 in range(1, delay_time + 1):
-        temp_var1 = np.array(list(input_signal_test)[-int(i2):] + list(input_signal_test)[0:-i2])
-        y_test_signal = temp_var1 + y_test_signal
-        y_test_signal[y_test_signal == 2] = 0
-# y_test_signal = y_test_signal.reshape(input_size, 1)
+
+train_cutoff = int(np.ceil(0.9 * input_size))
+print(train_cutoff)
+y_train_signal = y_train_signal.reshape(-1, 1)
+input_test, input_train = input_signal_raw[train_cutoff:], input_signal_raw[0:train_cutoff]
+y_test, y_train = y_train_signal[train_cutoff:], y_train_signal[0:train_cutoff]
 
 esn = ESN(n_inputs=1,
           n_outputs=1,
-          n_reservoir=200,
-          spectral_radius=0.25,
+          n_reservoir=400,
+          spectral_radius=0.3,
           density=0.5,
           noise=0.001,
-          input_shift=[0],
-          input_scaling=[0.01],
-          teacher_scaling=1.12,
-          teacher_shift=-0.7,
-          out_activation=np.tanh,
-          inverse_out_activation=np.arctanh)
+          noise_ignore=True,
+          input_shift=0,
+          input_scaling=1,
+          teacher_scaling=1,
+          teacher_shift=0,
+          teacher_forcing=False)
 
-pre_train = esn.train(input_signal_raw, y_train_signal)
+pre_train = esn.train_frequency(input_train, y_train)
+pre_test = esn.test_parity(input_test)
+print('error:{}'.format(np.var(pre_test-y_test)))
 
-print("test error:")
-pre_test = esn.test(input_signal_raw)
-print(np.sqrt(np.mean((pre_test - y_test_signal) ** 2)))
+plt.figure('train')
+x_sequence = np.linspace(0, len(y_train)-1, len(y_train))
+plt.subplot(3, 1, 1)
+plt.plot(x_sequence[0:100], input_train[0:100], label='input')
+plt.ylabel('input')
+plt.subplot(3, 1, 2)
+plt.plot(x_sequence[0:100], y_train[0:100], label='target')
+plt.ylabel('target')
+plt.legend()
+plt.subplot(3, 1, 3)
+plt.plot(x_sequence[0:100], pre_train[0:100], label='model')
+plt.ylabel('output')
+plt.legend()
 
-plt.figure()
-# plt.plot(train_ctrl[window_tr, 1], label='control')
-plt.plot(y_train_signal, label='target')
-plt.plot(pre_train, label='model')
-plt.legend(fontsize='x-small')
-plt.title('training (excerpt)')
-plt.ylim([-0.1, 1.1])
-
-window_test = range(2000)
-plt.figure(figsize=(10, 1.5))
-# plt.plot(test_ctrl[window_test, 1], label='control')
-plt.plot(y_train_signal, label='target')
-plt.plot(pre_test, label='model')
-plt.legend(fontsize='x-small')
-plt.title('test (excerpt)')
-plt.ylim([-0.1, 1.1])
+plt.figure('test')
+plt.subplot(3, 1, 1)
+plt.plot(input_test[0:100])
+plt.subplot(3, 1, 2)
+plt.plot(y_test[0:100], label='target')
+plt.subplot(3, 1, 3)
+plt.plot(pre_test[0:100], label='model')
 plt.show()

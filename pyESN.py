@@ -1,4 +1,5 @@
 import sys
+import os
 import numpy as np
 import scipy.sparse
 import scipy.sparse.linalg
@@ -77,7 +78,7 @@ class ESN:
         # build the free parameters
         self.weight_state, self.weight_in, self.weight_feedback = None, None, None
         self.weight_out, self.last_input, self.last_output = None, None, None
-        self.last_state = None
+        self.last_state, self.states_reservoir = None, None
         self.init_weights()
 
     def init_weights(self):
@@ -87,14 +88,17 @@ class ESN:
         elg_value, elg_vector = scipy.sparse.linalg.eigs(weight_state)
         self.weight_state = weight_state / max(np.abs(elg_value)) * self.spectral_radius
         self.weight_state = self.weight_state.todense()
+        # input weight could be sparse, the function will be added in next version
         self.weight_in = np.random.rand(self.n_reservoir, self.n_inputs) * 2 - 1
         self.weight_feedback = np.random.rand(self.n_reservoir, self.n_outputs) * 2 - 1
+        self.weight_out = np.random.rand(self.n_outputs, self.n_reservoir+self.n_inputs+1) * 2 - 1
 
     def _update(self, state, input_pattern, output_pattern):
         """
         performs one update step.
         i.e., computes the next network state by applying the recurrent weights
         to the last state & and feeding in the current input and output patterns
+        return: the state of reservoir in next time interval
         """
         # feedback loop
         if self.teacher_forcing:
@@ -107,9 +111,11 @@ class ESN:
 
         # noise term
         if self.noise_ignore:
+            result = np.tanh(pre_activation)
             return np.tanh(pre_activation)
         else:
-            return np.tanh(pre_activation) + self.noise * (np.random.rand(self.n_reservoir) - 0.5)
+            result = np.tanh(pre_activation) + self.noise * (np.random.rand(1, self.n_reservoir) - 0.5)
+            return result
 
     def _scale_inputs(self, inputs):
         """
@@ -142,7 +148,7 @@ class ESN:
             teacher_scaled = teacher_scaled / self.teacher_scaling
         return teacher_scaled
 
-    def train(self, inputs, outputs, inspect=False):
+    def train_frequency(self, inputs, outputs, inspect=False):
         """
         Collect the network's reaction to training data, train readout weights.
         Args:
@@ -163,6 +169,7 @@ class ESN:
 
         print("harvesting states...")
         # step the reservoir through the given input,output pairs:
+        print(inputs.shape)
         states = np.zeros((inputs.shape[0], self.n_reservoir))
         for n in range(1, inputs.shape[0]):
             states[n, :] = self._update(states[n - 1, :], inputs_scaled[n, :], teachers_scaled[n - 1, :])
@@ -178,6 +185,7 @@ class ESN:
         if np.max(teachers_scaled) > 1 and self.out_activation == np.tanh:
             print('the magnitude of output signal is too large for tanh function !')
             sys.exit()
+
         self.weight_out = np.dot(np.linalg.pinv(extended_states[transient:, :]),
                                  self.inverse_out_activation(teachers_scaled[transient:, :])).T
 
@@ -197,7 +205,7 @@ class ESN:
         print("training error:{}".format(np.sqrt(np.var(pre_train - outputs))))
         return pre_train
 
-    def test(self, inputs, continuation=True):
+    def test_frequency(self, inputs, continuation=True):
         """
         Apply the learned weights to the network's reactions to new input.
         Args:
@@ -231,3 +239,85 @@ class ESN:
                                                                     bias_term[n + 1, :]])))
 
         return self._unscale_teacher(outputs[1:])
+
+    def train_parity(self, input_signals, target_signals, states_0=None):
+        """
+        Test of Parity Check Tasks
+            Args:
+                input_signals: signals of input channel
+                states_0: initial states of reservoir, which will equal zero if no any initial values
+                target_signals: target output pattern
+            Returns:
+                output_signals, error between output_signals and target_signals
+        """
+        # initial states of reservoirs
+        if states_0 is None:
+            states_0 = np.zeros((input_signals.shape[0], self.n_reservoir))
+        else:
+            states_0 = np.array(states_0).reshape(input_signals.shape[0], self.n_reservoir)
+
+        # updating weights of reservoirs
+        inputs_scaled = self._scale_inputs(input_signals)
+        teachers_scaled = self._scale_teacher(target_signals)
+
+        print("harvesting states...")
+        # step the reservoir through the given input,output pairs:
+        print(input_signals.shape)
+        states = np.zeros((input_signals.shape[0], self.n_reservoir))
+        for n in range(1, input_signals.shape[0]):
+            # print(teachers_scaled.shape)
+            states[n, :] = self._update(states[n - 1, :], inputs_scaled[n, :], teachers_scaled[n - 1, :])
+
+        print("fitting...")
+        # we'll disregard the first few states:
+        transient = min(int(input_signals.shape[1] / 10), 100)
+        # include the raw inputs:
+        bias_term = np.ones((input_signals.shape[0], 1))
+        extended_states = np.hstack((states, inputs_scaled, bias_term))
+
+        # Solve for W_out:
+        if np.max(teachers_scaled) > 1 and self.out_activation == np.tanh:
+            print('the magnitude of output signal is too large for tanh function !')
+            sys.exit()
+
+        self.weight_out = np.dot(np.linalg.pinv(extended_states[transient:, :]),
+                                 self.inverse_out_activation(teachers_scaled[transient:, :])).T
+
+        # remember the last state for later:
+        self.last_state = states[-1, :]
+        self.last_input = input_signals[-1, :]
+        self.last_output = teachers_scaled[-1, :]
+
+        pre_train = self._unscale_teacher(self.out_activation(np.dot(extended_states, self.weight_out.T)))
+        print("training error:{}".format(np.sqrt(np.var(pre_train - target_signals))))
+        return pre_train
+
+    def test_parity(self, input_signals, continuation=True):
+        # if os.path.exists('weight_readout_parity.npy'):
+        #     self.weight_out = np.load('weight_readout_parity.npy')
+        #     print('load matrix successfully !')
+
+        n_samples = input_signals.shape[0]
+
+        if continuation:
+            last_state = self.last_state
+            last_input = self.last_input
+            last_output = self.last_output
+        else:
+            last_state = np.zeros(self.n_reservoir)
+            last_input = np.zeros(self.n_inputs)
+            last_output = np.zeros(self.n_outputs)
+
+        inputs = np.vstack([last_input, self._scale_inputs(input_signals)])
+        states = np.vstack([last_state, np.zeros((n_samples, self.n_reservoir))])
+        outputs = np.vstack([last_output, np.zeros((n_samples, self.n_outputs))])
+        bias_term = np.ones((n_samples + 1, 1))
+
+        for n in range(n_samples):
+            states[n + 1, :] = self._update(states[n, :], inputs[n + 1, :], outputs[n, :])
+            outputs[n + 1, :] = self.out_activation(np.dot(self.weight_out,
+                                                           np.concatenate([states[n + 1, :], inputs[n + 1, :],
+                                                                           bias_term[n + 1, :]])))
+
+        return self._unscale_teacher(outputs[1:])
+

@@ -1,13 +1,12 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from pyESN import ESN
-import pylab as pl
 
 rng = np.random.RandomState(42)
 
 
 def frequency_generator(N, min_period, max_period, n_changepoints):
-    """returns a random step function with N changepoints
+    """returns a random step function with N change points
        and a sine wave signal that changes its frequency at
        each such step, in the limits given by min_ and max_period."""
     # vector of random indices < N, padded with 0 and N at the ends:
@@ -45,8 +44,8 @@ esn = ESN(n_inputs=2,
           n_outputs=1,
           n_reservoir=300,
           spectral_radius=0.2,
-          density=0.48,
-          noise=0.001,
+          density=0.47,
+          noise=0.0001,
           noise_ignore=True,
           input_shift=[0, 0],
           input_scaling=[-3, 3],
@@ -55,10 +54,10 @@ esn = ESN(n_inputs=2,
           out_activation=np.tanh,
           inverse_out_activation=np.arctanh)
 
-pred_train = esn.train(train_ctrl, train_output)
+pred_train = esn.train_frequency(train_ctrl, train_output)
 
 print("test error:")
-pred_test = esn.test(test_ctrl)
+pred_test = esn.test_frequency(test_ctrl)
 print(np.sqrt(np.mean((pred_test - test_output) ** 2)))
 plt.figure()
 # plt.plot(train_ctrl[window_tr,1],label='control')
