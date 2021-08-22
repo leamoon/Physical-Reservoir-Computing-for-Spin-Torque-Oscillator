@@ -3,8 +3,8 @@ from matplotlib import pyplot as plt
 from pyESN import ESN
 
 # train_epoch >> 1 + input_size + reservoir_size
-input_size = 10000
-delay_time = 1
+input_size = 1000
+delay_time = 2
 input_signal_raw = np.random.randint(0, 2, input_size).reshape(input_size, 1)
 y_train_signal = input_signal_raw
 if int(delay_time) != 0:
@@ -21,7 +21,7 @@ y_test, y_train = y_train_signal[train_cutoff:], y_train_signal[0:train_cutoff]
 
 esn = ESN(n_inputs=1,
           n_outputs=1,
-          n_reservoir=400,
+          n_reservoir=300,
           spectral_radius=0.3,
           density=0.5,
           noise=0.001,
@@ -52,9 +52,15 @@ plt.legend()
 
 plt.figure('test')
 plt.subplot(3, 1, 1)
-plt.plot(input_test[0:100])
+plt.plot(x_sequence[0:100], input_test[0:100])
+plt.ylabel('input')
+plt.legend()
 plt.subplot(3, 1, 2)
-plt.plot(y_test[0:100], label='target')
+plt.plot(x_sequence[0:100], y_test[0:100], label='target', color='red')
+plt.ylabel('target')
+plt.legend()
 plt.subplot(3, 1, 3)
-plt.plot(pre_test[0:100], label='model')
+plt.plot(x_sequence[0:100], pre_test[0:100], label='model', color='red')
+plt.ylabel('model')
+plt.legend()
 plt.show()

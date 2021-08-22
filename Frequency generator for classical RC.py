@@ -39,6 +39,7 @@ print(traintest_cutoff)
 train_ctrl, train_output = frequency_control[:traintest_cutoff], frequency_output[:traintest_cutoff]
 test_ctrl, test_output = frequency_control[traintest_cutoff:], frequency_output[traintest_cutoff:]
 print(len(test_output))
+print(train_ctrl)
 
 esn = ESN(n_inputs=2,
           n_outputs=1,

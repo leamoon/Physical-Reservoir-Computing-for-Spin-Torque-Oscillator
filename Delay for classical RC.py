@@ -4,11 +4,11 @@ from pyESN import ESN
 
 esn = ESN(n_inputs=1,
           n_outputs=1,
-          n_reservoir=400,
+          n_reservoir=300,
           spectral_radius=0.3,
           density=0.5,
-          noise=0.0001,
-          noise_ignore=False,
+          noise=0.001,
+          noise_ignore=True,
           input_shift=None,
           input_scaling=None,
           teacher_scaling=None,
@@ -41,7 +41,7 @@ print('test_error:{}'.format(np.var(target_test-pre_test)))
 plt.figure('train')
 x_sequence = np.linspace(0, len(target_train)-1, len(target_train))
 plt.subplot(3, 1, 1)
-plt.plot(x_sequence[0:100], input_train[0:100], label='input')
+plt.plot(x_sequence[0:100], input_train[0:100], label='input', color='red')
 plt.ylabel('input')
 plt.subplot(3, 1, 2)
 plt.plot(x_sequence[0:100], target_train[0:100], label='target')
@@ -55,8 +55,13 @@ plt.legend()
 plt.figure('test')
 plt.subplot(3, 1, 1)
 plt.plot(input_test[0:100])
+plt.ylabel('input_signals')
 plt.subplot(3, 1, 2)
-plt.plot(target_test[0:100], label='target')
+plt.plot(target_test[0:100], label='target', color='red')
+plt.ylabel('target')
+plt.legend()
 plt.subplot(3, 1, 3)
-plt.plot(pre_test[0:100], label='model')
+plt.plot(pre_test[0:100], label='model', color='red')
+plt.ylabel('model')
+plt.legend()
 plt.show()
