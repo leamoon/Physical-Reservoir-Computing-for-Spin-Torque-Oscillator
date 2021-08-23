@@ -22,8 +22,6 @@ step = int(time_end / t_step)
 M_s = 1  # saturation magnetization
 Volume = 1  # the volume of FL
 H_th = np.sqrt(2*K_B*T*alpha/(u0*t_step*gamma*M_s*Volume))
-H_th = 0
-print(H_th)
 
 
 def module_evolution(time_step, m_x, m_y, m_z, current_density, sample_points=50):

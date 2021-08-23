@@ -1,3 +1,5 @@
+# the code applies another method to build a MTJ echo state network
+
 import numpy as np
 import matplotlib.pyplot as plt
 import device_module as dm

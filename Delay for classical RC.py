@@ -4,7 +4,7 @@ from pyESN import ESN
 
 esn = ESN(n_inputs=1,
           n_outputs=1,
-          n_reservoir=300,
+          n_reservoir=50,
           spectral_radius=0.3,
           density=0.5,
           noise=0.001,
@@ -17,7 +17,7 @@ esn = ESN(n_inputs=1,
 
 # train_epoch >> 1 + input_size + reservoir_size
 input_size = 10000
-delay_time = 2
+delay_time = 6
 index_slide = input_size/4*3
 input_signal_raw = np.random.randint(0, 2, input_size)
 if delay_time != 0:

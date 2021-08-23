@@ -37,7 +37,9 @@ def train_stm(a0, b0, c0, delay_time=1, nodes_number_stm=50, train_epoch=1, bias
         weight_out_stm = np.random.randint(-1, 2, (1, nodes_number_stm + 1))
         print('\r weight matrix of STM created successfully !', end='', flush=True)
 
-    print('\r' + 'start to train !', end='', flush=True)
+    print(f'\rSTM  Time:{delay_time}')
+    print('----------------------------------------------------------------')
+    print('start to train !', flush=True)
 
     # fabricate the input, target, and output signals
     for j in range(0, train_epoch):
@@ -91,7 +93,8 @@ def train_stm(a0, b0, c0, delay_time=1, nodes_number_stm=50, train_epoch=1, bias
             np.array(y_train_whole) - np.array(y_out_list))
         print('\rEpoch:{}/{}  error:{}'.format(j + 1, train_epoch, error_learning))
 
-        print('weight_out_stm_{} matrix of STM has been trained successfully !'.format(delay_time))
+        print('Trained successfully !')
+        print('----------------------------------------------------------------')
     return 0
 
 
@@ -104,7 +107,7 @@ def test_stm(a0, b0, c0, delay_time=1, test_points=20, bias_stm=1):
     :param delay_time: delay time of short term memory
     :param test_points: the length of test-input signals
     :param bias_stm: bias term
-    :return: not any return
+    :return: cor_stm, the correlation of target and actual output
     """
 
     # loading weights
@@ -145,8 +148,8 @@ def test_stm(a0, b0, c0, delay_time=1, test_points=20, bias_stm=1):
 
         x_matrix1 = np.append(x_matrix1, bias_stm).reshape(-1, 1)
         y_out = np.dot(weight_out_stm, x_matrix1)
-        print(x_matrix1)
-        print(mx_list)
+        # print(x_matrix1)
+        # print(mx_list)
         y_out_list.append(y_out[0, 0])
 
     # fabricate the target signals
@@ -179,9 +182,15 @@ def test_stm(a0, b0, c0, delay_time=1, test_points=20, bias_stm=1):
     plt.plot(t_step[10:], y_out_list[10:])
     plt.xlabel('T_step')
     plt.ylabel('y_out_STM')
-    plt.show()
 
-    return 0
+    plt.savefig('./FIGURES/train-delay={}'.format(delay_time))
+    plt.close()
+    # plt.show()
+
+    # calculate the correlation
+    cor_stm = pow(np.corrcoef(y_out_list[int(delay_time):], y_train_whole[int(delay_time):])[0, 1], 2)
+
+    return cor_stm
 
 
 def train_pc_task(a0, b0, c0, delay_time=1, nodes_number_pc=50, epoch_pc=1, bias_pc=1):
@@ -211,7 +220,9 @@ def train_pc_task(a0, b0, c0, delay_time=1, nodes_number_pc=50, epoch_pc=1, bias
         weight_out_pc = np.random.randint(-1, 2, (1, nodes_number_pc + 1))
         print('\rweight matrix of pc task has been created successfully !', end='', flush=True)
 
-    print('\rstart to train PC task !', end='', flush=True)
+    print(f'\rPC  Time:{delay_time}')
+    print('----------------------------------------------------------------')
+    print('start to train !', flush=True)
 
     # initial values
     m_x0, m_y0, m_z0 = a0, b0, c0
@@ -264,7 +275,8 @@ def train_pc_task(a0, b0, c0, delay_time=1, nodes_number_pc=50, epoch_pc=1, bias
         # calculate the error
         error_learning = np.var(np.array(y_train_pc) - np.array(y_out_list))
         print('\rEpoch:{}/{}  error:{}'.format(j + 1, epoch_pc, error_learning), flush=True)
-        print('weight_out_pc_{} matrix of STM has been trained successfully !'.format(delay_time))
+        print('Trained successfully !')
+        print('----------------------------------------------------------------')
 
     return 0
 
@@ -278,7 +290,7 @@ def test_pc_task(a0, b0, c0, delay_time=1, test_points=100, bias_pc=1):
     :param delay_time: delay time
     :param test_points: the length of test_input signals
     :param bias_pc: bias term
-    :return: no any return
+    :return: cor_pc, the correlation of target and actual output
     """
 
     # loading weights
@@ -356,8 +368,14 @@ def test_pc_task(a0, b0, c0, delay_time=1, test_points=100, bias_pc=1):
     plt.plot(t_step[10:], y_out_list[10:])
     plt.xlabel('T_step')
     plt.ylabel('y_out_PC')
-    plt.show()
-    return 0
+
+    plt.savefig('./FIGURES/PC-train-delay={}'.format(delay_time))
+    plt.close()
+    # plt.show()
+
+    # calculate the correlation
+    cor_pc = pow(np.corrcoef(y_out_list[int(delay_time):], y_test_pc[int(delay_time):])[0, 1], 2)
+    return cor_pc
 
 
 if __name__ == '__main__':
@@ -366,11 +384,51 @@ if __name__ == '__main__':
     # train_stm(m_x, m_y, m_z, delay_time=2, nodes_number_stm=50)
     # test_stm(m_x, m_y, m_z, delay_time=2, test_points=100)
 
-    # for Pc task without demagnetization
+    # for PC task without demagnetization
     # train_pc_task(m_x, m_y, m_z, delay_time=1, nodes_number_pc=50)
     # test_pc_task(m_x, m_y, m_z, delay_time=1, test_points=100)
 
+    ################################################################################################################
     # a test of comparison
-    for i in range(0, 30):
-        train_stm(m_x, m_y, m_z, delay_time=i, nodes_number_stm=50)
-        train_pc_task(m_x, m_y, m_z, delay_time=i, nodes_number_pc=50)
+    # test code
+    # capacity_stm, capacity_pc = [], []
+    # for i in range(0, 7):
+    #     cor1 = test_stm(m_x, m_y, m_z, delay_time=i, test_points=100)
+    #     capacity_stm.append(cor1)
+    #     print('---------------------------------------')
+    #     print(f'delay time = {i}  STM!')
+    #     print('---------------------------------------')
+    #
+    #     cor2 = test_pc_task(m_x, m_y, m_z, delay_time=i, test_points=100)
+    #     capacity_pc.append(cor2)
+    #     print('---------------------------------------')
+    #     print(f'delay time = {i}  PC !')
+    #     print('---------------------------------------')
+
+    # capacity
+    # print('capacity_stm:{}'.format(capacity_stm))
+    # print('capacity_pc:{}'.format(capacity_pc))
+
+    capacity_stm = [0.9999999994805995, 0.9999996330867625, 0.9999412769289289, 0.1669441968817252,
+                    0.04968739491271108, 0.0007354314653622022, 0.022378047756496006]
+    capacity_pc = [0.9999999997142932, 0.9999999969787305, 0.9999251613141497, 0.1888653184046998, 0.0597141768665486,
+                   0.0017979232561799695, 0.010448308224999862]
+    delay_time_list = np.linspace(0, 6, 7)
+    plt.figure('Capacity')
+    plt.subplot(2, 1, 1)
+    plt.plot(delay_time_list, capacity_stm, label='STM')
+    plt.scatter(delay_time_list, capacity_stm)
+    plt.fill_between(delay_time_list, capacity_stm, alpha=0.4)
+    plt.text(1, 0.5, 'Capacity', c='blue')
+    plt.title('delay time task')
+    plt.ylabel(r'quality')
+
+    plt.subplot(2, 1, 2)
+    plt.plot(delay_time_list, capacity_pc, label='PC')
+    plt.scatter(delay_time_list, capacity_pc)
+    plt.fill_between(delay_time_list, capacity_pc, alpha=0.5)
+    plt.text(1, 0.5, 'Capacity', c='blue')
+    plt.xlabel(r'delay time')
+    plt.ylabel(r'quality')
+    plt.title('Parity check task')
+    plt.show()
