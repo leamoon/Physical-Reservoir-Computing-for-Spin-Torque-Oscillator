@@ -12,7 +12,7 @@ my = 0.1
 mz = 0.0
 Hx = 0.1  # applied filed along x axis
 Hk = 0.2  # anisotropy field along x axis
-Hd = 0.5  # demagnetization field along z axis
+Hd = 0  # demagnetization field along z axis 0.5
 j = -0.45  # DC current density in MA/cm^2
 time = 2e-6  # simulation time
 t_step = 1e-11  # time step
@@ -37,7 +37,7 @@ for i in range(1, n):
     sigma_x = 0
     sigma_y = 0
     sigma_z = 0
-    H_TH = 0.001  # thermal field
+    H_TH = 0.02  # thermal field
     if N == 1:
         sigma_x = 2 * np.random.random() - 1
         sigma_y = 2 * np.random.random() - 1

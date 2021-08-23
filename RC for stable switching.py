@@ -409,17 +409,22 @@ if __name__ == '__main__':
     # print('capacity_stm:{}'.format(capacity_stm))
     # print('capacity_pc:{}'.format(capacity_pc))
 
+    # results
     capacity_stm = [0.9999999994805995, 0.9999996330867625, 0.9999412769289289, 0.1669441968817252,
                     0.04968739491271108, 0.0007354314653622022, 0.022378047756496006]
     capacity_pc = [0.9999999997142932, 0.9999999969787305, 0.9999251613141497, 0.1888653184046998, 0.0597141768665486,
                    0.0017979232561799695, 0.010448308224999862]
+
+    print('capacity_STM:{}'.format(sum([i * i for i in capacity_stm])))
+    print('capacity_PC:{}'.format(sum([i * i for i in capacity_pc])))
+
     delay_time_list = np.linspace(0, 6, 7)
     plt.figure('Capacity')
     plt.subplot(2, 1, 1)
     plt.plot(delay_time_list, capacity_stm, label='STM')
     plt.scatter(delay_time_list, capacity_stm)
     plt.fill_between(delay_time_list, capacity_stm, alpha=0.4)
-    plt.text(1, 0.5, 'Capacity', c='blue')
+    plt.text(1, 0.5, 'Capacity={:.2f}'.format(sum([i * i for i in capacity_stm])), c='blue')
     plt.title('delay time task')
     plt.ylabel(r'quality')
 
@@ -427,7 +432,7 @@ if __name__ == '__main__':
     plt.plot(delay_time_list, capacity_pc, label='PC')
     plt.scatter(delay_time_list, capacity_pc)
     plt.fill_between(delay_time_list, capacity_pc, alpha=0.5)
-    plt.text(1, 0.5, 'Capacity', c='blue')
+    plt.text(1, 0.5, 'Capacity={:.2f}'.format(sum([i * i for i in capacity_pc])), c='blue')
     plt.xlabel(r'delay time')
     plt.ylabel(r'quality')
     plt.title('Parity check task')
