@@ -6,11 +6,11 @@ import matplotlib.pyplot as plt
 # This code applies the virtual nodes method to build the reservoirs
 
 # RC parameters
-positive_voltage_stm = 0.7
-negative_voltage_stm = -0.7
+positive_voltage_stm = 0.95
+negative_voltage_stm = -0.95
 positive_voltage_pc = positive_voltage_stm
 negative_voltage_pc = negative_voltage_stm
-Batch_size = 9000  # batch size
+Batch_size = 6000  # batch size
 
 
 # build a random network
@@ -54,10 +54,10 @@ def train_stm(a0, b0, c0, delay_time=1, nodes_number_stm=50, train_epoch=1, bias
             else:
                 current_density = negative_voltage_stm
 
-            mx_list, m_x0, m_y0, m_z0, x_matrix1 = dm.module_evolution(50000, m_x=m_x0, m_y=m_y0, m_z=m_z0,
+            mx_list, m_x0, m_y0, m_z0, x_matrix1 = dm.module_evolution(18000, mx=m_x0, my=m_y0, mz=m_z0,
                                                                        current_density=current_density,
                                                                        sample_points=50)
-
+            print(x_matrix1.T)
             x_matrix1 = np.append(x_matrix1, bias_stm).reshape(-1, 1)
             y_out = np.dot(weight_out_stm, x_matrix1)
             y_out_list.append(y_out[0, 0])
@@ -65,16 +65,6 @@ def train_stm(a0, b0, c0, delay_time=1, nodes_number_stm=50, train_epoch=1, bias
 
             if i1 % 100 == 0:
                 print('\r Process:{}/{}'.format(i1, Batch_size), end='', flush=True)
-
-            # trick, maybe could be removed after introducing of thermal field
-            if abs(m_x0) > 0.9:
-                if abs(m_y0) < 0.01 or abs(m_z0) < 0.01:
-                    m_y0, m_z0 = 0.01, 0.01
-                    # normalization
-                    mod_vector1 = np.sqrt(pow(m_x0, 2) + pow(m_y0, 2) + pow(m_z0, 2))
-                    m_x0 = m_x0 / mod_vector1
-                    m_y0 = m_y0 / mod_vector1
-                    m_z0 = m_z0 / mod_vector1
 
         # update weight
         y_train_whole = list(s_in_stm)[-int(delay_time):] + list(s_in_stm)[0:-int(delay_time)]
@@ -129,22 +119,12 @@ def test_stm(a0, b0, c0, delay_time=1, test_points=20, bias_stm=1):
     # create pulse list
     for i1 in range(0, len(s_in_stm)):
         if s_in_stm[i1] == 1:
-            current_density = 0.7
+            current_density = 0.95
         else:
-            current_density = -0.7
+            current_density = -0.95
 
-        mx_list, m_x0, m_y0, m_z0, x_matrix1 = dm.module_evolution(50000, m_x=m_x0, m_y=m_y0, m_z=m_z0,
-                                                                   current_density=current_density,
-                                                                   sample_points=50)
-
-        if abs(m_x0) > 0.9:
-            if abs(m_y0) < 0.01 or abs(m_z0) < 0.01:
-                m_y0, m_z0 = 0.01, 0.01
-                # normalization
-                mod_vector1 = np.sqrt(pow(m_x0, 2) + pow(m_y0, 2) + pow(m_z0, 2))
-                m_x0 = m_x0 / mod_vector1
-                m_y0 = m_y0 / mod_vector1
-                m_z0 = m_z0 / mod_vector1
+        mx_list, m_x0, m_y0, m_z0, x_matrix1 = dm.module_evolution(18000, mx=m_x0, my=m_y0, mz=m_z0,
+                                                                   current_density=current_density, sample_points=50)
 
         x_matrix1 = np.append(x_matrix1, bias_stm).reshape(-1, 1)
         y_out = np.dot(weight_out_stm, x_matrix1)
@@ -239,7 +219,7 @@ def train_pc_task(a0, b0, c0, delay_time=1, nodes_number_pc=50, epoch_pc=1, bias
             else:
                 current_density = negative_voltage_pc
 
-            mx_list, m_x0, m_y0, m_z0, x_matrix1 = dm.module_evolution(50000, m_x=m_x0, m_y=m_y0, m_z=m_z0,
+            mx_list, m_x0, m_y0, m_z0, x_matrix1 = dm.module_evolution(18000, mx=m_x0, my=m_y0, mz=m_z0,
                                                                        current_density=current_density,
                                                                        sample_points=50)
 
@@ -249,16 +229,6 @@ def train_pc_task(a0, b0, c0, delay_time=1, nodes_number_pc=50, epoch_pc=1, bias
             x_final_matrix.append(x_matrix1.T.tolist()[0])
             if i1 % 100 == 0:
                 print('\rProcess:{}/{}'.format(i1, Batch_size), end='', flush=True)
-
-            # trick
-            if abs(m_x0) > 0.9:
-                if abs(m_y0) < 0.01 or abs(m_z0) < 0.01:
-                    m_y0, m_z0 = 0.01, 0.01
-                    # normalization
-                    mod_vector1 = np.sqrt(pow(m_x0, 2) + pow(m_y0, 2) + pow(m_z0, 2))
-                    m_x0 = m_x0 / mod_vector1
-                    m_y0 = m_y0 / mod_vector1
-                    m_z0 = m_z0 / mod_vector1
 
         # build the train_pc pulse
         y_train_pc = s_in_pc
@@ -316,23 +286,12 @@ def test_pc_task(a0, b0, c0, delay_time=1, test_points=100, bias_pc=1):
         else:
             current_density = negative_voltage_pc
 
-        mx_list, m_x0, m_y0, m_z0, x_matrix1 = dm.module_evolution(50000, m_x=m_x0, m_y=m_y0, m_z=m_z0,
-                                                                   current_density=current_density,
-                                                                   sample_points=50)
+        mx_list, m_x0, m_y0, m_z0, x_matrix1 = dm.module_evolution(18000, mx=m_x0, my=m_y0, mz=m_z0,
+                                                                   current_density=current_density, sample_points=50)
 
         x_matrix1 = np.append(x_matrix1, bias_pc).reshape(-1, 1)
         y_out = np.dot(weight_out_pc, x_matrix1)
         y_out_list.append(y_out[0, 0])
-
-        # trick
-        if abs(m_x0) > 0.9:
-            if abs(m_y0) < 0.01 or abs(m_z0) < 0.01:
-                m_y0, m_z0 = 0.01, 0.01
-                # normalization
-                mod_vector1 = np.sqrt(pow(m_x0, 2) + pow(m_y0, 2) + pow(m_z0, 2))
-                m_x0 = m_x0 / mod_vector1
-                m_y0 = m_y0 / mod_vector1
-                m_z0 = m_z0 / mod_vector1
 
     y_test_pc = s_in_pc
     if delay_time != 0:
@@ -381,8 +340,11 @@ def test_pc_task(a0, b0, c0, delay_time=1, test_points=100, bias_pc=1):
 if __name__ == '__main__':
     m_x, m_y, m_z = 1, 0.01, 0.01
     # for delay time task without demagnetization
-    # train_stm(m_x, m_y, m_z, delay_time=2, nodes_number_stm=50)
-    # test_stm(m_x, m_y, m_z, delay_time=2, test_points=100)
+    # for i in range(0, 5):
+    # train_stm(m_x, m_y, m_z, delay_time=i, nodes_number_stm=50)
+    # test_stm(m_x, m_y, m_z, delay_time=i, test_points=100)
+    # train_pc_task(m_x, m_y, m_z, delay_time=i, nodes_number_pc=50)
+    # test_stm(m_x, m_y, m_z, delay_time=i)
 
     # for PC task without demagnetization
     # train_pc_task(m_x, m_y, m_z, delay_time=1, nodes_number_pc=50)
@@ -391,34 +353,43 @@ if __name__ == '__main__':
     ################################################################################################################
     # a test of comparison
     # test code
-    # capacity_stm, capacity_pc = [], []
-    # for i in range(0, 7):
-    #     cor1 = test_stm(m_x, m_y, m_z, delay_time=i, test_points=100)
-    #     capacity_stm.append(cor1)
-    #     print('---------------------------------------')
-    #     print(f'delay time = {i}  STM!')
-    #     print('---------------------------------------')
-    #
-    #     cor2 = test_pc_task(m_x, m_y, m_z, delay_time=i, test_points=100)
-    #     capacity_pc.append(cor2)
-    #     print('---------------------------------------')
-    #     print(f'delay time = {i}  PC !')
-    #     print('---------------------------------------')
+    capacity_stm, capacity_pc = [], []
+    for i in range(0, 21):
+        # cor1 = test_stm(m_x, m_y, m_z, delay_time=i, test_points=100)
+        # capacity_stm.append(cor1)
+        # print('---------------------------------------')
+        # print(f'delay time = {i}  STM!')
+        # print('---------------------------------------')
+
+        cor2 = test_pc_task(m_x, m_y, m_z, delay_time=i, test_points=100)
+        capacity_pc.append(cor2)
+        print('---------------------------------------')
+        print(f'delay time = {i}  PC !')
+        print('correlation:{}'.format(cor2))
+        print('---------------------------------------')
 
     # capacity
     # print('capacity_stm:{}'.format(capacity_stm))
     # print('capacity_pc:{}'.format(capacity_pc))
 
     # results
-    capacity_stm = [0.9999999994805995, 0.9999996330867625, 0.9999412769289289, 0.1669441968817252,
-                    0.04968739491271108, 0.0007354314653622022, 0.022378047756496006]
-    capacity_pc = [0.9999999997142932, 0.9999999969787305, 0.9999251613141497, 0.1888653184046998, 0.0597141768665486,
-                   0.0017979232561799695, 0.010448308224999862]
+    capacity_stm = [0.9998721581522959, 0.9999849401320483, 0.1809747176270993, 0.02214981761205479,
+                    0.020737870891673227, 0.010660591433593174, 0.003356392305204282, 0.0058944224229696696,
+                    0.02532332213732217, 0.00020762070736371927, 0.002280615940803865, 0.02281418081604381,
+                    0.0021352055413634934, 0.007523903653554596, 0.01813802313903494, 8.150892634551523e-05,
+                    0.03920655427795086, 9.289376113745982e-05, 0.0024156701023737887, 0.018068039631425,
+                    0.007153418223369739]
+    capacity_pc = [0.9999809528250504, 0.4334501042306525, 0.2286365321897746, 0.0016308831613695285,
+                   0.004989590063356006, 0.0001790580998681386, 0.00024255841788249006, 0.0014520616824037964,
+                   0.0008324164726256202, 0.0016581237607313632, 0.02733097468130944, 0.011054195174623211,
+                   0.008363694522928287, 0.006564877199434791, 0.0011705762349381796, 0.023954398453773423,
+                   0.0034334495788275504, 0.0011039200722510695, 9.855662778222297e-05, 0.00041914816497020025,
+                   0.023056049942002672]
 
     print('capacity_STM:{}'.format(sum([i * i for i in capacity_stm])))
     print('capacity_PC:{}'.format(sum([i * i for i in capacity_pc])))
 
-    delay_time_list = np.linspace(0, 6, 7)
+    delay_time_list = np.linspace(0, 20, 21)
     plt.figure('Capacity')
     plt.subplot(2, 1, 1)
     plt.plot(delay_time_list, capacity_stm, label='STM')
