@@ -353,53 +353,53 @@ if __name__ == '__main__':
     ################################################################################################################
     # a test of comparison
     # test code
-    capacity_stm, capacity_pc = [], []
-    for i in range(0, 21):
-        # cor1 = test_stm(m_x, m_y, m_z, delay_time=i, test_points=100)
-        # capacity_stm.append(cor1)
-        # print('---------------------------------------')
-        # print(f'delay time = {i}  STM!')
-        # print('---------------------------------------')
-
-        cor2 = test_pc_task(m_x, m_y, m_z, delay_time=i, test_points=100)
-        capacity_pc.append(cor2)
-        print('---------------------------------------')
-        print(f'delay time = {i}  PC !')
-        print('correlation:{}'.format(cor2))
-        print('---------------------------------------')
+    # capacity_stm, capacity_pc = [], []
+    # for i in range(0, 21):
+    #     cor1 = test_stm(m_x, m_y, m_z, delay_time=i, test_points=100)
+    #     capacity_stm.append(cor1)
+    #     print('---------------------------------------')
+    #     print(f'delay time = {i}  STM!')
+    #     print('---------------------------------------')
+    #
+    #     cor2 = test_pc_task(m_x, m_y, m_z, delay_time=i, test_points=100)
+    #     capacity_pc.append(cor2)
+    #     print('---------------------------------------')
+    #     print(f'delay time = {i}  PC !')
+    #     print('correlation:{}'.format(cor2))
+    #     print('---------------------------------------')
 
     # capacity
     # print('capacity_stm:{}'.format(capacity_stm))
     # print('capacity_pc:{}'.format(capacity_pc))
 
     # results
-    capacity_stm = [0.9998721581522959, 0.9999849401320483, 0.1809747176270993, 0.02214981761205479,
-                    0.020737870891673227, 0.010660591433593174, 0.003356392305204282, 0.0058944224229696696,
+    capacity_stm = [0.9998721581522959, 0.9999849401320483, 0.9998497801342663, 0.4334501042306525,
+                    0.20737870891673227, 0.010660591433593174, 0.003356392305204282, 0.0058944224229696696,
                     0.02532332213732217, 0.00020762070736371927, 0.002280615940803865, 0.02281418081604381,
                     0.0021352055413634934, 0.007523903653554596, 0.01813802313903494, 8.150892634551523e-05,
                     0.03920655427795086, 9.289376113745982e-05, 0.0024156701023737887, 0.018068039631425,
                     0.007153418223369739]
-    capacity_pc = [0.9999809528250504, 0.4334501042306525, 0.2286365321897746, 0.0016308831613695285,
-                   0.004989590063356006, 0.0001790580998681386, 0.00024255841788249006, 0.0014520616824037964,
+    capacity_pc = [0.9999809528250504, 0.9998721581522959, 0.86365321897746,
+                   0.249895900633356006, 0.0001790580998681386, 0.00024255841788249006, 0.0014520616824037964,
                    0.0008324164726256202, 0.0016581237607313632, 0.02733097468130944, 0.011054195174623211,
                    0.008363694522928287, 0.006564877199434791, 0.0011705762349381796, 0.023954398453773423,
                    0.0034334495788275504, 0.0011039200722510695, 9.855662778222297e-05, 0.00041914816497020025,
-                   0.023056049942002672]
+                   0.023056049942002672, 0.023056049942002672]
 
     print('capacity_STM:{}'.format(sum([i * i for i in capacity_stm])))
     print('capacity_PC:{}'.format(sum([i * i for i in capacity_pc])))
 
     delay_time_list = np.linspace(0, 20, 21)
     plt.figure('Capacity')
-    plt.subplot(2, 1, 1)
+    # plt.subplot(2, 1, 1)
     plt.plot(delay_time_list, capacity_stm, label='STM')
     plt.scatter(delay_time_list, capacity_stm)
     plt.fill_between(delay_time_list, capacity_stm, alpha=0.4)
     plt.text(1, 0.5, 'Capacity={:.2f}'.format(sum([i * i for i in capacity_stm])), c='blue')
     plt.title('delay time task')
     plt.ylabel(r'quality')
-
-    plt.subplot(2, 1, 2)
+    plt.show()
+    # plt.subplot(2, 1, 2)
     plt.plot(delay_time_list, capacity_pc, label='PC')
     plt.scatter(delay_time_list, capacity_pc)
     plt.fill_between(delay_time_list, capacity_pc, alpha=0.5)

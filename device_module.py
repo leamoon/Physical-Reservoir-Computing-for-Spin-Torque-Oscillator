@@ -13,7 +13,7 @@ T = 300  # temperature
 alpha = 0.002  # damping factor
 H_x = 0.1  # applied filed along x axis
 H_k = 0.2  # anisotropy field along x axis
-H_d = 0  # demagnetization field along z axis          0.4
+H_d = 0.4  # demagnetization field along z axis          0.4
 # j = 0.45  # DC current density in MA/cm^2
 time_end = 0.2e-6  # simulation time 1e-6
 t_step = 1e-11  # time step
@@ -188,6 +188,8 @@ if __name__ == '__main__':
     m_x0, m_y0, m_z0 = 1, 0.01, 0.01  # initial values
     mx_matrix = []
     virtual_matrix, t_step_matrix = [], []
+    # for getting some data
+    input_voltage = [-0.95, -0.95]
     print(input_voltage)
     for i in input_voltage:
         mx_list, m_x0, m_y0, m_z0, virtual_nodes = module_evolution(18000, mx=m_x0, my=m_y0, mz=m_z0, current_density=i)

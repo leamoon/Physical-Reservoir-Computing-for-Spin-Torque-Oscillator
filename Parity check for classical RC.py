@@ -85,7 +85,7 @@ def test_pc_classical(input_size=10000, delay_time=0):
 if __name__ == '__main__':
     # calculate capacity
     cor_list = []
-    for i in range(0, 30):
+    for i in range(0, 21):
         cor = test_pc_classical(input_size=10000, delay_time=i)
         cor_list.append(cor)
         print('-----------------------------------------------------')
@@ -95,10 +95,10 @@ if __name__ == '__main__':
     print('capacity_STM:{}'.format(sum([i * i for i in cor_list])))
 
     plt.figure()
-    delay_time_list = np.linspace(0, 29, 30)
+    delay_time_list = np.linspace(0, 20, 21)
     plt.plot(delay_time_list, cor_list)
     plt.scatter(delay_time_list, cor_list)
-    plt.fill_between(delay_time_list, cor_list, alpha=0.5)
+    plt.fill_between(delay_time_list, cor_list, alpha=0.5, color='red')
     plt.ylabel('quality')
     plt.xlabel('delay time')
     plt.text(1, 0.6, 'capacity={:.2f}'.format(sum([i * i for i in cor_list])), c='blue')

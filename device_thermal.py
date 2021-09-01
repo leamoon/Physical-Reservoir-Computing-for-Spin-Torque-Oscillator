@@ -182,7 +182,7 @@ if __name__ == '__main__':
         else:
             input_voltage.append(-1)
 
-    m_x0, m_y0, m_z0 = 0, 0.1, 0.1  # initial values
+    m_x0, m_y0, m_z0 = 1, 0.1, 0.1  # initial values
     mx_matrix = []
     virtual_matrix, t_step_matrix = [], []
     input_voltage = [-1]
