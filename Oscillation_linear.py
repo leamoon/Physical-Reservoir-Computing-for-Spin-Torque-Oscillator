@@ -1,5 +1,8 @@
 import numpy as np
+import os
 import matplotlib.pyplot as plt
+import scipy.sparse
+import scipy.sparse.linalg
 
 # constant parameters
 u0 = 12.56637e-7  # Vacuum permeability in H/m
@@ -7,7 +10,6 @@ h_bar = 1.054e-34  # Reduced Planck constant in Js
 uB = 9.274e-24  # Bohr magneton in J/T
 gamma = 2 * uB / (h_bar * 2 * np.pi)  # Gyromagnetic ratio in 1/Ts
 alpha = 0.002
-# H_x = 0.3  # applied filed along x axis
 Hk = 0.5  # anisotropy field along x axis
 Hd = 0.5  # demagnetization field along z axis
 time = 2e-8  # simulation time
@@ -17,8 +19,15 @@ n = int(step)
 R_ap = 400
 R_p = 200
 
+# constants of computing
+Batch_size = 50
+leaky_rate = 0.15
+g_parameter = 1.5
+seed = 1000
+np.random.seed(seed)
 
-def evolution_mag(m_x, m_y, m_z, direc_current=-0.836, magnitude=0.0, h_x=0.3, f_ac=8e11, time_used=int(n/2)):
+
+def evolution_mag(m_x, m_y, m_z, direc_current=-0.836, magnitude=0.0, h_x=0.3, f_ac=8e11, time_used=int(n)):
     """
     a function used to build time evolution of MTJ oscillation
     :param m_x: initial state of magnetization vector
@@ -31,7 +40,6 @@ def evolution_mag(m_x, m_y, m_z, direc_current=-0.836, magnitude=0.0, h_x=0.3, f
     :param time_used: time_step used to make evolution
     :return: mx_list, t_list, voltage_list, envelope_list1, time_env_list1, [mx, my, mz], my_list
     """
-
     # initial
     t_list, resistance_list, voltage_list = [], [], []
     mx_list, my_list, mz_list = [], [], []
@@ -44,8 +52,8 @@ def evolution_mag(m_x, m_y, m_z, direc_current=-0.836, magnitude=0.0, h_x=0.3, f
     # f_ac = 8e11
 
     for i1 in range(1, time_used):
-        # analog_current = magnitude * np.sin(2 * np.pi * f_ac * i1 * t_step)  # sine function
-        analog_current = magnitude
+        analog_current = magnitude * np.sin(2 * np.pi * f_ac * i1 * t_step)  # sine function
+        # analog_current = magnitude
         sum_current = direc_current + analog_current
 
         H_DL = 2000 * sum_current  # field-like torque
@@ -152,114 +160,139 @@ def evolution_mag(m_x, m_y, m_z, direc_current=-0.836, magnitude=0.0, h_x=0.3, f
         resistance_list.append(resistance)
         voltage_list.append(voltage_osc)
 
-    # finding the trajectory / envelope
-    envelope_list, time_env_list = [], []
-    for i in range(0, len(voltage_list)):
+    # calculate the resistance difference
+    extreme_high_index, extreme_low_index = [], []
+    for i in range(len(voltage_list)):
         if i != 0 and i != len(voltage_list) - 1:
             if voltage_list[i - 1] < voltage_list[i] and voltage_list[i] > voltage_list[i + 1]:
-                envelope_list.append(voltage_list[i])
-                time_env_list.append(t_list[i])
+                extreme_high_index.append(voltage_list[i])
+            elif voltage_list[i - 1] > voltage_list[i] and voltage_list[i] < voltage_list[i + 1]:
+                extreme_low_index.append(voltage_list[i])
 
-    # get the trajectory
-    envelope_list1, time_env_list1 = [], []
-    for i in range(len(envelope_list)):
-        if i % 2 == 0:
-            envelope_list1.append(envelope_list[i])
-            time_env_list1.append(time_env_list[i])
+    resistance_dif = []
+    for i in range(min(len(extreme_low_index), len(extreme_high_index))):
+        temp = extreme_high_index[i] - extreme_low_index[i]
+        resistance_dif.append(temp)
 
-    # # try one period:
-    # envelope_list2, time_env_list2 = [], []
-    # index_point_extreme = []
-    # for i in range(len(envelope_list1)):
-    #     if i != 0 and i != len(envelope_list1) - 1:
-    #         if envelope_list1[i - 1] < envelope_list1[i] and envelope_list1[i] > envelope_list1[i + 1]:
-    #             # find the index of extreme point
-    #             index_point_extreme.append(i)
+    return mx_list, t_list, voltage_list, [mx, my, mz], my_list, resistance_dif[-1]
 
-    # debug
-    # print(len(index_point_extreme))
 
-    # for i in range(len(envelope_list1)):
-    #     if index_point_extreme[1] >= i >= index_point_extreme[0]:
-    #         envelope_list2.append(envelope_list1[i])
-    #         time_env_list2.append(time_env_list1[i])
+def train_stm(a0, b0, c0, delay_time=1, nodes_number_stm=23, bias_stm=1, density=0.3, spectral_radius=0.2):
+    """
+    a function used to achieve training of classification by using oscillation MTJ
+    :param a0: initial state of magnetization vector at x axis
+    :param b0: initial state of magnetization vector at y axis
+    :param c0: initial state of magnetization vector at z axis
+    :param delay_time: delay time
+    :param nodes_number_stm: number of nodes, reservoir size
+    :param bias_stm: bias term
+    :param density: the density of weight matrix between states
+    :param spectral_radius: the largest elg_value of matrix
+    :return: no any return
+    """
 
-    # debug
-    # print(len(time_env_list2))
+    # initial weight matrix
+    weight_state = scipy.sparse.rand(nodes_number_stm, nodes_number_stm, density=density, format='coo')
+    elg_value, elg_vector = scipy.sparse.linalg.eigs(weight_state)
+    weight_state = weight_state / max(np.abs(elg_value)) * spectral_radius
+    weight_state = weight_state.todense()
+    # input weight could be sparse, the function will be added in next version
+    weight_feedback = np.random.rand(1, nodes_number_stm) * 2 - 1
 
-    # normalization
-    # envelope_list1 = [i/max(np.abs(envelope_list1)) for i in envelope_list1]
-    # voltage_list = [i/max(np.abs(voltage_list)) for i in voltage_list]
-    return mx_list, t_list, voltage_list, envelope_list1, time_env_list1, [mx, my, mz], my_list
+    # find the last weight matrix data
+    if os.path.exists(
+            'weight_matrix_os/weight_out_stm_{}.npy'.format(delay_time)):
+        weight_out_stm = np.load(
+            'weight_matrix_os/weight_out_stm_{}.npy'.format(delay_time))
+        print('\r' + 'Loading weight_stm_{} matrix of STM successfully !'.format(delay_time), end='',
+              flush=True)
+
+    else:
+        weight_out_stm = np.random.randint(-1, 2, (1, nodes_number_stm + 1))
+        print('\r weight matrix of STM created successfully !', end='', flush=True)
+
+    print(f'\rSTM  Time:{delay_time}')
+    print('----------------------------------------------------------------')
+    print('start to train !', flush=True)
+
+    # fabricate the input, target, and output signals
+    s_in_stm = np.random.randint(0, 2, Batch_size)
+    y_out_list, x_final_matrix = [], []
+    last_states = np.zeros((3, nodes_number_stm))
+    current_states = [0]*nodes_number_stm
+    input_list_reservoir = [0]*nodes_number_stm
+    output = 0
+    output_matrix = []
+
+    # create pulse list
+    for i1 in range(0, Batch_size):
+        if s_in_stm[i1] == 1:
+            magnitude = 0.4
+        else:
+            magnitude = 0.8
+
+        # neuron states update
+        for i in range(nodes_number_stm):
+            m_x0, m_y0, m_z0 = last_states[:, i]
+            if i != 0:
+                magnitude = input_list_reservoir[i]
+            if m_x0 == 0:
+                m_x0, m_y0, m_z0 = 1, 0.01, 0.01
+            mx_li1, t, v_1, [m_x1, m_y1, m_z1], my_li1, resist_dif = evolution_mag(m_x0, m_y0, m_z0,
+                                                                                   magnitude=magnitude)
+            # update states
+            last_states[:, i] = [m_x1, m_y1, m_z1]
+            current_states[i] = resist_dif
+            # calculate the next term
+            temp = 0
+            for j in range(nodes_number_stm):
+                if weight_state[j:i] != 0:
+                    temp += weight_out_stm[j:i]*current_states[j]
+
+            temp *= g_parameter
+            output_current = (1-leaky_rate)*current_states[i] + leaky_rate*np.tanh(temp+weight_feedback[0]*output)
+
+            for j in range(nodes_number_stm):
+                if weight_state[i:j] != 0:
+                    input_list_reservoir[j] = output_current
+
+        # calculate the output
+        current_states.append(1)  # bias
+        current_states = np.array(current_states).reshape(1+nodes_number_stm, 1)
+        output = np.dot(weight_out_stm, current_states)
+        output_matrix.append(output)
+
+    # update matrix of readout part
+    if delay_time != 0:
+        y_train_signal = np.array(list(s_in_stm)[-int(delay_time):] + list(s_in_stm)[:-int(delay_time)])
+    else:
+        y_train_signal = s_in_stm
+    return 0
 
 
 if __name__ == '__main__':
-    mx_matrix, time_matrix, voltage_matrix, trace_list, trace_time, _, my_matrix = evolution_mag(1, -0.001, 0.001,
-                                                                                                 direc_current=-0.836,
-                                                                                                 magnitude=0.2,
-                                                                                                 h_x=0.3, f_ac=8e11)
-
-    plt.figure('Oscillation')
-    plt.plot(time_matrix, mx_matrix, c='blue')
-    plt.plot(time_matrix, my_matrix, c='red')
-    plt.xlabel('time(ns)')
-    plt.ylabel('mx')
-    # plt.ylim(-1.2, 1.2)
-
-    plt.figure()
-    plt.plot(time_matrix, voltage_matrix)
-    plt.scatter(trace_time, trace_list, c='red')
-    plt.ylabel('Volt_ocs', fontsize=15)
-    plt.xlabel('Time')
+    mx_list, t_list, voltage_list, [mx, my, mz], my_list, r_d = evolution_mag(1, 0.01, 0.01, magnitude=0.3)
+    plt.figure('evolution')
+    plt.plot(t_list, voltage_list)
     plt.show()
 
-    mx_matrix1, time_matrix1, voltage_matrix1, trace_list1, trace_time1, _, _ = evolution_mag(1, -0.001, 0.001,
-                                                                                              direc_current=-0.836,
-                                                                                              magnitude=0.1,
-                                                                                              h_x=0.3, f_ac=8e11)
-    plt.figure()
-    plt.plot(time_matrix1, mx_matrix1)
-    plt.xlabel('time(ns)')
-    plt.ylabel('mx')
+    plt.figure('resistance')
+    plt.plot(r_d, c='red')
+    plt.show()
 
-    plt.figure()
-    plt.plot(time_matrix1, voltage_matrix1)
-    plt.scatter(trace_time1, trace_list1, c='red')
-    plt.ylabel('Voltage_ocs', fontsize=12)
-    plt.xlabel('Time', fontsize=12)
+    # current_list = np.linspace(0, 1, 20)
+    # resist_diff_list = []
+    # for i in current_list:
+    #     mx_list, t_list, vol_list, [mx, my, mz], _, r_d = evolution_mag(1, 0.01, 0.01, magnitude=i)
+    #     # plt.figure()
+    #     # plt.plot(t_list, vol_list)
+    #     # plt.show()
+    #     resist_diff_list.append(r_d)
+    #
+    # plt.figure('linear curve')
+    # plt.plot(current_list, resist_diff_list)
+    # plt.scatter(current_list, resist_diff_list, c='red')
+    # plt.ylabel(r'$\Delta R$')
+    # plt.xlabel('Current density')
     # plt.show()
 
-    plt.figure('comparison')
-    plt.subplot(2, 1, 1)
-    plt.title('+1 input', fontsize=12)
-    plt.plot(trace_time, trace_list)
-    plt.ylabel('Voltage', fontsize=12)
-
-    plt.subplot(2, 1, 2)
-    plt.title('-1 input', fontsize=12)
-    plt.plot(trace_time1, trace_list1)
-    plt.ylabel('Voltage', fontsize=12)
-    plt.xlabel('time', fontsize=12)
-    plt.show()
-
-    # #############################################################################################################
-    # dc current vs amplitude
-    # ###############################################################################################################
-
-    # amplitude_list = []
-    # current_list = np.linspace(-11, 11, 50)
-    # for i in current_list:
-    #     mx_matrix1, time_matrix1, voltage_matrix1, trace_list1, trace_time1, _, _ = evolution_mag(1, 0.01, 0.01,
-    #                                                                                               direc_current=i,
-    #                                                                                               magnitude=0)
-    #     if trace_list1:
-    #         amplitude_list.append(np.max(trace_list1))
-    #     else:
-    #         amplitude_list.append(np.max(voltage_matrix1))
-    #
-    # plt.figure()
-    # plt.plot(current_list, amplitude_list)
-    # plt.scatter(current_list, amplitude_list)
-    # plt.ylabel('Amplitude', fontsize=12)
-    # plt.xlabel('dc current', fontsize=12)
-    plt.show()

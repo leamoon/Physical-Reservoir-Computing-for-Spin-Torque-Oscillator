@@ -238,10 +238,20 @@ def waveform_generator(current_limited, number_wave):
         temp = [i]*8
         train_signal = train_signal + temp
     print('train_signal:{}'.format(train_signal))
-    return wave_points, train_signal
+    return wave_points, list(random_pulse)
 
 
 def train_classification(a0, b0, c0, current_limited, number_wave, nodes_number):
+    """
+    a function used to train weight of classification task
+    :param a0: initial value of magnetization at x axis
+    :param b0: initial value of magnetization at y axis
+    :param c0: initial value of magnetization at z axis
+    :param current_limited: the boundary of applied current
+    :param number_wave: number of input wave signals
+    :param nodes_number: size of reservoir
+    :return: no any return, all of results have achieved in process
+    """
     # wave generators
     # wave_points = waveform_generator(current_limited, number_wave)
     # find the last weight matrix data
@@ -270,41 +280,58 @@ def train_classification(a0, b0, c0, current_limited, number_wave, nodes_number)
         envelope_matrix = []
 
         # create pulse list
-        for i1 in s_in:
+        for i1 in range(len(s_in)):
             mx_list, _, vol1, envelope_list, time_env_list, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0, m_z0,
-                                                                                                     magnitude=i1)
-            mx_list2, _, vol2, envelope_list2, time_env_list2, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0,
-                                                                                                        m_z0,
-                                                                                                        magnitude=-i1)
-            envelope_list = envelope_list + envelope_list2
+                                                                                                     magnitude=s_in[i1])
+            # mx_list2, _, vol2, envelope_list2, time_env_list2, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0,
+            #                                                                                             m_z0,
+            #                                                                                             magnitude=-i1)
+            # envelope_list = envelope_list + envelope_list2
             envelope_matrix = envelope_matrix + envelope_list
             # sampling the nodes from resistances list
-            number_interval = int(len(envelope_list) / nodes_number)
-            print('length of wave form: {}'.format(len(envelope_list)))
-            x_matrix1 = np.array(envelope_list[1: len(envelope_list):number_interval])
+            if (i1+1) % 8 == 0:
+                number_interval = int(len(envelope_matrix) / nodes_number)
+                print('length of wave form: {}'.format(len(envelope_matrix)))
+                if number_interval < 1:
+                    number_interval = 1
+                x_matrix1 = np.array(envelope_matrix[1: len(envelope_matrix):number_interval])
 
-            while len(x_matrix1) != nodes_number:
-                if len(x_matrix1) > nodes_number:
-                    x_matrix1 = x_matrix1[:-1]
-                else:
-                    x_matrix1 = np.append(x_matrix1, x_matrix1[-1])
-            x_matrix1 = np.reshape(x_matrix1, (nodes_number, 1))
+                while len(x_matrix1) != nodes_number:
+                    if len(x_matrix1) > nodes_number:
+                        x_matrix1 = x_matrix1[:-1]
+                    else:
+                        x_matrix1 = np.append(x_matrix1, x_matrix1[-1])
+                x_matrix1 = np.reshape(x_matrix1, (nodes_number, 1))
 
-            print(x_matrix1.T)
-            x_matrix1 = np.append(x_matrix1, 1).reshape(-1, 1)
-            y_out = np.dot(weight_out_stm, x_matrix1)
-            y_out_list.append(y_out[0, 0])
-            x_final_matrix.append(x_matrix1.T.tolist()[0])
+                # normalization
+                min_value, max_value = -435, -9
+                x_matrix1 = np.subtract(x_matrix1, min_value)
+                x_matrix1 = np.divide(x_matrix1, (max_value-min_value))
+                print(x_matrix1.T)
+
+                x_matrix1 = np.append(x_matrix1, 1).reshape(-1, 1)
+                y_out = np.dot(weight_out_stm, x_matrix1)
+                y_out_list.append(y_out[0, 0])
+                x_final_matrix.append(x_matrix1.T.tolist()[0])
+                envelope_matrix = []
 
         # debug
         plt.figure()
-        plt.plot(envelope_matrix)
-        plt.show()
+        plt.plot(envelope_matrix, c='red')
+        # plt.show()
 
         # update weight
         y_train_matrix = np.array(train_signal).reshape(1, len(train_signal))
         x_final_matrix = np.asmatrix(x_final_matrix).T
         weight_out_stm = np.dot(y_train_matrix, np.linalg.pinv(x_final_matrix))
+
+        # test for training
+        y_out_test = np.dot(weight_out_stm, x_final_matrix)
+        print(y_out_test.shape)
+        print(y_out_test)
+        plt.figure('PostProcessing')
+        plt.plot(y_out_test)
+        plt.show()
 
         # save weight matrix as .npy files
         np.save('weight_matrix_os/weight_out_classification.npy', weight_out_stm)
@@ -320,6 +347,16 @@ def train_classification(a0, b0, c0, current_limited, number_wave, nodes_number)
 
 
 def test_classification(a0, b0, c0, current_limited, test_number_wave, nodes_number):
+    """
+    a function used to test ability of classification task
+    :param a0: initial value of magnetization at x axis
+    :param b0: initial value of magnetization at y axis
+    :param c0: initial value of magnetization at z axis
+    :param current_limited: maximum and minimum value of applied current
+    :param test_number_wave: the number of test wave signals
+    :param nodes_number: size of reservoirs
+    :return: no any return
+    """
     # find the last weight matrix data
     if os.path.exists('weight_matrix_os/weight_out_classification.npy'):
         weight_out_stm = np.load('weight_matrix_os/weight_out_classification.npy')
@@ -340,32 +377,42 @@ def test_classification(a0, b0, c0, current_limited, test_number_wave, nodes_num
         print('---------------------------------------------------------------')
         y_out_list = []
         m_x0, m_y0, m_z0 = a0, b0, c0
-        # used to get the figure
         envelope_matrix = []
+        # used to get the figure
 
         # create pulse list
-        for i1 in s_in:
+        for i1 in range(len(s_in)):
             mx_list, _, vol1, envelope_list, time_env_list, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0, m_z0,
-                                                                                                     magnitude=i1)
-            mx_list2, _, vol2, envelope_list2, time_env_list2, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0,
-                                                                                                        m_z0,
-                                                                                                        magnitude=-i1)
-            envelope_list = envelope_list + envelope_list2
+                                                                                                     magnitude=s_in[i1])
+            # mx_list2, _, vol2, envelope_list2, time_env_list2, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0,
+            #                                                                                             m_z0,
+            #                                                                                             magnitude=-i1)
+
+            # envelope_list = envelope_list + envelope_list2
             envelope_matrix = envelope_matrix + envelope_list
             # sampling the nodes from resistances list
-            number_interval = int(len(envelope_list) / nodes_number)
-            x_matrix1 = np.array(envelope_list[1: len(envelope_list):number_interval])
+            if (i1+1) % 8 == 0 and i1 != 0:
+                number_interval = int(len(envelope_matrix) / nodes_number)
+                if number_interval < 1:
+                    number_interval = 1
+                x_matrix1 = np.array(envelope_matrix[1: len(envelope_matrix):number_interval])
 
-            while len(x_matrix1) != nodes_number:
-                if len(x_matrix1) > nodes_number:
-                    x_matrix1 = x_matrix1[:-1]
-                else:
-                    x_matrix1 = np.append(x_matrix1, x_matrix1[-1])
-            x_matrix1 = np.reshape(x_matrix1, (nodes_number, 1))
+                while len(x_matrix1) != nodes_number:
+                    if len(x_matrix1) > nodes_number:
+                        x_matrix1 = x_matrix1[:-1]
+                    else:
+                        x_matrix1 = np.append(x_matrix1, x_matrix1[-1])
+                x_matrix1 = np.reshape(x_matrix1, (nodes_number, 1))
 
-            x_matrix1 = np.append(x_matrix1, 1).reshape(-1, 1)
-            y_out = np.dot(weight_out_stm, x_matrix1)
-            y_out_list.append(y_out[0, 0])
+                # normalization
+                min_value, max_value = -435, -9
+                x_matrix1 = np.subtract(x_matrix1, min_value)
+                x_matrix1 = np.divide(x_matrix1, (max_value - min_value))
+
+                x_matrix1 = np.append(x_matrix1, 1).reshape(-1, 1)
+                y_out = np.dot(weight_out_stm, x_matrix1)
+                y_out_list.append(y_out[0, 0])
+                envelope_matrix = []
 
         # calculate the error
         error_learning = np.var(np.array(train_signal) - np.array(y_out_list))
@@ -373,9 +420,28 @@ def test_classification(a0, b0, c0, current_limited, test_number_wave, nodes_num
         print('----------------------------------------------------------------')
 
         # FIGURES
+        plt.figure('Train')
+        plt.plot(envelope_matrix, c='blue')
+        # plt.show()
+
         plt.figure('Test results')
-        plt.plot(train_signal, c='blue')
-        plt.plot(y_out_list, c='red')
+        plt.plot(train_signal, c='blue', label='target')
+        plt.plot(y_out_list, c='green', label='module')
+        plt.ylabel('Index')
+        plt.xlabel('Time')
+        plt.legend()
+        # plt.show()
+
+        plt.figure('Comparison')
+        plt.ylabel('Index')
+        plt.xlabel('Time')
+        plt.subplot(2, 1, 1)
+        plt.plot(train_signal, c='blue', label='target')
+        plt.legend()
+
+        plt.subplot(2, 1, 2)
+        plt.plot(y_out_list, c='red', label='module')
+        plt.legend()
         plt.show()
 
     return 0
@@ -387,5 +453,5 @@ if __name__ == '__main__':
     # test_stm(1, -0.01, 0.01, delay_time=1, test_points=100, nodes_number_stm=23)
 
     # for classification task
-    train_classification(1, -0.01, 0.01, current_limited=0.8, number_wave=20, nodes_number=24)
-    test_classification(1, -0.01, 0.01, current_limited=0.8, test_number_wave=10, nodes_number=24)
+    train_classification(1, -0.01, 0.01, current_limited=0.8, number_wave=30, nodes_number=50)
+    test_classification(1, -0.01, 0.01, current_limited=0.8, test_number_wave=30, nodes_number=50)
