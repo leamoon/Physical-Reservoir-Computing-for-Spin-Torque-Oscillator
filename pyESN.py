@@ -321,3 +321,87 @@ class ESN:
 
         return self._unscale_teacher(outputs[1:])
 
+    def train_classification(self, inputs, outputs):
+        """
+        Collect the network's reaction to training data, train readout weights.
+        Args:
+            inputs: array of dimensions (N_training_samples x n_inputs)
+            outputs: array of dimension (N_training_samples x n_outputs)
+        Returns:
+            the network's output on the training data, using the trained weights
+        """
+        # transform any vectors of shape (x,) into vectors of shape (x,1):
+        if inputs.ndim < 2:
+            inputs = np.reshape(inputs, (len(inputs), -1))
+        if outputs.ndim < 2:
+            outputs = np.reshape(outputs, (len(outputs), -1))
+        # transform input and teacher signal:
+        inputs_scaled = self._scale_inputs(inputs)
+        teachers_scaled = self._scale_teacher(outputs)
+
+        print("harvesting states...")
+        # step the reservoir through the given input,output pairs:
+        print(inputs.shape)
+        states = np.zeros((inputs.shape[0], self.n_reservoir))
+        for n in range(1, inputs.shape[0]):
+            states[n, :] = self._update(states[n - 1, :], inputs_scaled[n, :], teachers_scaled[n - 1, :])
+
+        print("fitting...")
+        # we'll disregard the first few states:
+        transient = min(int(inputs.shape[1] / 10), 100)
+        # include the raw inputs:
+        bias_term = np.ones((inputs.shape[0], 1))
+        extended_states = np.hstack((states, inputs_scaled, bias_term))
+
+        # Solve for W_out:
+        if np.max(teachers_scaled) > 1 and self.out_activation == np.tanh:
+            print('the magnitude of output signal is too large for tanh function !')
+            sys.exit()
+
+        self.weight_out = np.dot(np.linalg.pinv(extended_states[transient:, :]),
+                                 self.inverse_out_activation(teachers_scaled[transient:, :])).T
+
+        # remember the last state for later:
+        self.last_state = states[-1, :]
+        self.last_input = inputs[-1, :]
+        self.last_output = teachers_scaled[-1, :]
+
+        pre_train = self._unscale_teacher(self.out_activation(np.dot(extended_states, self.weight_out.T)))
+        print("training error:{}".format(np.sqrt(np.var(pre_train - outputs))))
+        return pre_train
+
+    def test_classification(self, inputs, continuation=True):
+        """
+        Apply the learned weights to the network's reactions to new input.
+        Args:
+            inputs: array of dimensions (N_test_samples x n_inputs)
+            continuation: if True, start the network from the last training state
+        Returns:
+            Array of output activations
+        """
+        if inputs.ndim < 2:
+            inputs = np.reshape(inputs, (len(inputs), -1))
+        n_samples = inputs.shape[0]
+
+        if continuation:
+            last_state = self.last_state
+            last_input = self.last_input
+            last_output = self.last_output
+        else:
+            last_state = np.zeros(self.n_reservoir)
+            last_input = np.zeros(self.n_inputs)
+            last_output = np.zeros(self.n_outputs)
+
+        inputs = np.vstack([last_input, self._scale_inputs(inputs)])
+        states = np.vstack([last_state, np.zeros((n_samples, self.n_reservoir))])
+        outputs = np.vstack([last_output, np.zeros((n_samples, self.n_outputs))])
+        bias_term = np.ones((n_samples+1, 1))
+
+        for n in range(n_samples):
+            states[n + 1, :] = self._update(states[n, :], inputs[n + 1, :], outputs[n, :])
+            outputs[n + 1, :] = self.out_activation(np.dot(self.weight_out,
+                                                    np.concatenate([states[n + 1, :], inputs[n + 1, :],
+                                                                    bias_term[n + 1, :]])))
+
+        return self._unscale_teacher(outputs[1:])
+

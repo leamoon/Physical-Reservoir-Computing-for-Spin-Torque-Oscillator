@@ -29,7 +29,7 @@ def evolution_mag(m_x, m_y, m_z, direc_current=-0.836, magnitude=0.0, h_x=0.3, f
     :param h_x: external magnetic field
     :param f_ac: frequency of ac current
     :param time_used: time_step used to make evolution
-    :return: mx_list, t_list, voltage_list, envelope_list1, time_env_list1, [mx, my, mz], my_list
+    :return: mx_list, t_list, voltage_list, envelope_list1, time_env_list1, [mx, my, mz], my_list1
     """
 
     # initial
@@ -44,8 +44,8 @@ def evolution_mag(m_x, m_y, m_z, direc_current=-0.836, magnitude=0.0, h_x=0.3, f
     # f_ac = 8e11
 
     for i1 in range(1, time_used):
-        # analog_current = magnitude * np.sin(2 * np.pi * f_ac * i1 * t_step)  # sine function
-        analog_current = magnitude
+        analog_current = magnitude * np.sin(2 * np.pi * f_ac * i1 * t_step)  # sine function
+        # analog_current = magnitude
         sum_current = direc_current + analog_current
 
         H_DL = 2000 * sum_current  # field-like torque

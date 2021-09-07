@@ -38,7 +38,7 @@ def evolution_mag(m_x, m_y, m_z, direc_current=-0.836, magnitude=0.0, h_x=0.3, f
     :param h_x: external magnetic field
     :param f_ac: frequency of ac current
     :param time_used: time_step used to make evolution
-    :return: mx_list, t_list, voltage_list, envelope_list1, time_env_list1, [mx, my, mz], my_list
+    :return: mx_list, t_list, voltage_list, envelope_list1, time_env_list1, [mx, my, mz], my_list1
     """
     # initial
     t_list, resistance_list, voltage_list = [], [], []
@@ -52,8 +52,8 @@ def evolution_mag(m_x, m_y, m_z, direc_current=-0.836, magnitude=0.0, h_x=0.3, f
     # f_ac = 8e11
 
     for i1 in range(1, time_used):
-        analog_current = magnitude * np.sin(2 * np.pi * f_ac * i1 * t_step)  # sine function
-        # analog_current = magnitude
+        # analog_current = magnitude * np.sin(2 * np.pi * f_ac * i1 * t_step)  # sine function
+        analog_current = magnitude
         sum_current = direc_current + analog_current
 
         H_DL = 2000 * sum_current  # field-like torque
@@ -197,7 +197,7 @@ def train_stm(a0, b0, c0, delay_time=1, nodes_number_stm=23, bias_stm=1, density
     weight_state = weight_state / max(np.abs(elg_value)) * spectral_radius
     weight_state = weight_state.todense()
     # input weight could be sparse, the function will be added in next version
-    weight_feedback = np.random.rand(1, nodes_number_stm) * 2 - 1
+    weight_feedback = np.random.rand(nodes_number_stm, 1) * 2 - 1
 
     # find the last weight matrix data
     if os.path.exists(
@@ -218,11 +218,12 @@ def train_stm(a0, b0, c0, delay_time=1, nodes_number_stm=23, bias_stm=1, density
     # fabricate the input, target, and output signals
     s_in_stm = np.random.randint(0, 2, Batch_size)
     y_out_list, x_final_matrix = [], []
-    last_states = np.zeros((3, nodes_number_stm))
+    last_mx, last_my, last_mz = [1]*nodes_number_stm, [0.01]*nodes_number_stm, [0.01]*nodes_number_stm
     current_states = [0]*nodes_number_stm
     input_list_reservoir = [0]*nodes_number_stm
     output = 0
     output_matrix = []
+    state_final_matrix = []
 
     # create pulse list
     for i1 in range(0, Batch_size):
@@ -233,27 +234,26 @@ def train_stm(a0, b0, c0, delay_time=1, nodes_number_stm=23, bias_stm=1, density
 
         # neuron states update
         for i in range(nodes_number_stm):
-            m_x0, m_y0, m_z0 = last_states[:, i]
+            m_x0, m_y0, m_z0 = last_mx[i], last_my[i], last_mz[i]
             if i != 0:
                 magnitude = input_list_reservoir[i]
-            if m_x0 == 0:
-                m_x0, m_y0, m_z0 = 1, 0.01, 0.01
+            print(f'{m_x0}, {m_y0}, {m_z0}')
             mx_li1, t, v_1, [m_x1, m_y1, m_z1], my_li1, resist_dif = evolution_mag(m_x0, m_y0, m_z0,
                                                                                    magnitude=magnitude)
             # update states
-            last_states[:, i] = [m_x1, m_y1, m_z1]
+            last_mx[i], last_my[i], last_mz[i] = m_x1, m_y1, m_z1
             current_states[i] = resist_dif
             # calculate the next term
             temp = 0
             for j in range(nodes_number_stm):
-                if weight_state[j:i] != 0:
-                    temp += weight_out_stm[j:i]*current_states[j]
+                if weight_state[j, i] != 0:
+                    temp = weight_state[j, i]*current_states[j] + temp
 
-            temp *= g_parameter
-            output_current = (1-leaky_rate)*current_states[i] + leaky_rate*np.tanh(temp+weight_feedback[0]*output)
+            temp = g_parameter * temp
+            output_current = (1-leaky_rate)*current_states[i] + leaky_rate*np.tanh(temp+weight_feedback[i]*output)
 
             for j in range(nodes_number_stm):
-                if weight_state[i:j] != 0:
+                if weight_state[i, j] != 0:
                     input_list_reservoir[j] = output_current
 
         # calculate the output
@@ -261,24 +261,31 @@ def train_stm(a0, b0, c0, delay_time=1, nodes_number_stm=23, bias_stm=1, density
         current_states = np.array(current_states).reshape(1+nodes_number_stm, 1)
         output = np.dot(weight_out_stm, current_states)
         output_matrix.append(output)
+        state_final_matrix.append(current_states.tolist()[0])
 
     # update matrix of readout part
     if delay_time != 0:
         y_train_signal = np.array(list(s_in_stm)[-int(delay_time):] + list(s_in_stm)[:-int(delay_time)])
     else:
         y_train_signal = s_in_stm
+    state_final_matrix = np.asmatrix(state_final_matrix).reshape(-1, nodes_number_stm+1)
+    weight_out_stm = np.dot(y_train_signal, state_final_matrix)
+    print('Training successfully !')
+    # save weight matrix as .npy files
+    np.save('weight_matrix_os/weight_out_stm_{}.npy'.format(delay_time), weight_out_stm)
+
     return 0
 
 
 if __name__ == '__main__':
-    mx_list, t_list, voltage_list, [mx, my, mz], my_list, r_d = evolution_mag(1, 0.01, 0.01, magnitude=0.3)
-    plt.figure('evolution')
-    plt.plot(t_list, voltage_list)
-    plt.show()
-
-    plt.figure('resistance')
-    plt.plot(r_d, c='red')
-    plt.show()
+    # mx_list, t_list, voltage_list, [mx, my, mz], my_list1, r_d = evolution_mag(1, 0.01, 0.01, magnitude=0.3)
+    # plt.figure('evolution')
+    # plt.plot(t_list, voltage_list)
+    # plt.show()
+    #
+    # plt.figure('resistance')
+    # plt.plot(r_d, c='red')
+    # plt.show()
 
     # current_list = np.linspace(0, 1, 20)
     # resist_diff_list = []
@@ -296,3 +303,5 @@ if __name__ == '__main__':
     # plt.xlabel('Current density')
     # plt.show()
 
+    # for delay task
+    train_stm(a0=1, b0=0.01, c0=0.01, delay_time=1, nodes_number_stm=30)
