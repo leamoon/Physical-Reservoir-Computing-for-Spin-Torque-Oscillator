@@ -54,11 +54,12 @@ class Mtj:
         # K1 calculation Fourth Runge Kutta Method
         x_axis = np.array([1, 0, 0])
 
-        delta_m = -self.gyo_ratio * np.cross(self.m, self.effective_field) - self.damping_factor * self.gyo_ratio * \
-                  np.dot(
-                      self.m,
-                      self.effective_field) * self.m + self.damping_factor * self.gyo_ratio * self.effective_field + self.stt_amplitude * self.damping_factor * self.gyo_ratio * (
-                          self.x0 * np.cross(self.m, self.m) - np.cross(self.m, x_axis)) + (self.m * np.dot(self.m, x_axis) - x_axis) * self.stt_amplitude * self.gyo_ratio
+        delta_m = -self.gyo_ratio * np.cross(self.m,
+                                             self.effective_field) - self.damping_factor * self.gyo_ratio * np.dot(
+            self.m, self.effective_field) * self.m + self.damping_factor * self.gyo_ratio * \
+            self.effective_field + self.stt_amplitude * self.damping_factor * self.gyo_ratio * (
+                          self.x0 * np.cross(self.m, self.m) - np.cross(self.m, x_axis)) + (
+                          self.m * np.dot(self.m, x_axis) - x_axis) * self.stt_amplitude * self.gyo_ratio
 
         delta1_m_reduce = np.divide(delta_m, (1 + pow(self.damping_factor, 2)))
 
@@ -66,10 +67,10 @@ class Mtj:
         self.m = last_magnetization + 1 / 2 * delta1_m_reduce * t_step
         delta_m = -self.gyo_ratio * np.cross(self.m,
                                              self.effective_field) - self.damping_factor * self.gyo_ratio * np.dot(
-            self.m, self.effective_field) * self.m + self.damping_factor * self.gyo_ratio * self.effective_field + self \
-                      .stt_amplitude * self.damping_factor * self.gyo_ratio * (
-                          self.x0 * np.cross(self.m, self.m) - np.cross(self.m, x_axis)) + \
-                  (self.m * np.dot(self.m, x_axis) - x_axis) * self.stt_amplitude * self.gyo_ratio
+            self.m, self.effective_field) * self.m + self.damping_factor * self.gyo_ratio * self.effective_field + \
+            self.stt_amplitude * self.damping_factor * self.gyo_ratio * (
+                          self.x0 * np.cross(self.m, self.m) - np.cross(self.m, x_axis)) + (
+                              self.m * np.dot(self.m, x_axis) - x_axis) * self.stt_amplitude * self.gyo_ratio
 
         delta2_m_reduce = np.divide(delta_m, (1 + pow(self.damping_factor, 2)))
 
@@ -77,10 +78,10 @@ class Mtj:
         self.m = last_magnetization + 1 / 2 * delta2_m_reduce * t_step
         delta_m = -self.gyo_ratio * np.cross(self.m,
                                              self.effective_field) - self.damping_factor * self.gyo_ratio * np.dot(
-            self.m, self.effective_field) * self.m + self.damping_factor * self.gyo_ratio * self.effective_field + self \
-                      .stt_amplitude * self.damping_factor * self.gyo_ratio * (
-                          self.x0 * np.cross(self.m, self.m) - np.cross(self.m, x_axis)) + \
-                  (self.m * np.dot(self.m, x_axis) - x_axis) * self.stt_amplitude * self.gyo_ratio
+            self.m, self.effective_field) * self.m + self.damping_factor * self.gyo_ratio * self.effective_field + \
+            self.stt_amplitude * self.damping_factor * self.gyo_ratio * (
+                self.x0 * np.cross(self.m, self.m) - np.cross(self.m, x_axis)) + (
+                              self.m * np.dot(self.m, x_axis) - x_axis) * self.stt_amplitude * self.gyo_ratio
 
         delta3_m_reduce = np.divide(delta_m, (1 + pow(self.damping_factor, 2)))
 
@@ -88,14 +89,14 @@ class Mtj:
         self.m = last_magnetization + delta3_m_reduce * t_step
         delta_m = -self.gyo_ratio * np.cross(self.m,
                                              self.effective_field) - self.damping_factor * self.gyo_ratio * np.dot(
-            self.m, self.effective_field) * self.m + self.damping_factor * self.gyo_ratio * self.effective_field + self \
-                      .stt_amplitude * self.damping_factor * self.gyo_ratio * (
-                          self.x0 * np.cross(self.m, self.m) - np.cross(self.m, x_axis)) + \
-                  (self.m * np.dot(self.m, x_axis) - x_axis) * self.stt_amplitude * self.gyo_ratio
+            self.m, self.effective_field) * self.m + self.damping_factor * self.gyo_ratio * self.effective_field + \
+            self.stt_amplitude * self.damping_factor * self.gyo_ratio * (
+                          self.x0 * np.cross(self.m, self.m) - np.cross(self.m, x_axis)) + (
+                              self.m * np.dot(self.m, x_axis) - x_axis) * self.stt_amplitude * self.gyo_ratio
         delta4_m_reduce = np.divide(delta_m, (1 + pow(self.damping_factor, 2)))
 
         self.m = last_magnetization + 1 / 6 * t_step * (
-                    delta1_m_reduce + 2 * delta2_m_reduce + 2 * delta3_m_reduce + delta4_m_reduce)
+                delta1_m_reduce + 2 * delta2_m_reduce + 2 * delta3_m_reduce + delta4_m_reduce)
 
         # normalization of magnetization vector
         [self.x0, self.y0, self.z0] = self.m
@@ -128,7 +129,7 @@ class Mtj:
                     extreme_points.append(t_list[i1])
         self.dc_frequency = 1 / (extreme_points[int(len(extreme_points) / 2)] - extreme_points[int(len(
             extreme_points) / 2) - 1])
-        print('dc frequency: {}'.format(self.dc_frequency))
+        # print('dc frequency: {}'.format(self.dc_frequency))
 
         return mx_list, my_list, mz_list, t_list
 
@@ -219,17 +220,17 @@ if __name__ == '__main__':
     fourier_consequence = fourier_consequence / max(fourier_consequence) * 50
     fourier_freq = np.fft.fftfreq(len(t_list1))
     pds = [pow(i, 2) for i in fourier_consequence]
-    print('Fourier:{}'.format(pds))
+    # print('Fourier:{}'.format(pds))
 
     mz_list1 = np.array(mz_list1).reshape(-1, 1)
-    d = lyapunov.mle(mz_list1[int(len(mz_list1) / 2):], maxt=10, window=1e-7, maxnum=100)
+    le_number = lyapunov.mle(mz_list1[int(len(mz_list1) / 2):], maxt=10, window=1e-7, maxnum=100)
 
     plt.figure()
     plt.title('Maximum Lyapunov exponent')
     plt.xlabel(r'Time $t$')
     plt.ylabel(r'Maximum Lyapunov exponent')
-    plt.plot(d, label='divergence')
-    t1 = np.linspace(0, len(d) - 1, len(d))
+    plt.plot(le_number, label='divergence')
+    t1 = np.linspace(0, 9, 10)
     x1 = [0 for i in t1]
     plt.plot(t1, x1, label='zero line')
     plt.legend()
@@ -268,27 +269,36 @@ if __name__ == '__main__':
     plt.ylabel('Fourier Transform')
     plt.xlabel('Frequency interval')
 
-    plt.show()
+    # plt.show()
 
     # ##################################################################################
-    # find chaos
+    # find chaos, modification and synchronization regions
     # ###################################################################################
-    # le_list = []
-    # fac_list = np.linspace(226, 232, 50)
-    # for i in fac_list:
-    #     mtj = Mtj(a, b, c)
-    #
-    #     mx_list1, my_list1, mz_list1, t_list1 = mtj.frequency_dc(extern_field, ani_field, dem_field, i,
-    #                                                              ac_amplitude=ac_current, ac_frequency=f_ac,
-    #                                                              time_consumed=time_consume, time_step=t_step)
-    #
-    #     mz_list1 = np.array(mz_list1).reshape(-1, 1)
-    #     print(mz_list1.shape)
-    #     d = lyapunov.mle(mz_list1, maxt=10, window=1e-3, maxnum=10)
-    #     le_list.append(max(d))
-    #
-    # plt.figure()
-    # plt.plot(fac_list, le_list, c='blue')
-    # plt.ylabel('Lyapunov Exponent')
-    # plt.xlabel('dc current(Oe)')
-    # plt.show()
+    # regions
+    chaos_dc, chaos_fre = [], []
+    fre_range = np.linspace(57e9, 257e9, 200)
+    dc_current_range = np.linspace(100, 500, 401)
+
+    for i in range(len(fre_range)):
+        for j in range(len(dc_current_range)):
+            mtj = Mtj(a, b, c)
+            mx_list1, my_list1, mz_list1, t_list1 = mtj.frequency_dc(extern_field, ani_field, dem_field,
+                                                                     dc_current_range[j],
+                                                                     ac_amplitude=ac_current, ac_frequency=fre_range[i],
+                                                                     time_consumed=time_consume, time_step=t_step)
+            mz_list1 = np.array(mz_list1).reshape(-1, 1)
+            d = lyapunov.mle(mz_list1, maxt=10, window=1e-3, maxnum=10)
+            print('-----------------------------------------------------------------')
+            print('Frequency: {} Hz,  Dc_current: {} Oe'.format(fre_range[i], dc_current_range[j]))
+            print('Maximum Lyapunov Exponent : {:.2}'.format(np.max(d)))
+            if len(chaos_dc) != 0:
+                print('Chaos conditions: dc={}, fre={}'.format(chaos_dc, chaos_fre))
+            else:
+                print('Finding Chaos Region')
+            print('Progress: {} %'.format(100*(i*len(dc_current_range)+j+1)/(len(fre_range)*len(dc_current_range))))
+            print('-----------------------------------------------------------------')
+            if np.max(d) >= 0:
+                chaos_dc.append(dc_current_range[j])
+                chaos_fre.append(fre_range[i])
+
+    print('Chaos conditions: dc={}, fre={}'.format(chaos_dc, chaos_fre))
