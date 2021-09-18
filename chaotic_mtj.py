@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -7,13 +8,13 @@ def gram_schmidt(un_o_matrix):
         # distinguish the shape
         row_len, column_len = un_o_matrix.shape
         x1, x2, x3, x4 = un_o_matrix[0, :], un_o_matrix[1, :], un_o_matrix[2, :], un_o_matrix[3, :]
-        x1_new = x1
-        x2_new = x2 - (np.dot(x2, x1_new.T) / np.dot(x1_new, x1_new.T))[0, 0] * x1_new
-        x3_new = x3 - (np.dot(x3, x1_new.T) / np.dot(x1_new, x1_new.T))[0, 0] * x1_new - (np.dot(
-            x3, x2_new.T) / np.dot(x2_new, x2_new.T))[0, 0] * x2_new
-        x4_new = x4 - (np.dot(x4, x1_new.T) / np.dot(x1_new, x1_new.T))[0, 0] * x1_new - (np.dot(
-            x4, x2_new.T) / np.dot(x2_new, x2_new.T))[0, 0] * x2_new - (
-                         np.dot(x4, x3_new.T) / np.dot(x3_new, x3_new.T))[0, 0] * x3_new
+        x4_new = x4
+        x3_new = x3 - (np.dot(x3, x4_new.T) / np.dot(x4_new, x4_new.T))[0, 0] * x4_new
+        x2_new = x2 - (np.dot(x2, x4_new.T) / np.dot(x4_new, x4_new.T))[0, 0] * x4_new - (np.dot(
+            x2, x3_new.T) / np.dot(x3_new, x3_new.T))[0, 0] * x3_new
+        x1_new = x1 - (np.dot(x1, x4_new.T) / np.dot(x4_new, x4_new.T))[0, 0] * x4_new - (np.dot(
+            x1, x3_new.T) / np.dot(x3_new, x3_new.T))[0, 0] * x3_new - (
+                         np.dot(x1, x2_new.T) / np.dot(x2_new, x2_new.T))[0, 0] * x2_new
         o_matrix = np.vstack([x1_new, x2_new, x3_new, x4_new])
 
         # normalization
@@ -28,6 +29,32 @@ def gram_schmidt(un_o_matrix):
     except Exception as e:
         print(e)
         return 0
+
+
+def waveform_generator(number_wave):
+    """
+    a function used to create random wave(sine or square)
+    :param number_wave: number of waves
+    :return: wave_points
+    """
+    # 8 points to express waveform
+    random_pulse = np.random.randint(0, 2, int(number_wave))
+    print('random:{}'.format(random_pulse))
+    wave_points = []
+    for i in random_pulse:
+        if i == 0:
+            # sine function
+            sine_points = [259.50, 259.52, 259.53, 259.52, 259.50,
+                           259.48, 259.47, 259.48]
+            wave_points = wave_points + sine_points
+        elif i == 1:
+            # square function
+            square_points = [259.53] * 4 + [259.47] * 4
+            wave_points = wave_points + square_points
+
+    print('wave:{}'.format(wave_points))
+
+    return wave_points, list(random_pulse)
 
 
 class Mtj:
@@ -164,32 +191,34 @@ class Mtj:
 
             # calculation of time
             if i1 % 1000 == 0:
-                print('Process: {:.3} %'.format((i1 + 1) / int(time_consumed / time_step) * 100))
+                print('Process: {:.3} %  Time evolution'.format((i1 + 1) / int(time_consumed / time_step) * 100))
 
         # find dc frequency
-        extreme_points = []
-        for i1 in range(len(mz_list)):
-            if i1 != 0 and i1 != len(mz_list) - 1:
-                if mz_list[i1] < mz_list[i1 - 1] and mz_list[i1] < mz_list[i1 + 1]:
-                    extreme_points.append(t_list[i1])
-        self.dc_frequency = 1 / (extreme_points[int(len(extreme_points) / 2)] - extreme_points[int(len(
-            extreme_points) / 2) - 1])
+        # extreme_points = []
+        # for i1 in range(len(mz_list)):
+        #     if i1 != 0 and i1 != len(mz_list) - 1:
+        #         if mz_list[i1] < mz_list[i1 - 1] and mz_list[i1] < mz_list[i1 + 1]:
+        #             extreme_points.append(t_list[i1])
+        # self.dc_frequency = 1 / (extreme_points[int(len(extreme_points) / 2)] - extreme_points[int(len(
+        #     extreme_points) / 2) - 1])
         # print('dc frequency: {}'.format(self.dc_frequency))
 
         return mx_list, my_list, mz_list, t_list
 
-    def lyapunov_parameter(self, current_t, time_interval, delta_x=None):
+    def lyapunov_parameter(self, current_magnetization, current_t, time_interval, delta_x=None):
         """
         a function to get largest lyapunov exponent and its spectrum
         :param current_t: the current time, which work for stt term
         :param time_interval: the time step between two closest elements
         :param delta_x: the input orthogonal matrix
+        :param current_magnetization: the magnetization states at current time
         :return v_matrix, delta_x
         """
 
         # define the g parameters, to simplified latter calculation
+        [self.x0, self.y0, self.z0] = current_magnetization
         self.stt_amplitude = self.dc_amplitude + self.ac_amplitude*np.cos(self.ac_frequency*current_t)
-        stt_partial = self.ac_frequency*self.ac_frequency*np.cos(self.ac_frequency*current_t)
+        stt_partial = self.ac_amplitude*self.ac_frequency*np.cos(self.ac_frequency*current_t)
 
         g1 = (-self.gyo_ratio * self.z0 * self.y0 * self.demagnetization_field -
               self.damping_factor * self.gyo_ratio * (self.x0 * self.external_field +
@@ -307,7 +336,7 @@ class Mtj:
         # initial orthogonal matrix
         if delta_x is None:
             delta_x = np.mat([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
-            print('Create the initial delta_x')
+
         jacobian_matrix = np.mat([[partial_g1_mx, partial_g1_my, partial_g1_mz, partial_g1_t],
                                   [partial_g2_mx, partial_g2_my, partial_g2_mz, partial_g2_t],
                                   [partial_g3_mx, partial_g3_my, partial_g3_mz, partial_g3_t],
@@ -319,28 +348,182 @@ class Mtj:
         v_matrix, delta_x = gram_schmidt(delta_x_new)
         return v_matrix, delta_x
 
-    def lyapunov_exponent(self, current_time, length_n=10, cal_t_step=0.01):
+    def lyapunov_exponent(self, current_magnetization, current_time, length_n=10, cal_t_step=3e-13):
 
         delta_x = None
         sum_x, sum_y, sum_z, sum_t = 0, 0, 0, 0
         for i in range(int(length_n)):
             v_matrix, delta_x = self.lyapunov_parameter(current_t=cal_t_step*i+current_time, time_interval=cal_t_step,
-                                                        delta_x=delta_x)
+                                                        delta_x=delta_x, current_magnetization=current_magnetization)
+            # print('delta_x:{}'.format(delta_x))
             sum_x = np.log(np.linalg.norm(v_matrix[0, :])) + sum_x
             sum_y = np.log(np.linalg.norm(v_matrix[1, :])) + sum_y
             sum_z = np.log(np.linalg.norm(v_matrix[2, :])) + sum_z
             sum_t = np.log(np.linalg.norm(v_matrix[3, :])) + sum_t
 
         # calculation of Le
-        sum_x = sum_x / length_n / cal_t_step
-        sum_y = sum_y / length_n / cal_t_step
-        sum_z = sum_z / length_n / cal_t_step
-        sum_t = sum_t / length_n / cal_t_step
+        sum_x = sum_x / length_n
+        sum_y = sum_y / length_n
+        sum_z = sum_z / length_n
+        sum_t = sum_t / length_n
 
         return sum_x, sum_y, sum_z, sum_t
 
+    def classification_train(self, number_wave, nodes_classification):
+        if os.path.exists('weight_matrix_chaos/weight_out_classification.npy'):
+            weight_out_stm = np.load('weight_matrix_chaos/weight_out_classification.npy')
+            print('\r' + 'Loading weight_out_classification matrix successfully !', end='', flush=True)
+
+        else:
+            # think about bias term
+            weight_out_stm = np.random.randint(-1, 2, (1, nodes_classification + 1))
+            print('\r weight matrix of STM created successfully !', end='', flush=True)
+
+        print('\rClassification')
+        print('----------------------------------------------------------------')
+        print('start to train !', flush=True)
+
+        # fabricate the input, target, and output signals
+        y_out_list, x_final_matrix = [], []
+        s_in, train_signal = waveform_generator(number_wave)
+        print('---------------------------------------------------------------')
+
+        for i in range(len(s_in)):
+            mx_list2, my_list2, mz_list2, t_list2 = self.frequency_dc(external_field=200, anisotropy_field=0,
+                                                                      demagnetization_field=8400, dc_amplitude=s_in[i],
+                                                                      ac_amplitude=20, ac_frequency=32e9,
+                                                                      time_consumed=1e-8, time_step=3e-13)
+
+            # sampling points
+            if (i + 1) % 8 == 0:
+                number_interval = int(len(mz_list2) / nodes_classification)
+                if number_interval < 1:
+                    number_interval = 1
+                x_matrix1 = np.array(mz_list2[1: len(mz_list2):number_interval])
+
+                while len(x_matrix1) != nodes_classification:
+                    if len(x_matrix1) > nodes_classification:
+                        x_matrix1 = x_matrix1[:-1]
+                    else:
+                        x_matrix1 = np.append(x_matrix1, x_matrix1[-1])
+                x_matrix1 = np.reshape(x_matrix1, (nodes_classification, 1))
+
+                # add bias term
+                x_matrix1 = np.append(x_matrix1.T, 1).reshape(-1, 1)
+                y_out = np.dot(weight_out_stm, x_matrix1)
+                y_out_list.append(y_out[0, 0])
+                x_final_matrix.append(x_matrix1.T.tolist()[0])
+
+            # calculation time
+            if i % 20 == 0:
+                print('-------------------------------------------------------------')
+                print('progress : {:.3} % classification training'.format(i/len(s_in)*100))
+                print('-------------------------------------------------------------')
+
+        # update weight
+        y_train_matrix = np.array(train_signal).reshape(1, len(train_signal))
+        x_final_matrix = np.asmatrix(x_final_matrix).T
+        weight_out_stm = np.dot(y_train_matrix, np.linalg.pinv(x_final_matrix))
+
+        # test for training
+        y_out_test = np.dot(weight_out_stm, x_final_matrix)
+
+        # save weight matrix as .npy files
+        np.save('weight_matrix_chaos/weight_out_classification.npy', weight_out_stm)
+
+        # calculate the error
+        error_learning = np.var(np.array(train_signal) - np.array(y_out_list))
+        print('error:{}'.format(error_learning))
+        print('Trained successfully !')
+        print('----------------------------------------------------------------')
+
+    def classification_test(self, test_number, nodes_classification):
+        if os.path.exists('weight_matrix_chaos/weight_out_classification.npy'):
+            weight_out_stm = np.load('weight_matrix_chaos/weight_out_classification.npy')
+            print('\r' + 'Loading weight_out_classification matrix successfully !', end='', flush=True)
+            print(weight_out_stm)
+
+        else:
+            print('\rno valid weight data !', end='', flush=True)
+            return 0
+
+        print('\rClassification')
+        print('----------------------------------------------------------------')
+        print('start to test !', flush=True)
+
+        # fabricate the input, target, and output signals
+        y_out_list, x_final_matrix = [], []
+        s_in, train_signal = waveform_generator(test_number)
+        print('---------------------------------------------------------------')
+
+        for i in range(len(s_in)):
+            mx_list2, my_list2, mz_list2, t_list2 = self.frequency_dc(external_field=200, anisotropy_field=0,
+                                                                      demagnetization_field=8400, dc_amplitude=s_in[i],
+                                                                      ac_amplitude=20, ac_frequency=32e9,
+                                                                      time_consumed=1e-8, time_step=3e-13)
+
+            # sampling points
+            if (i + 1) % 8 == 0:
+                number_interval = int(len(mz_list2) / nodes_classification)
+                print('length of mz_list form: {}'.format(len(mz_list2)))
+                if number_interval < 1:
+                    number_interval = 1
+                x_matrix1 = np.array(mz_list2[1: len(mz_list2):number_interval])
+
+                while len(x_matrix1) != nodes_classification:
+                    if len(x_matrix1) > nodes_classification:
+                        x_matrix1 = x_matrix1[:-1]
+                    else:
+                        x_matrix1 = np.append(x_matrix1, x_matrix1[-1])
+                x_matrix1 = np.reshape(x_matrix1, (nodes_classification, 1))
+
+                # add bias term
+                x_matrix1 = np.append(x_matrix1.T, 1).reshape(-1, 1)
+                y_out = np.dot(weight_out_stm, x_matrix1)
+                print('y_out :{}'.format(y_out))
+                y_out_list.append(y_out[0, 0])
+
+            print('-------------------------------------------------------------')
+            print('progress : {} % classification testing'.format(i / len(s_in) * 100))
+            print('-------------------------------------------------------------')
+
+        # calculate the error
+        error_learning = np.var(np.array(train_signal) - np.array(y_out_list))
+        print('test error:{}'.format(error_learning))
+        print('----------------------------------------------------------------')
+
+        # FIGURES
+        plt.figure('Test results')
+        plt.plot(train_signal, c='blue', label='target')
+        plt.plot(y_out_list, c='green', label='module')
+        plt.ylabel('Index')
+        plt.xlabel('Time')
+        plt.legend()
+        # plt.show()
+
+        plt.figure('Comparison')
+        plt.subplot(2, 1, 1)
+        plt.plot(train_signal, c='blue', label='target & input')
+        plt.legend()
+        plt.ylabel('Index')
+        plt.xlabel('Time')
+
+        plt.subplot(2, 1, 2)
+        plt.plot(y_out_list, c='red', label='module')
+        plt.legend()
+        plt.ylabel('Index')
+        plt.xlabel('Time')
+        plt.show()
+
 
 if __name__ == '__main__':
+
+    mtj = Mtj(0.1, 0.1, 0)
+    t_step = 3e-13
+    # mtj.classification_train(number_wave=500, nodes_classification=100)
+    mtj = Mtj(0.1, 0.1, 0)
+    mtj.classification_test(test_number=30, nodes_classification=100)
+
     # initial state
     a, b, c = 0.1, 0.1, 0
     t_step = 3e-13
@@ -349,7 +532,7 @@ if __name__ == '__main__':
     extern_field = 200  # Unit: Oe
     ani_field = 0  # Unit: Oe
     dem_field = 8400  # Unit: Oe
-    dc_current = 420
+    dc_current = 269
     ac_current = 20
     f_ac = 32e9
 
@@ -367,30 +550,36 @@ if __name__ == '__main__':
     pds = [pow(i, 2) for i in fourier_consequence]
     # print('Fourier:{}'.format(pds))
 
-    mz_list1 = np.array(mz_list1).reshape(-1, 1)
-    le_x, le_y, le_z, le_t = mtj.lyapunov_exponent(current_time=100e-9, length_n=100, cal_t_step=1e-11)
-    print('le_z: {}'.format(le_z))
-    print('le_t: {}'.format(le_t))
-    temp1_list = np.linspace(0, 100-9, 101)*1e-9
-    le_t_list, le_z_list, le_x_list, le_y_list = [], [], [], []
-    for i in temp1_list:
-        le_x, le_y, le_z, le_t = mtj.lyapunov_exponent(current_time=i, length_n=50, cal_t_step=1e-11)
-        le_t_list.append(le_t)
-        le_z_list.append(le_z)
-        le_x_list.append(le_x)
-        le_y_list.append(le_y)
-
-    plt.figure()
-    plt.title('Maximum Lyapunov exponent')
-    plt.xlabel(r'Time $t$')
-    plt.ylabel(r'Maximum Lyapunov exponent')
-    plt.plot(temp1_list, le_z_list, c='blue', label='m_z')
-    plt.plot(temp1_list, le_t_list, c='pink', label='m_t')
-    plt.plot(temp1_list, le_x_list, c='orange', label='m_x')
-    plt.plot(temp1_list, le_y_list, c='green', label='m_y')
-    x1 = [0 for i in temp1_list]
-    plt.plot(temp1_list, x1, label='zero line')
-    plt.legend()
+    # #############################################################################################
+    # calculation of lyapunov exponent1
+    # #############################################################################################
+    # le_t_list, le_z_list, le_x_list, le_y_list = [], [], [], []
+    # for i in range(len(t_list1)):
+    #     le_x, le_y, le_z, le_t = mtj.lyapunov_exponent(current_time=t_list1[i], length_n=50,
+    #                                                    cal_t_step=t_step,
+    #                                                    current_magnetization=[mx_list1[i],
+    #                                                                           my_list1[i],
+    #                                                                           mz_list1[i]])
+    #     le_t_list.append(le_t)
+    #     le_z_list.append(le_z)
+    #     le_x_list.append(le_x)
+    #     le_y_list.append(le_y)
+    #
+    #     # time index
+    #     if i % 1000 == 0:
+    #         print('Process: {:.3} %  Calculating Lyapunov Exponent'.format((i + 1) / len(t_list1) * 100))
+    #
+    # plt.figure()
+    # plt.title('Maximum Lyapunov exponent')
+    # plt.xlabel(r'Time $t$')
+    # plt.ylabel(r'Maximum Lyapunov exponent')
+    # plt.plot(t_list1, le_z_list, c='blue', label='m_z')
+    # plt.plot(t_list1, le_t_list, c='pink', label='m_t')
+    # plt.plot(t_list1, le_x_list, c='orange', label='m_x')
+    # plt.plot(t_list1, le_y_list, c='green', label='m_y')
+    # x1 = [0 for i in t_list1]
+    # plt.plot(t_list1, x1, ls='--', label='zero line', c='black')
+    # plt.legend()
 
     plt.figure()
     plt.plot(mx_list1, c='red', label='mx')
