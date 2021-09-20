@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 def gram_schmidt(un_o_matrix):
     try:
         # distinguish the shape
-        row_len, column_len = un_o_matrix.shape
         x1, x2, x3, x4 = un_o_matrix[0, :], un_o_matrix[1, :], un_o_matrix[2, :], un_o_matrix[3, :]
         x4_new = x4
         x3_new = x3 - (np.dot(x3, x4_new.T) / np.dot(x4_new, x4_new.T))[0, 0] * x4_new
@@ -26,8 +25,8 @@ def gram_schmidt(un_o_matrix):
 
         return o_matrix, o_matrix_normal
 
-    except Exception as e:
-        print(e)
+    except Exception as e1:
+        print(e1)
         return 0
 
 
@@ -191,7 +190,9 @@ class Mtj:
 
             # calculation of time
             if i1 % 1000 == 0:
-                print('Process: {:.3} %  Time evolution'.format((i1 + 1) / int(time_consumed / time_step) * 100))
+                print('\rProcess: {:.3} %  Time evolution'.format((i1 + 1) / int(time_consumed / time_step) * 100),
+                      flush=True, end='')
+        print('-----------------------------------')
 
         # find dc frequency
         # extreme_points = []
@@ -218,14 +219,13 @@ class Mtj:
         # define the g parameters, to simplified latter calculation
         [self.x0, self.y0, self.z0] = current_magnetization
         self.stt_amplitude = self.dc_amplitude + self.ac_amplitude*np.cos(self.ac_frequency*current_t)
-        stt_partial = self.ac_amplitude*self.ac_frequency*np.cos(self.ac_frequency*current_t)
+        stt_partial = -self.ac_amplitude*self.ac_frequency*np.sin(self.ac_frequency*current_t)
 
         g1 = (-self.gyo_ratio * self.z0 * self.y0 * self.demagnetization_field -
               self.damping_factor * self.gyo_ratio * (self.x0 * self.external_field +
                                                       pow(self.x0, 2) * self.anisotropy_field +
                                                       self.demagnetization_field * pow(self.z0, 2)) * self.x0 +
-              self.damping_factor * self.gyo_ratio * (self.external_field + self.anisotropy_field * self.x0) +
-              self.damping_factor * self.stt_amplitude * self.gyo_ratio * self.x0 -
+              self.damping_factor * self.gyo_ratio * (self.external_field + self.anisotropy_field * self.x0) -
               (pow(self.y0, 2) + pow(self.z0, 2)) * self.stt_amplitude * self.damping_factor) / (
                          1 + self.damping_factor ** 2)
 
@@ -233,8 +233,8 @@ class Mtj:
                                  self.z0 * self.external_field + self.z0 * self.x0 * self.anisotropy_field) -
               self.damping_factor * self.gyo_ratio * (self.x0 * self.external_field +
                                                       self.anisotropy_field * pow(self.x0, 2) +
-                                                      self.demagnetization_field * pow(self.z0, 2)) * self.y0 +
-              self.damping_factor * self.gyo_ratio * self.stt_amplitude * (self.x0 - self.z0) +
+                                                      self.demagnetization_field * pow(self.z0, 2)) * self.y0 -
+              self.damping_factor * self.gyo_ratio * self.stt_amplitude * self.z0 +
               self.x0 * self.y0 * self.stt_amplitude * self.damping_factor) / (1 + self.damping_factor ** 2)
 
         g3 = (self.gyo_ratio * (self.y0 * self.external_field + self.x0 * self.y0 * self.anisotropy_field) -
@@ -242,14 +242,13 @@ class Mtj:
                                                       self.anisotropy_field * pow(self.x0, 2) +
                                                       self.demagnetization_field * pow(self.z0, 2)) * self.z0 +
               self.damping_factor * self.gyo_ratio * (self.demagnetization_field * self.z0 +
-                                                      self.x0 * self.stt_amplitude +
                                                       self.stt_amplitude * self.y0) +
               self.stt_amplitude * self.damping_factor * self.x0 * self.z0) / (1 + self.damping_factor ** 2)
 
         # construct jacobian matrix
         partial_g1_mx = -self.damping_factor * self.gyo_ratio * (
                 2 * self.x0 * self.external_field + 3 * pow(self.x0, 2) * self.anisotropy_field +
-                self.demagnetization_field * pow(self.z0, 2) - self.anisotropy_field - self.stt_amplitude) / (
+                self.demagnetization_field * pow(self.z0, 2) - self.anisotropy_field) / (
                                 1 + self.damping_factor ** 2)
 
         partial_g1_my = (-self.gyo_ratio * self.z0 * self.demagnetization_field -
@@ -266,8 +265,7 @@ class Mtj:
                                                                 self.demagnetization_field * (self.z0 * self.z0 * g1 +
                                                                                               self.x0 * self.z0 * 2 * g3
                                                                                               )) +
-                        self.damping_factor * self.gyo_ratio * self.anisotropy_field * g1 +
-                        self.damping_factor*self.gyo_ratio*(stt_partial*self.x0 + self.stt_amplitude*g1) -
+                        self.damping_factor * self.gyo_ratio * self.anisotropy_field * g1 -
                         self.stt_amplitude * self.damping_factor * (2 * self.y0 * g2 + 2 * self.z0 * g3) +
                         self.damping_factor*(pow(self.y0, 2)+pow(self.z0, 2))*stt_partial) / (
                                    1 + self.damping_factor ** 2)
@@ -275,7 +273,6 @@ class Mtj:
         partial_g2_mx = (-self.gyo_ratio * (-self.z0 * self.demagnetization_field + self.z0 * self.anisotropy_field) -
                          self.damping_factor * self.gyo_ratio * (self.y0 * self.external_field +
                                                                  2 * self.x0 * self.y0 * self.anisotropy_field) +
-                         self.damping_factor * self.gyo_ratio * self.stt_amplitude +
                          self.y0 * self.stt_amplitude * self.damping_factor) / (1 + self.damping_factor ** 2)
 
         partial_g2_my = (-self.damping_factor * self.gyo_ratio * (self.x0 * self.external_field +
@@ -296,16 +293,15 @@ class Mtj:
                                                                 2 * g1 * self.x0 * self.y0 * self.anisotropy_field +
                                                                 pow(self.x0, 2) * g2 * self.anisotropy_field +
                                                                 self.demagnetization_field * g2 * pow(self.z0, 2) +
-                                                                self.demagnetization_field*2*self.z0 * g3 * self.y0) +
-                        self.damping_factor * self.gyo_ratio * self.stt_amplitude * (g1 - g3) +
-                        self.damping_factor*self.gyo_ratio*(stt_partial*self.x0-stt_partial*self.z0) +
+                                                                self.demagnetization_field*2*self.z0 * g3 * self.y0) -
+                        self.damping_factor * self.gyo_ratio * self.stt_amplitude * g3 -
+                        self.damping_factor*self.gyo_ratio*stt_partial*self.z0 +
                         self.damping_factor * self.stt_amplitude * (self.x0 * g2 + self.y0 * g1) +
                         self.damping_factor*stt_partial*self.x0*self.y0) / (1 + self.damping_factor ** 2)
 
         partial_g3_mx = (self.gyo_ratio * self.y0 * self.anisotropy_field -
                          self.damping_factor * self.gyo_ratio * (
                                  self.external_field + self.x0 * 2 * self.anisotropy_field) * self.z0 +
-                         self.damping_factor * self.gyo_ratio * self.stt_amplitude +
                          self.damping_factor * self.stt_amplitude * self.z0
                          ) / (1 + self.damping_factor ** 2)
 
@@ -314,21 +310,20 @@ class Mtj:
 
         partial_g3_mz = (-self.damping_factor * self.gyo_ratio * (self.x0 * self.external_field +
                                                                   self.anisotropy_field * pow(self.x0, 2) +
-                                                                  self.demagnetization_field * pow(self.z0, 3)) +
+                                                                  self.demagnetization_field * pow(self.z0, 3)*3) +
                          self.damping_factor * self.gyo_ratio * self.demagnetization_field +
                          self.stt_amplitude * self.damping_factor * self.x0) / (1 + self.damping_factor ** 2)
 
         partial_g3_t = (self.gyo_ratio * (
                     g2 * self.external_field + self.anisotropy_field * (self.x0 * g2 + g1 * self.y0)) -
                         self.damping_factor * self.gyo_ratio * (g1 * self.z0 * self.external_field +
-                                                                g2 * self.x0 * self.external_field +
+                                                                g3 * self.x0 * self.external_field +
                                                                 self.anisotropy_field * g3 * pow(self.x0, 2) +
                                                                 self.anisotropy_field * 2 * g1 * self.z0 * self.x0 +
                                                                 self.demagnetization_field * g3 * 3 * pow(self.z0, 2)) +
                         self.damping_factor * self.gyo_ratio * (self.demagnetization_field * g3 +
-                                                                self.stt_amplitude * g1 +
                                                                 self.stt_amplitude * g2) +
-                        self.damping_factor*self.gyo_ratio*(stt_partial*self.x0+stt_partial*self.y0) +
+                        self.damping_factor*self.gyo_ratio*stt_partial*self.y0 +
                         self.stt_amplitude * self.damping_factor * (g1 * self.z0 + g3 * self.x0) +
                         self.damping_factor*self.x0*self.z0*stt_partial) / (
                                    1 + self.damping_factor ** 2)
@@ -348,13 +343,17 @@ class Mtj:
         v_matrix, delta_x = gram_schmidt(delta_x_new)
         return v_matrix, delta_x
 
-    def lyapunov_exponent(self, current_magnetization, current_time, length_n=10, cal_t_step=3e-13):
+    def lyapunov_exponent(self, current_magnetization, current_time, index_time, length_n=10, cal_t_step=3e-13):
 
         delta_x = None
         sum_x, sum_y, sum_z, sum_t = 0, 0, 0, 0
+        [mx, my, mz] = current_magnetization
         for i in range(int(length_n)):
+            # find corresponding magnetization to the current_t
             v_matrix, delta_x = self.lyapunov_parameter(current_t=cal_t_step*i+current_time, time_interval=cal_t_step,
-                                                        delta_x=delta_x, current_magnetization=current_magnetization)
+                                                        delta_x=delta_x, current_magnetization=[mx[index_time+i],
+                                                                                                my[index_time+i],
+                                                                                                mz[index_time+i]])
             # print('delta_x:{}'.format(delta_x))
             sum_x = np.log(np.linalg.norm(v_matrix[0, :])) + sum_x
             sum_y = np.log(np.linalg.norm(v_matrix[1, :])) + sum_y
@@ -362,14 +361,15 @@ class Mtj:
             sum_t = np.log(np.linalg.norm(v_matrix[3, :])) + sum_t
 
         # calculation of Le
-        sum_x = sum_x / length_n
-        sum_y = sum_y / length_n
-        sum_z = sum_z / length_n
-        sum_t = sum_t / length_n
+        sum_x = sum_x / length_n / cal_t_step * 1e-9
+        sum_y = sum_y / length_n / cal_t_step * 1e-9
+        sum_z = sum_z / length_n / cal_t_step * 1e-9
+        sum_t = sum_t / length_n / cal_t_step * 1e-9
 
         return sum_x, sum_y, sum_z, sum_t
 
     def classification_train(self, number_wave, nodes_classification):
+
         if os.path.exists('weight_matrix_chaos/weight_out_classification.npy'):
             weight_out_stm = np.load('weight_matrix_chaos/weight_out_classification.npy')
             print('\r' + 'Loading weight_out_classification matrix successfully !', end='', flush=True)
@@ -393,6 +393,25 @@ class Mtj:
                                                                       demagnetization_field=8400, dc_amplitude=s_in[i],
                                                                       ac_amplitude=20, ac_frequency=32e9,
                                                                       time_consumed=1e-8, time_step=3e-13)
+
+            try:
+                max_extreme1, min_extreme1 = [], []
+                for i1 in range(len(mz_list1)):
+                    if i1 != 0 and i1 != len(mz_list1) - 1:
+                        if mz_list1[i1] > mz_list1[i1 - 1] and mz_list1[i1] > mz_list1[i1 + 1]:
+                            max_extreme1.append(mz_list1[i])
+                        elif mz_list1[i1] < mz_list1[i1 - 1] and mz_list1[i1] < mz_list1[i1 + 1]:
+                            min_extreme1.append(mz_list1[i1])
+
+                length_extreme1 = min(len(max_extreme1), len(min_extreme1))
+                print('length:{}'.format(length_extreme1))
+                for i1 in range(length_extreme1):
+                    resistance_dif_list.append(max_extreme1[i1] - min_extreme1[i1])
+
+            except Exception as error:
+                print('error in finding max_extreme1 or min_extreme: {}'.format(error))
+                print('max_point :{}'.format(len(max_extreme1)))
+                print('min_point :{}'.format(len(min_extreme)))
 
             # sampling points
             if (i + 1) % 8 == 0:
@@ -424,9 +443,6 @@ class Mtj:
         y_train_matrix = np.array(train_signal).reshape(1, len(train_signal))
         x_final_matrix = np.asmatrix(x_final_matrix).T
         weight_out_stm = np.dot(y_train_matrix, np.linalg.pinv(x_final_matrix))
-
-        # test for training
-        y_out_test = np.dot(weight_out_stm, x_final_matrix)
 
         # save weight matrix as .npy files
         np.save('weight_matrix_chaos/weight_out_classification.npy', weight_out_stm)
@@ -518,12 +534,11 @@ class Mtj:
 
 if __name__ == '__main__':
 
-    mtj = Mtj(0.1, 0.1, 0)
-    t_step = 3e-13
-    # mtj.classification_train(number_wave=500, nodes_classification=100)
-    mtj = Mtj(0.1, 0.1, 0)
-    mtj.classification_test(test_number=30, nodes_classification=100)
+    # using chaotic region to build echo state network
 
+    # ########################################################################################
+    # time evolution
+    # ########################################################################################
     # initial state
     a, b, c = 0.1, 0.1, 0
     t_step = 3e-13
@@ -543,15 +558,53 @@ if __name__ == '__main__':
                                                              ac_amplitude=ac_current, ac_frequency=f_ac,
                                                              time_consumed=time_consume, time_step=t_step)
 
+    # fourier transformation
     temp1 = mz_list1[200:]
     fourier_consequence = np.abs(np.fft.fft(temp1))
     fourier_consequence = fourier_consequence / max(fourier_consequence) * 50
     fourier_freq = np.fft.fftfreq(len(t_list1))
     pds = [pow(i, 2) for i in fourier_consequence]
-    # print('Fourier:{}'.format(pds))
+
+    # test for resistance difference
+    # mtj = Mtj(a, b, c)
+    plt.figure('resistance difference')
+    dc_current_list = [269, 268, 267]
+    print('dc_list : {}'.format(dc_current_list))
+    resistance_dif_list = []
+    for j in dc_current_list:
+        _, _, mz_list1, t_list1 = mtj.frequency_dc(extern_field, ani_field, dem_field, dc_amplitude=j,
+                                                   ac_amplitude=ac_current, ac_frequency=f_ac,
+                                                   time_consumed=time_consume, time_step=t_step)
+        try:
+            max_extreme, min_extreme = [], []
+            for i in range(len(mz_list1)):
+                if i != 0 and i != len(mz_list1)-1:
+                    if mz_list1[i] > mz_list1[i-1] and mz_list1[i] > mz_list1[i+1]:
+                        max_extreme.append(mz_list1[i])
+                    elif mz_list1[i] < mz_list1[i-1] and mz_list1[i] < mz_list1[i+1]:
+                        min_extreme.append(mz_list1[i])
+
+            length_extreme = min(len(max_extreme), len(min_extreme))
+            print('length:{}'.format(length_extreme))
+            # resistance_dif_list = []
+            for i in range(length_extreme):
+                resistance_dif_list.append(max_extreme[i] - min_extreme[i])
+
+            # plt.figure('resistance difference')
+            # plt.plot(resistance_dif_list, label='dc:{}'.format(j))
+            # plt.show()
+
+        except Exception as e:
+            print('error in finding max_extreme or min_extreme: {}'.format(e))
+            print('max_point :{}'.format(len(max_extreme)))
+            print('min_point :{}'.format(len(min_extreme)))
+
+    plt.plot(resistance_dif_list)
+    plt.legend()
+    plt.show()
 
     # #############################################################################################
-    # calculation of lyapunov exponent1
+    # calculation of lyapunov exponent
     # #############################################################################################
     # le_t_list, le_z_list, le_x_list, le_y_list = [], [], [], []
     # for i in range(len(t_list1)):

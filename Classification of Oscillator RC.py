@@ -218,7 +218,7 @@ def waveform_generator(current_limited, number_wave):
     :return: wave_points
     """
     # 8 points to express waveform
-    random_pulse = np.random.randint(0, 4, int(number_wave))
+    random_pulse = np.random.randint(0, 2, int(number_wave))
     print('random:{}'.format(random_pulse))
     wave_points = []
     for i in random_pulse:
@@ -294,10 +294,10 @@ def train_classification(a0, b0, c0, current_limited, number_wave, nodes_number)
         for i1 in range(len(s_in)):
             mx_list, _, vol1, envelope_list, time_env_list, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0, m_z0,
                                                                                                      magnitude=s_in[i1])
-            # mx_list2, _, vol2, envelope_list2, time_env_list2, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0,
-            #                                                                                             m_z0,
-            #                                                                                             magnitude=-i1)
-            # envelope_list = envelope_list + envelope_list2
+            mx_list2, _, vol2, envelope_list2, time_env_list2, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0,
+                                                                                                        m_z0,
+                                                                                                        magnitude=-s_in[i1])
+            envelope_list = envelope_list + envelope_list2
             envelope_matrix = envelope_matrix + envelope_list
             # sampling the nodes from resistances list
             if (i1 + 1) % 8 == 0:
@@ -396,11 +396,11 @@ def test_classification(a0, b0, c0, current_limited, test_number_wave, nodes_num
         for i1 in range(len(s_in)):
             mx_list, _, vol1, envelope_list, time_env_list, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0, m_z0,
                                                                                                      magnitude=s_in[i1])
-            # mx_list2, _, vol2, envelope_list2, time_env_list2, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0,
-            #                                                                                             m_z0,
-            #                                                                                             magnitude=-i1)
-            #
-            # envelope_list = envelope_list + envelope_list2
+            mx_list2, _, vol2, envelope_list2, time_env_list2, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0,
+                                                                                                        m_z0,
+                                                                                                        magnitude=-s_in[i1])
+
+            envelope_list = envelope_list + envelope_list2
             envelope_matrix = envelope_matrix + envelope_list
             # sampling the nodes from resistances list
             if (i1 + 1) % 8 == 0 and i1 != 0:
@@ -463,6 +463,5 @@ if __name__ == '__main__':
     # test_stm(1, -0.01, 0.01, delay_time=1, test_points=100, nodes_number_stm=23)
 
     # for classification task
-    train_classification(1, -0.01, 0.01, current_limited=0.8, number_wave=300, nodes_number=200)
+    train_classification(1, -0.01, 0.01, current_limited=0.8, number_wave=1000, nodes_number=200)
     test_classification(1, -0.01, 0.01, current_limited=0.8, test_number_wave=80, nodes_number=200)
-

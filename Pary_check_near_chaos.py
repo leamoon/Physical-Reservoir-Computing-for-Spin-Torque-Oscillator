@@ -359,10 +359,10 @@ class Mtj:
             sum_t = np.log(np.linalg.norm(v_matrix[3, :])) + sum_t
 
         # calculation of Le
-        sum_x = sum_x / length_n
-        sum_y = sum_y / length_n
+        sum_x = sum_x / length_n / cal_t_step * 1e-9
+        sum_y = sum_y / length_n / cal_t_step * 1e-9
         sum_z = sum_z / length_n / cal_t_step * 1e-9
-        sum_t = sum_t / length_n
+        sum_t = sum_t / length_n / cal_t_step * 1e-9
 
         return sum_x, sum_y, sum_z, sum_t
 
