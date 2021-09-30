@@ -675,8 +675,8 @@ class Mtj:
         if not os.path.exists(file_path):
             os.makedirs(file_path)
 
-        if os.path.exists('{}/weight_out_STM.npy'.format(file_path)):
-            weight_out_stm = np.load('{}/weight_out_STM.npy'.format(file_path))
+        if os.path.exists('{}/weight_out_STM_double.npy'.format(file_path)):
+            weight_out_stm = np.load('{}/weight_out_STM_double.npy'.format(file_path))
             print('Loading weight_out_STM matrix successfully !')
             print('shape of weight:{}'.format(weight_out_stm.shape))
             print('###############################################')
@@ -693,30 +693,26 @@ class Mtj:
         # fabricate the input, target, and output signals
         y_out_list, x_final_matrix, plus_visual_mz, minus_visual_mz = [], [], [], []
         plus_time, minus_time, time_index = [], [], 0
+        trace_mz = []
 
         # it seems to build a function better
         positive_dc_current = 268.65
+        negative_dc_current = 259.47
         s_in, train_signal = real_time_generator(task='Delay', superposition_number=1, length_signals=number_wave)
 
         print('---------------------------------------------------------------')
-        trace_mz = []
+        pre_training = 5
+        # pre training
+        if pre_training != 0:
+            for i in range(pre_training):
+                self.time_evolution(external_field=200, anisotropy_field=0, demagnetization_field=8400,
+                                    dc_amplitude=negative_dc_current, ac_amplitude=20, ac_frequency=32e9,
+                                    time_consumed=6e-9, time_step=3e-13)
 
-        pre_training_signals = np.random.randint(0, 2, 10)
-        for i in range(len(pre_training_signals)):
-            if s_in[i] == 1:
-                dc_current1 = positive_dc_current
-                _, _, mz_list_chao, t_list2 = self.time_evolution(external_field=200, anisotropy_field=0,
-                                                                  demagnetization_field=8400,
-                                                                  dc_amplitude=dc_current1, ac_amplitude=20,
-                                                                  ac_frequency=32e9, time_consumed=3e-8,
-                                                                  time_step=3e-13)
+                self.time_evolution(external_field=200, anisotropy_field=0, demagnetization_field=8400,
+                                    dc_amplitude=220,
+                                    ac_amplitude=0, ac_frequency=32e9, time_consumed=7e-9, time_step=3e-13)
 
-            else:
-                _, _, mz_list_chao, t_list2 = self.time_evolution(external_field=200, anisotropy_field=0,
-                                                                  demagnetization_field=8400, dc_amplitude=0,
-                                                                  ac_amplitude=20, ac_frequency=32e9,
-                                                                  time_consumed=3e-8,
-                                                                  time_step=3e-13)
         print('Pre training successfully!')
 
         for i in track(range(len(s_in))):
@@ -725,23 +721,45 @@ class Mtj:
                 _, _, mz_list_chao, t_list2 = self.time_evolution(external_field=200, anisotropy_field=0,
                                                                   demagnetization_field=8400,
                                                                   dc_amplitude=dc_current1, ac_amplitude=20,
-                                                                  ac_frequency=32e9, time_consumed=3e-8,
+                                                                  ac_frequency=32e9, time_consumed=7e-9,
                                                                   time_step=3e-13)
 
+                _, _, mz_list_osc, t_list_osc = self.time_evolution(external_field=200, anisotropy_field=0,
+                                                                    demagnetization_field=8400, dc_amplitude=220,
+                                                                    ac_amplitude=0, ac_frequency=32e9,
+                                                                    time_consumed=6e-9,
+                                                                    time_step=3e-13)
+
             else:
-                _, _, mz_list_chao, t_list2 = self.time_evolution(external_field=200, anisotropy_field=0,
-                                                                  demagnetization_field=8400, dc_amplitude=0,
-                                                                  ac_amplitude=20, ac_frequency=32e9,
-                                                                  time_consumed=3e-8,
-                                                                  time_step=3e-13)
+                dc_current1 = negative_dc_current
+                mx_list2, _, mz_list_chao, t_list2 = self.time_evolution(external_field=200, anisotropy_field=0,
+                                                                         demagnetization_field=8400,
+                                                                         dc_amplitude=dc_current1, ac_amplitude=20,
+                                                                         ac_frequency=32e9, time_consumed=6e-9,
+                                                                         time_step=3e-13)
+
+                _, _, mz_list_osc, t_list_osc = self.time_evolution(external_field=200, anisotropy_field=0,
+                                                                    demagnetization_field=8400, dc_amplitude=220,
+                                                                    ac_amplitude=0, ac_frequency=32e9,
+                                                                    time_consumed=7e-9,
+                                                                    time_step=3e-13)
+
+            mz_list_chao = mz_list_chao + mz_list_osc
+            t_list2 = t_list2 + t_list_osc
 
             try:
                 mz_list_all, t_list_whole = [], []
+                extreme_high, extreme_low = [], []
                 for i1 in range(len(mz_list_chao)):
                     if i1 != 0 and i1 != len(mz_list_chao) - 1:
                         if mz_list_chao[i1] > mz_list_chao[i1 - 1] and mz_list_chao[i1] > mz_list_chao[i1 + 1]:
-                            mz_list_all.append(mz_list_chao[i1])
-                            t_list_whole.append(t_list2[i1])
+                            extreme_high.append(mz_list_chao[i1])
+                        if mz_list_chao[i1] < mz_list_chao[i1 - 1] and mz_list_chao[i1] < mz_list_chao[i1 + 1]:
+                            extreme_low.append(mz_list_chao[i1])
+
+                length_extreme = min(len(extreme_low), len(extreme_high))
+                for i2 in range(length_extreme):
+                    mz_list_all.append(extreme_high[i2] - extreme_low[i2])
 
             except Exception as error:
                 print('error from sampling curve :{}'.format(error))
@@ -817,7 +835,7 @@ class Mtj:
 
         # save weight matrix as .npy files
         if save_index:
-            np.save('weight_matrix_chaos/weight_out_STM.npy', weight_out_stm)
+            np.save('weight_matrix_chaos/weight_out_STM_double.npy', weight_out_stm)
             print('Saved weight matrix file')
 
         # visualization of magnetization
@@ -851,8 +869,8 @@ class Mtj:
         :param alert_index: sending notification when it is True
         """
 
-        if os.path.exists('{}/weight_out_STM.npy'.format(file_path)):
-            weight_out_stm = np.load('{}/weight_out_STM.npy'.format(file_path))
+        if os.path.exists('{}/weight_out_STM_double.npy'.format(file_path)):
+            weight_out_stm = np.load('{}/weight_out_STM_double.npy'.format(file_path))
             print('Loading weight_out_STM matrix successfully !')
             print('shape of weight:{}'.format(weight_out_stm.shape))
             print('weight: {}'.format(weight_out_stm))
@@ -867,16 +885,28 @@ class Mtj:
         print('start to test !', flush=True)
 
         # fabricate the input, target, and output signals
-        y_out_list = []
+        y_out_list, x_final_matrix, plus_visual_mz, minus_visual_mz = [], [], [], []
+        trace_mz = []
 
         # it seems to build a function better
         positive_dc_current = 268.65
-        # negative_dc_current = 259.47
+        negative_dc_current = 259.47
+        s_in, train_signal = real_time_generator(task='Delay', superposition_number=1, length_signals=test_number)
 
-        # prepare for inputs and target signals
-        s_in = np.random.randint(0, 2, test_number)
-        train_signal = list(s_in)[-1:] + list(s_in)[:-1]
         print('---------------------------------------------------------------')
+        pre_training = 5
+        # pre training
+        if pre_training != 0:
+            for i in range(pre_training):
+                self.time_evolution(external_field=200, anisotropy_field=0, demagnetization_field=8400,
+                                    dc_amplitude=negative_dc_current, ac_amplitude=20, ac_frequency=32e9,
+                                    time_consumed=6e-9, time_step=3e-13)
+
+                self.time_evolution(external_field=200, anisotropy_field=0, demagnetization_field=8400,
+                                    dc_amplitude=220,
+                                    ac_amplitude=0, ac_frequency=32e9, time_consumed=7e-9, time_step=3e-13)
+
+        print('Pre training successfully!')
 
         for i in track(range(len(s_in))):
             if s_in[i] == 1:
@@ -884,15 +914,31 @@ class Mtj:
                 _, _, mz_list_chao, t_list2 = self.time_evolution(external_field=200, anisotropy_field=0,
                                                                   demagnetization_field=8400,
                                                                   dc_amplitude=dc_current1, ac_amplitude=20,
-                                                                  ac_frequency=32e9, time_consumed=3e-8,
+                                                                  ac_frequency=32e9, time_consumed=7e-9,
                                                                   time_step=3e-13)
 
+                _, _, mz_list_osc, t_list_osc = self.time_evolution(external_field=200, anisotropy_field=0,
+                                                                    demagnetization_field=8400, dc_amplitude=220,
+                                                                    ac_amplitude=0, ac_frequency=32e9,
+                                                                    time_consumed=6e-9,
+                                                                    time_step=3e-13)
+
             else:
-                _, _, mz_list_chao, t_list2 = self.time_evolution(external_field=200, anisotropy_field=0,
-                                                                  demagnetization_field=8400, dc_amplitude=0,
-                                                                  ac_amplitude=20, ac_frequency=32e9,
-                                                                  time_consumed=3e-8,
-                                                                  time_step=3e-13)
+                dc_current1 = negative_dc_current
+                mx_list2, _, mz_list_chao, t_list2 = self.time_evolution(external_field=200, anisotropy_field=0,
+                                                                         demagnetization_field=8400,
+                                                                         dc_amplitude=dc_current1, ac_amplitude=20,
+                                                                         ac_frequency=32e9, time_consumed=6e-9,
+                                                                         time_step=3e-13)
+
+                _, _, mz_list_osc, t_list_osc = self.time_evolution(external_field=200, anisotropy_field=0,
+                                                                    demagnetization_field=8400, dc_amplitude=220,
+                                                                    ac_amplitude=0, ac_frequency=32e9,
+                                                                    time_consumed=7e-9,
+                                                                    time_step=3e-13)
+
+            mz_list_chao = mz_list_chao + mz_list_osc
+            t_list2 = t_list2 + t_list_osc
 
             try:
                 mz_list_all, t_list_whole = [], []
@@ -909,12 +955,13 @@ class Mtj:
 
             print('mz_list_all:{}'.format(mz_list_all))
             print('len of mz sampling points :{}'.format(len(mz_list_all)))
+            trace_mz = trace_mz + mz_list_all
 
             # sampling points
             try:
                 if len(mz_list_all) < nodes_stm:
                     print('the nodes number is too large')
-                    print('len of mz_list_all : {}'.format(len(mz_list_all)))
+                    print('len of mz_list_normal : {}'.format(len(mz_list_all)))
                     print('length of nodes number : {}'.format(nodes_stm))
                     return 0
 
@@ -940,11 +987,12 @@ class Mtj:
                 print('Please check for your weight file at {}'.format(file_path))
                 print('________________________________________')
                 return 0
-
         # calculate the error
         error_learning = np.var(np.array(train_signal) - np.array(y_out_list))
-        print('Test Error:{}'.format(error_learning))
-        print('----------------------------------------------------------------')
+        print('##################################################################')
+        print('error:{}'.format(error_learning))
+        print('Test successfully !')
+        print('##################################################################')
 
         if alert_index:
             email_alert(subject='error of STM : {}'.format(error_learning))
@@ -989,56 +1037,56 @@ if __name__ == '__main__':
     f_ac = 32e9
 
     mtj = Mtj(a, b, c)
-    mtj.stm_train(number_wave=100, nodes_stm=100, visual_process=True, save_index=False)
-    # mtj.stm_test(test_number=100, nodes_stm=20)
+    mtj.stm_train(number_wave=300, nodes_stm=25, visual_process=False, save_index=True)
+    mtj.stm_test(test_number=10, nodes_stm=25)
 
-    mx_list1, my_list1, mz_list1, t_list1 = mtj.time_evolution(extern_field, ani_field, dem_field, dc_current,
-                                                               ac_amplitude=ac_current, ac_frequency=f_ac,
-                                                               time_consumed=time_consume, time_step=t_step)
-    # fourier transformation
-    temp1 = mz_list1[200:]
-    fourier_consequence = np.abs(np.fft.fft(temp1))
-    fourier_consequence = fourier_consequence / max(fourier_consequence) * 50
-    fourier_freq = np.fft.fftfreq(len(t_list1))
-    pds = [pow(i, 2) for i in fourier_consequence]
-
-    # FIGURES
-    plt.figure()
-    plt.plot(mx_list1, c='red', label='mx')
-    plt.legend()
-    plt.ylabel('mx')
-    plt.xlabel('Time:ns')
-    plt.ylim(-1, 1)
-
-    plt.figure()
-    plt.plot(my_list1, c='purple', label='my')
-    plt.legend()
-    plt.ylabel('my')
-    plt.xlabel('Time:ns')
-    plt.ylim(-1, 1)
-
-    plt.figure()
-    t_1 = np.linspace(0, len(mz_list1)-1, len(mz_list1))
-    plt.scatter(t_1, mz_list1, c='orange', label='mz')
-    plt.legend()
-    plt.ylabel('mz')
-    plt.xlabel('Time: {}s'.format(t_step))
-    plt.ylim(-1, 1)
-
-    plt.figure('chaos')
-    plt.scatter(my_list1[int(len(my_list1) / 5):], mz_list1[int(len(mz_list1) / 5):], c='red')
-    plt.ylabel('$m_Z$')
-    plt.xlabel('$m_Y$')
-    plt.ylim(-1, 1)
-    plt.xlim(-1, 1)
-
-    plt.figure('PDS')
-    fre_x_list = np.linspace(-1, 1, len(pds) - 1)
-    plt.plot(fre_x_list, pds[1:])
-    plt.ylabel('Fourier Transform')
-    plt.xlabel('Frequency interval')
-
-    plt.show()
+    # mx_list1, my_list1, mz_list1, t_list1 = mtj.time_evolution(extern_field, ani_field, dem_field, dc_current,
+    #                                                            ac_amplitude=ac_current, ac_frequency=f_ac,
+    #                                                            time_consumed=time_consume, time_step=t_step)
+    # # fourier transformation
+    # temp1 = mz_list1[200:]
+    # fourier_consequence = np.abs(np.fft.fft(temp1))
+    # fourier_consequence = fourier_consequence / max(fourier_consequence) * 50
+    # fourier_freq = np.fft.fftfreq(len(t_list1))
+    # pds = [pow(i, 2) for i in fourier_consequence]
+    #
+    # # FIGURES
+    # plt.figure()
+    # plt.plot(mx_list1, c='red', label='mx')
+    # plt.legend()
+    # plt.ylabel('mx')
+    # plt.xlabel('Time:ns')
+    # plt.ylim(-1, 1)
+    #
+    # plt.figure()
+    # plt.plot(my_list1, c='purple', label='my')
+    # plt.legend()
+    # plt.ylabel('my')
+    # plt.xlabel('Time:ns')
+    # plt.ylim(-1, 1)
+    #
+    # plt.figure()
+    # t_1 = np.linspace(0, len(mz_list1)-1, len(mz_list1))
+    # plt.scatter(t_1, mz_list1, c='orange', label='mz')
+    # plt.legend()
+    # plt.ylabel('mz')
+    # plt.xlabel('Time: {}s'.format(t_step))
+    # plt.ylim(-1, 1)
+    #
+    # plt.figure('chaos')
+    # plt.scatter(my_list1[int(len(my_list1) / 5):], mz_list1[int(len(mz_list1) / 5):], c='red')
+    # plt.ylabel('$m_Z$')
+    # plt.xlabel('$m_Y$')
+    # plt.ylim(-1, 1)
+    # plt.xlim(-1, 1)
+    #
+    # plt.figure('PDS')
+    # fre_x_list = np.linspace(-1, 1, len(pds) - 1)
+    # plt.plot(fre_x_list, pds[1:])
+    # plt.ylabel('Fourier Transform')
+    # plt.xlabel('Frequency interval')
+    #
+    # plt.show()
     # #############################################################################################
 
     # #############################################################################################

@@ -105,6 +105,11 @@ def real_time_generator(task='Delay', superposition_number=1, length_signals=100
         elif task == 'Parity':
             train_signal = 0
 
+        print('############################################################')
+        print('inputs :{}'.format(s_in))
+        print('target :{}'.format(train_signal))
+        print('############################################################')
+
         return s_in, train_signal
 
     except Exception as error:
@@ -693,30 +698,17 @@ class Mtj:
         # fabricate the input, target, and output signals
         y_out_list, x_final_matrix, plus_visual_mz, minus_visual_mz = [], [], [], []
         plus_time, minus_time, time_index = [], [], 0
+        plus_time_switch, minus_time_switch = [], []
+        plus_visual_switch, minus_visual_switch = [], []
 
         # it seems to build a function better
         positive_dc_current = 268.65
-        s_in, train_signal = real_time_generator(task='Delay', superposition_number=1, length_signals=number_wave)
-
+        s_in = np.random.randint(0, 2, number_wave)
+        # s_in = [1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        train_signal = list(s_in)[-1:] + list(s_in)[:-1]
         print('---------------------------------------------------------------')
         trace_mz = []
 
-        pre_training_signals = np.random.randint(0, 2, 10)
-        for i in range(len(pre_training_signals)):
-            if s_in[i] == 1:
-                dc_current1 = positive_dc_current
-                _, _, mz_list_chao, t_list2 = self.time_evolution(external_field=200, anisotropy_field=0,
-                                                                  demagnetization_field=8400,
-                                                                  dc_amplitude=dc_current1, ac_amplitude=20,
-                                                                  ac_frequency=32e9, time_consumed=3e-8,
-                                                                  time_step=3e-13)
-
-            else:
-                _, _, mz_list_chao, t_list2 = self.time_evolution(external_field=200, anisotropy_field=0,
-                                                                  demagnetization_field=8400, dc_amplitude=0,
-                                                                  ac_amplitude=20, ac_frequency=32e9,
-                                                                  time_consumed=3e-8,
-                                                                  time_step=3e-13)
         print('Pre training successfully!')
 
         for i in track(range(len(s_in))):
@@ -739,7 +731,7 @@ class Mtj:
                 mz_list_all, t_list_whole = [], []
                 for i1 in range(len(mz_list_chao)):
                     if i1 != 0 and i1 != len(mz_list_chao) - 1:
-                        if mz_list_chao[i1] > mz_list_chao[i1 - 1] and mz_list_chao[i1] > mz_list_chao[i1 + 1]:
+                        if mz_list_chao[i1] < mz_list_chao[i1 - 1] and mz_list_chao[i1] < mz_list_chao[i1 + 1]:
                             mz_list_all.append(mz_list_chao[i1])
                             t_list_whole.append(t_list2[i1])
 
@@ -748,7 +740,9 @@ class Mtj:
                 mz_list_all = mz_list_chao
                 t_list_whole = t_list2
 
-            print('mz_list_all:{}'.format(mz_list_all))
+            # normalization
+            # mz_list_normal = [i / max(map(abs, mz_list_chao)) for i in mz_list_chao]
+            print(mz_list_all)
             print('len of mz sampling points :{}'.format(len(mz_list_all)))
             trace_mz = trace_mz + mz_list_all
 
@@ -799,26 +793,11 @@ class Mtj:
         # update weight
         y_train_matrix = np.array(train_signal).reshape(1, len(train_signal))
         x_final_matrix = np.asmatrix(x_final_matrix).T
-
-        # here is for regression
-        # temp_1 = np.dot(y_train_matrix, x_final_matrix.T)
-        # weight_out_stm = np.dot(temp_1, np.linalg.pinv(np.dot(x_final_matrix, x_final_matrix.T)))
-        weight_out_stm = np.dot(y_train_matrix, np.linalg.pinv(x_final_matrix))
-
+        temp_1 = np.dot(y_train_matrix, x_final_matrix.T)
+        weight_out_stm = np.dot(temp_1, np.linalg.pinv(np.dot(x_final_matrix, x_final_matrix.T)))
+        # weight_out_stm = np.dot(y_train_matrix, np.linalg.pinv(x_final_matrix))
         y_test = np.dot(weight_out_stm, x_final_matrix)
         print('train result:{}'.format(y_test))
-
-        # calculate the error
-        error_learning = np.var(np.array(train_signal) - np.array(y_test))
-        print('##################################################################')
-        print('error:{}'.format(error_learning))
-        print('Trained successfully !')
-        print('##################################################################')
-
-        # save weight matrix as .npy files
-        if save_index:
-            np.save('weight_matrix_chaos/weight_out_STM.npy', weight_out_stm)
-            print('Saved weight matrix file')
 
         # visualization of magnetization
         if visual_process:
@@ -835,6 +814,18 @@ class Mtj:
             plt.figure('input')
             plt.plot(s_in)
             plt.show()
+
+        # save weight matrix as .npy files
+        if save_index:
+            np.save('weight_matrix_chaos/weight_out_STM.npy', weight_out_stm)
+            print('Saved weight matrix file')
+
+        # calculate the error
+        error_learning = np.var(np.array(train_signal) - np.array(y_test))
+        print('##################################################################')
+        print('error:{}'.format(error_learning))
+        print('Trained successfully !')
+        print('##################################################################')
 
         # notification
         if alert_index:
@@ -871,11 +862,13 @@ class Mtj:
 
         # it seems to build a function better
         positive_dc_current = 268.65
+        time_consume_all = 3e-8
         # negative_dc_current = 259.47
 
         # prepare for inputs and target signals
-        s_in = np.random.randint(0, 2, test_number)
-        train_signal = list(s_in)[-1:] + list(s_in)[:-1]
+        # s_in = np.random.randint(0, 2, test_number)
+        # train_signal = list(s_in)[-1:] + list(s_in)[:-1]
+        s_in, train_signal = real_time_generator(task='Delay', superposition_number=1, length_signals=test_number)
         print('---------------------------------------------------------------')
 
         for i in track(range(len(s_in))):
@@ -884,14 +877,14 @@ class Mtj:
                 _, _, mz_list_chao, t_list2 = self.time_evolution(external_field=200, anisotropy_field=0,
                                                                   demagnetization_field=8400,
                                                                   dc_amplitude=dc_current1, ac_amplitude=20,
-                                                                  ac_frequency=32e9, time_consumed=3e-8,
+                                                                  ac_frequency=32e9, time_consumed=time_consume_all,
                                                                   time_step=3e-13)
 
             else:
                 _, _, mz_list_chao, t_list2 = self.time_evolution(external_field=200, anisotropy_field=0,
                                                                   demagnetization_field=8400, dc_amplitude=0,
                                                                   ac_amplitude=20, ac_frequency=32e9,
-                                                                  time_consumed=3e-8,
+                                                                  time_consumed=time_consume_all,
                                                                   time_step=3e-13)
 
             try:
@@ -989,56 +982,56 @@ if __name__ == '__main__':
     f_ac = 32e9
 
     mtj = Mtj(a, b, c)
-    mtj.stm_train(number_wave=10, nodes_stm=30, visual_process=True, save_index=True)
+    # mtj.stm_train(number_wave=1000, nodes_stm=30, visual_process=True, save_index=True)
     mtj.stm_test(test_number=10, nodes_stm=30)
 
-    # mx_list1, my_list1, mz_list1, t_list1 = mtj.time_evolution(extern_field, ani_field, dem_field, dc_current,
-    #                                                            ac_amplitude=ac_current, ac_frequency=f_ac,
-    #                                                            time_consumed=time_consume, time_step=t_step)
-    # # fourier transformation
-    # temp1 = mz_list1[200:]
-    # fourier_consequence = np.abs(np.fft.fft(temp1))
-    # fourier_consequence = fourier_consequence / max(fourier_consequence) * 50
-    # fourier_freq = np.fft.fftfreq(len(t_list1))
-    # pds = [pow(i, 2) for i in fourier_consequence]
-    #
-    # # FIGURES
-    # plt.figure()
-    # plt.plot(mx_list1, c='red', label='mx')
-    # plt.legend()
-    # plt.ylabel('mx')
-    # plt.xlabel('Time:ns')
-    # plt.ylim(-1, 1)
-    #
-    # plt.figure()
-    # plt.plot(my_list1, c='purple', label='my')
-    # plt.legend()
-    # plt.ylabel('my')
-    # plt.xlabel('Time:ns')
-    # plt.ylim(-1, 1)
-    #
-    # plt.figure()
-    # t_1 = np.linspace(0, len(mz_list1)-1, len(mz_list1))
-    # plt.scatter(t_1, mz_list1, c='orange', label='mz')
-    # plt.legend()
-    # plt.ylabel('mz')
-    # plt.xlabel('Time: {}s'.format(t_step))
-    # plt.ylim(-1, 1)
-    #
-    # plt.figure('chaos')
-    # plt.scatter(my_list1[int(len(my_list1) / 5):], mz_list1[int(len(mz_list1) / 5):], c='red')
-    # plt.ylabel('$m_Z$')
-    # plt.xlabel('$m_Y$')
-    # plt.ylim(-1, 1)
-    # plt.xlim(-1, 1)
-    #
-    # plt.figure('PDS')
-    # fre_x_list = np.linspace(-1, 1, len(pds) - 1)
-    # plt.plot(fre_x_list, pds[1:])
-    # plt.ylabel('Fourier Transform')
-    # plt.xlabel('Frequency interval')
-    #
-    # plt.show()
+    mx_list1, my_list1, mz_list1, t_list1 = mtj.time_evolution(extern_field, ani_field, dem_field, dc_current,
+                                                               ac_amplitude=ac_current, ac_frequency=f_ac,
+                                                               time_consumed=time_consume, time_step=t_step)
+    # fourier transformation
+    temp1 = mz_list1[200:]
+    fourier_consequence = np.abs(np.fft.fft(temp1))
+    fourier_consequence = fourier_consequence / max(fourier_consequence) * 50
+    fourier_freq = np.fft.fftfreq(len(t_list1))
+    pds = [pow(i, 2) for i in fourier_consequence]
+
+    # FIGURES
+    plt.figure()
+    plt.plot(mx_list1, c='red', label='mx')
+    plt.legend()
+    plt.ylabel('mx')
+    plt.xlabel('Time:ns')
+    plt.ylim(-1, 1)
+
+    plt.figure()
+    plt.plot(my_list1, c='purple', label='my')
+    plt.legend()
+    plt.ylabel('my')
+    plt.xlabel('Time:ns')
+    plt.ylim(-1, 1)
+
+    plt.figure()
+    t_1 = np.linspace(0, len(mz_list1)-1, len(mz_list1))
+    plt.scatter(t_1, mz_list1, c='orange', label='mz')
+    plt.legend()
+    plt.ylabel('mz')
+    plt.xlabel('Time: {}s'.format(t_step))
+    plt.ylim(-1, 1)
+
+    plt.figure('chaos')
+    plt.scatter(my_list1[int(len(my_list1) / 5):], mz_list1[int(len(mz_list1) / 5):], c='red')
+    plt.ylabel('$m_Z$')
+    plt.xlabel('$m_Y$')
+    plt.ylim(-1, 1)
+    plt.xlim(-1, 1)
+
+    plt.figure('PDS')
+    fre_x_list = np.linspace(-1, 1, len(pds) - 1)
+    plt.plot(fre_x_list, pds[1:])
+    plt.ylabel('Fourier Transform')
+    plt.xlabel('Frequency interval')
+
+    plt.show()
     # #############################################################################################
 
     # #############################################################################################
