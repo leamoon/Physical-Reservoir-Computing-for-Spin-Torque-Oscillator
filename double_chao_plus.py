@@ -942,11 +942,17 @@ class Mtj:
 
             try:
                 mz_list_all, t_list_whole = [], []
+                extreme_high, extreme_low = [], []
                 for i1 in range(len(mz_list_chao)):
                     if i1 != 0 and i1 != len(mz_list_chao) - 1:
                         if mz_list_chao[i1] > mz_list_chao[i1 - 1] and mz_list_chao[i1] > mz_list_chao[i1 + 1]:
-                            mz_list_all.append(mz_list_chao[i1])
-                            t_list_whole.append(t_list2[i1])
+                            extreme_high.append(mz_list_chao[i1])
+                        if mz_list_chao[i1] < mz_list_chao[i1 - 1] and mz_list_chao[i1] < mz_list_chao[i1 + 1]:
+                            extreme_low.append(mz_list_chao[i1])
+
+                length_extreme = min(len(extreme_low), len(extreme_high))
+                for i2 in range(length_extreme):
+                    mz_list_all.append(extreme_high[i2] - extreme_low[i2])
 
             except Exception as error:
                 print('error from sampling curve :{}'.format(error))
@@ -956,6 +962,18 @@ class Mtj:
             print('mz_list_all:{}'.format(mz_list_all))
             print('len of mz sampling points :{}'.format(len(mz_list_all)))
             trace_mz = trace_mz + mz_list_all
+
+            # for figures
+            if s_in[i] == 1:
+                plus_visual_mz = plus_visual_mz + mz_list_chao
+                plus_time = plus_time + list(
+                    np.linspace(time_index, time_index + 3e-13 * (len(t_list2) - 1), len(t_list2)))
+            else:
+                minus_visual_mz = minus_visual_mz + mz_list_chao
+                minus_time = minus_time + list(
+                    np.linspace(time_index, time_index + 3e-13 * (len(t_list2) - 1), len(t_list2)))
+
+            time_index = time_index + t_list2[-1]
 
             # sampling points
             try:
