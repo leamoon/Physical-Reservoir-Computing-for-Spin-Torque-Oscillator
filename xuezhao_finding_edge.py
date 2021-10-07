@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from rich.progress import track
 import numpy as np
 import matplotlib.pyplot as plt
@@ -86,9 +87,9 @@ def waveform_generator(number_wave):
     plt.figure('input-signals')
     wave_signals = []
     for j1 in wave_points:
-        temp2 = [j1]*20
+        temp2 = [j1] * 20
         wave_signals = wave_signals + temp2
-    temp1 = np.linspace(0, len(wave_signals)-1, len(wave_signals))
+    temp1 = np.linspace(0, len(wave_signals) - 1, len(wave_signals))
     plt.plot(temp1, wave_signals)
     # plt.scatter(temp1, wave_signals)
 
@@ -118,6 +119,129 @@ def real_time_generator(task='Delay', superposition_number=1, length_signals=100
     except Exception as error:
         print('Sth wrong in generating input signals:{}'.format(error))
         sys.exit(0)
+
+
+def edge_of_chaos(initial_dif=1e-8, len_input_number=10, time_consume_single=7e-9, len_input_pattern=10,
+                  ac_current1=0):
+    """
+    a function used to find edge of chaos
+    :param initial_dif: the initial difference / perturbation
+    :param len_input_number:  the number of calculation times over different inputs sequence
+    :param time_consume_single:  time used to make evolution of magnetization
+    :param len_input_pattern:  lengthen of single input signal
+    :param ac_current1: amplitude of ac current, unit: Oe
+    :return: largest lyapunov exponent
+    """
+
+    positive_dc_current = 100
+    negative_dc_current = 200
+    delta_t_diff = []
+
+    t_step = 3e-13
+    print('Time lengthen : {}'.format(int(time_consume_single / t_step)))
+
+    for i in range(len_input_number):
+        t1 = time.time()
+        mtj1 = Mtj()
+        mtj2 = Mtj()
+        # trace1 and trace2 in attractor
+        mtj1.time_evolution(time_consumed=1e-8, dc_amplitude=positive_dc_current,
+                            ac_amplitude=ac_current1)
+        mtj2.time_evolution(time_consumed=1e-8, dc_amplitude=positive_dc_current,
+                            ac_amplitude=ac_current1)
+        # introduce a perturbation
+        mtj1.z0 += initial_dif
+        mode = np.sqrt(pow(mtj1.x0, 2) + pow(mtj1.y0, 2) + pow(mtj1.z0, 2))
+        mtj1.x0, mtj1.y0, mtj1.z0 = mtj1.x0 / mode, mtj1.y0 / mode, mtj1.z0 / mode
+        initial_dif_real = np.sqrt(pow(mtj1.x0 - mtj2.x0, 2) + pow(mtj1.y0 - mtj2.y0, 2) + pow(mtj1.z0 - mtj2.z0, 2))
+        print('initial perturbation : {}'.format(initial_dif_real))
+
+        s_in = np.random.randint(0, 2, len_input_pattern)
+        single_delta_t = []
+        print('single input:{}'.format(s_in))
+        for j in s_in:
+            if j == 1:
+                dc_current1 = positive_dc_current
+            elif j == 0:
+                dc_current1 = negative_dc_current
+
+            mtj1.time_evolution(time_consumed=time_consume_single, dc_amplitude=dc_current1, ac_amplitude=ac_current1)
+            mtj2.time_evolution(time_consumed=time_consume_single, dc_amplitude=dc_current1, ac_amplitude=ac_current1)
+
+            # calculate error and reset
+            diff_temp = np.sqrt(pow((mtj1.x0 - mtj2.x0), 2) + pow(mtj1.y0 - mtj2.y0, 2) + pow(mtj1.z0 - mtj2.z0, 2))
+            mtj1.x0 = mtj2.x0 + initial_dif_real / diff_temp * (mtj1.x0 - mtj2.x0)
+            mtj1.y0 = mtj2.y0 + initial_dif_real / diff_temp * (mtj1.y0 - mtj2.y0)
+            mtj1.z0 = mtj2.z0 + initial_dif_real / diff_temp * (mtj1.z0 - mtj2.z0)
+            mode = np.sqrt(pow(mtj1.x0, 2) + pow(mtj1.y0, 2) + pow(mtj1.z0, 2))
+            mtj1.x0, mtj1.y0, mtj1.z0 = mtj1.x0 / mode, mtj1.y0 / mode, mtj1.z0 / mode
+            single_delta_t.append(np.log(diff_temp / initial_dif_real))
+            print('each log d1/d0 : {}'.format(single_delta_t))
+
+        delta_t_diff.append(np.mean(single_delta_t))
+        t2 = time.time()
+        print('delta_t: {}  time_used: {:.3f}s'.format(delta_t_diff[i], t2 - t1))
+        print('##################################################################')
+
+    # calculate lyapunov exponent
+    le_z = np.mean(delta_t_diff)
+    print('le_z : {}'.format(le_z))
+    print('delta_t_diff : {}'.format(delta_t_diff))
+    return le_z, delta_t_diff
+
+
+def chaos_mine(initial_dif=1e-8, len_input_number=10, time_consume_single=7e-9, len_input_pattern=10,
+               ac_current1=0):
+    """
+    a function used to find edge of chaos
+    :param initial_dif: the initial difference / perturbation
+    :param len_input_number:  the number of calculation times over different inputs sequence
+    :param time_consume_single:  time used to make evolution of magnetization
+    :param len_input_pattern:  lengthen of single input signal
+    :param ac_current1: amplitude of ac current, unit: Oe
+    :return: largest lyapunov exponent
+    """
+
+    positive_dc_current = 100
+    negative_dc_current = 200
+    delta_t_diff = []
+    t_step = 3e-13
+
+    print('Time lengthen : {}'.format(int(time_consume_single / t_step)))
+    for i in range(len_input_number):
+        t1 = time.time()
+        mtj1 = Mtj()
+        mtj2 = Mtj()
+        mtj1.time_evolution(time_consumed=time_consume_single, dc_amplitude=positive_dc_current,
+                            ac_amplitude=ac_current1)
+        mtj2.time_evolution(time_consumed=time_consume_single, dc_amplitude=positive_dc_current,
+                            ac_amplitude=ac_current1)
+        # introduce perturbation
+        mtj1.z0 += initial_dif
+        mode = np.sqrt(pow(mtj1.x0, 2) + pow(mtj1.y0, 2) + pow(mtj1.z0, 2))
+        mtj1.x0, mtj1.y0, mtj1.z0 = mtj1.x0 / mode, mtj1.y0 / mode, mtj1.z0 / mode
+        initial_dif_real = abs(mtj2.z0 - mtj1.z0)
+        print('initial perturbation : {}'.format(initial_dif_real))
+
+        s_in = np.random.randint(0, 2, len_input_pattern)
+        print(s_in)
+        for j in s_in:
+            if j == 1:
+                dc_current1 = positive_dc_current
+            else:
+                dc_current1 = negative_dc_current
+            mtj1.time_evolution(time_consumed=time_consume_single, dc_amplitude=dc_current1, ac_amplitude=ac_current1)
+            mtj2.time_evolution(time_consumed=time_consume_single, dc_amplitude=dc_current1, ac_amplitude=ac_current1)
+        delta_t_diff.append(abs(mtj2.z0 - mtj1.z0))
+        t2 = time.time()
+        print('delta_t: {}  time_used: {:.3f}s'.format(delta_t_diff[i], t2 - t1))
+
+    # calculate lyapunov exponent
+    mz_diff = np.mean(delta_t_diff)
+    le_z = np.log(mz_diff / initial_dif_real) / (time_consume_single / t_step)
+    print('le_z : {}'.format(le_z))
+    print('mz_diff : {}'.format(delta_t_diff))
+    return le_z, delta_t_diff
 
 
 class Mtj:
@@ -239,8 +363,9 @@ class Mtj:
         return self.x0, self.y0, self.z0
 
     def time_evolution(self, external_field=200, anisotropy_field=0, demagnetization_field=8400, dc_amplitude=420.21,
-                       ac_amplitude=0.0, ac_frequency=32e9, time_consumed=1e-8, time_step=3e-13):
+                       ac_amplitude=0, ac_frequency=32e9, time_consumed=1e-8):
         mx_list, my_list, mz_list, t_list = [], [], [], []
+        time_step = self.t_step
 
         # time evolution
         for i1 in range(int(time_consumed / time_step)):
@@ -266,7 +391,7 @@ class Mtj:
         """
 
         # define the g parameters, to simplified latter calculation
-        temp_magnetization = [self.x0, self.y0, self.z0]    # record the states
+        temp_magnetization = [self.x0, self.y0, self.z0]  # record the states
         self.x0, self.y0, self.z0 = 0.1, 0.1, 1
         mode = pow(self.x0, 2) + pow(self.y0, 2) + pow(self.z0, 2)
         self.x0 = self.x0 / np.sqrt(mode)
@@ -275,8 +400,8 @@ class Mtj:
         self.m = np.array([self.x0, self.y0, self.z0])
         self.time_evolution(dc_amplitude=dc_amplitude, ac_amplitude=ac_amplitude, time_consumed=current_t)
 
-        self.stt_amplitude = self.dc_amplitude + self.ac_amplitude*np.cos(self.ac_frequency*current_t)
-        stt_partial = -self.ac_amplitude*self.ac_frequency*np.sin(self.ac_frequency*current_t)
+        self.stt_amplitude = self.dc_amplitude + self.ac_amplitude * np.cos(self.ac_frequency * current_t)
+        stt_partial = -self.ac_amplitude * self.ac_frequency * np.sin(self.ac_frequency * current_t)
 
         g1 = (-self.gyo_ratio * self.z0 * self.y0 * self.demagnetization_field -
               self.damping_factor * self.gyo_ratio * (self.x0 * self.external_field +
@@ -284,7 +409,7 @@ class Mtj:
                                                       self.demagnetization_field * pow(self.z0, 2)) * self.x0 +
               self.damping_factor * self.gyo_ratio * (self.external_field + self.anisotropy_field * self.x0) -
               (pow(self.y0, 2) + pow(self.z0, 2)) * self.stt_amplitude * self.damping_factor) / (
-                         1 + self.damping_factor ** 2)
+                     1 + self.damping_factor ** 2)
 
         g2 = (-self.gyo_ratio * (-self.x0 * self.z0 * self.demagnetization_field +
                                  self.z0 * self.external_field + self.z0 * self.x0 * self.anisotropy_field) -
@@ -324,8 +449,8 @@ class Mtj:
                                                                                               )) +
                         self.damping_factor * self.gyo_ratio * self.anisotropy_field * g1 -
                         self.stt_amplitude * self.damping_factor * (2 * self.y0 * g2 + 2 * self.z0 * g3) +
-                        self.damping_factor*(pow(self.y0, 2)+pow(self.z0, 2))*stt_partial) / (
-                                   1 + self.damping_factor ** 2)
+                        self.damping_factor * (pow(self.y0, 2) + pow(self.z0, 2)) * stt_partial) / (
+                               1 + self.damping_factor ** 2)
 
         partial_g2_mx = (-self.gyo_ratio * (-self.z0 * self.demagnetization_field + self.z0 * self.anisotropy_field) -
                          self.damping_factor * self.gyo_ratio * (self.y0 * self.external_field +
@@ -350,11 +475,11 @@ class Mtj:
                                                                 2 * g1 * self.x0 * self.y0 * self.anisotropy_field +
                                                                 pow(self.x0, 2) * g2 * self.anisotropy_field +
                                                                 self.demagnetization_field * g2 * pow(self.z0, 2) +
-                                                                self.demagnetization_field*2*self.z0 * g3 * self.y0) -
+                                                                self.demagnetization_field * 2 * self.z0 * g3 * self.y0) -
                         self.damping_factor * self.gyo_ratio * self.stt_amplitude * g3 -
-                        self.damping_factor*self.gyo_ratio*stt_partial*self.z0 +
+                        self.damping_factor * self.gyo_ratio * stt_partial * self.z0 +
                         self.damping_factor * self.stt_amplitude * (self.x0 * g2 + self.y0 * g1) +
-                        self.damping_factor*stt_partial*self.x0*self.y0) / (1 + self.damping_factor ** 2)
+                        self.damping_factor * stt_partial * self.x0 * self.y0) / (1 + self.damping_factor ** 2)
 
         partial_g3_mx = (self.gyo_ratio * self.y0 * self.anisotropy_field -
                          self.damping_factor * self.gyo_ratio * (
@@ -367,12 +492,12 @@ class Mtj:
 
         partial_g3_mz = (-self.damping_factor * self.gyo_ratio * (self.x0 * self.external_field +
                                                                   self.anisotropy_field * pow(self.x0, 2) +
-                                                                  self.demagnetization_field * pow(self.z0, 3)*3) +
+                                                                  self.demagnetization_field * pow(self.z0, 3) * 3) +
                          self.damping_factor * self.gyo_ratio * self.demagnetization_field +
                          self.stt_amplitude * self.damping_factor * self.x0) / (1 + self.damping_factor ** 2)
 
         partial_g3_t = (self.gyo_ratio * (
-                    g2 * self.external_field + self.anisotropy_field * (self.x0 * g2 + g1 * self.y0)) -
+                g2 * self.external_field + self.anisotropy_field * (self.x0 * g2 + g1 * self.y0)) -
                         self.damping_factor * self.gyo_ratio * (g1 * self.z0 * self.external_field +
                                                                 g3 * self.x0 * self.external_field +
                                                                 self.anisotropy_field * g3 * pow(self.x0, 2) +
@@ -380,10 +505,10 @@ class Mtj:
                                                                 self.demagnetization_field * g3 * 3 * pow(self.z0, 2)) +
                         self.damping_factor * self.gyo_ratio * (self.demagnetization_field * g3 +
                                                                 self.stt_amplitude * g2) +
-                        self.damping_factor*self.gyo_ratio*stt_partial*self.y0 +
+                        self.damping_factor * self.gyo_ratio * stt_partial * self.y0 +
                         self.stt_amplitude * self.damping_factor * (g1 * self.z0 + g3 * self.x0) +
-                        self.damping_factor*self.x0*self.z0*stt_partial) / (
-                                   1 + self.damping_factor ** 2)
+                        self.damping_factor * self.x0 * self.z0 * stt_partial) / (
+                               1 + self.damping_factor ** 2)
 
         # initial orthogonal matrix
         if delta_x is None:
@@ -406,7 +531,7 @@ class Mtj:
     def lyapunov_exponent(self, calculation_time=10000, cal_t_step=3e-13, dc_amplitude=269, ac_amplitude=0):
 
         delta_x = None
-        h = 6e-13   # time_step of Runge-Kutta
+        h = 6e-13  # time_step of Runge-Kutta
 
         for i in range(int(calculation_time)):
             # find corresponding magnetization to the current_t
@@ -425,7 +550,7 @@ class Mtj:
                                                    delta_x=delta_x1 + h * k3,
                                                    dc_amplitude=dc_amplitude, ac_amplitude=ac_amplitude)
 
-            delta_x = delta_x1 + h/6*(k1+2*k2+2*k3+k4)
+            delta_x = delta_x1 + h / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
             v_matrix, delta_x = gram_schmidt(delta_x)
             print(i)
 
@@ -447,7 +572,7 @@ class Mtj:
         temp2 = np.dot(delta_x.T, delta_x)
         print('temp2: {}'.format(temp2))
         eigenvalue_x, _ = np.linalg.eig(temp2)
-        lyapunov_exponent = [np.log(abs(i))/2/calculation_time for i in eigenvalue_x]
+        lyapunov_exponent = [np.log(abs(i)) / 2 / calculation_time for i in eigenvalue_x]
 
         return eigenvalue_x, lyapunov_exponent
 
@@ -480,8 +605,7 @@ class Mtj:
             mx_list2, my_list2, mz_list2, t_list2 = self.time_evolution(external_field=200, anisotropy_field=0,
                                                                         demagnetization_field=8400,
                                                                         dc_amplitude=s_in[i], ac_amplitude=20,
-                                                                        ac_frequency=32e9, time_consumed=1e-8,
-                                                                        time_step=3e-13)
+                                                                        ac_frequency=32e9, time_consumed=1e-8)
 
             try:
                 max_extreme1, min_extreme1, resistance_dif_list1 = [], [], []
@@ -535,7 +659,7 @@ class Mtj:
             # calculation time
             if i % 20 == 0:
                 print('-------------------------------------------------------------')
-                print('progress : {:.3} % classification training'.format(i/len(s_in)*100))
+                print('progress : {:.3} % classification training'.format(i / len(s_in) * 100))
                 print('-------------------------------------------------------------')
 
         # update weight
@@ -670,7 +794,7 @@ class Mtj:
         plt.show()
 
     def stm_train(self, number_wave, nodes_stm, file_path='weight_matrix_oscillator_xuezhao', visual_process=False,
-                  save_index=True, alert_index=False, superposition=0, time_consume_all=1e-8, ac_amplitude=0.0):
+                  save_index=True, alert_index=False, superposition=0, time_consume_all=1e-8):
         """
         a function used to train weight matrix of readout layer in classification task
         :param file_path: the path of weight_matrix
@@ -681,7 +805,6 @@ class Mtj:
         :param alert_index: sending notification or not after training successfully
         :param superposition: the number of delay or time interval
         :param time_consume_all: time consume in single step evolution
-        :param ac_amplitude: amplitude of ac term
         """
         if not os.path.exists(file_path):
             os.makedirs(file_path)
@@ -698,7 +821,7 @@ class Mtj:
             weight_out_stm = np.random.randint(-1, 2, (1, nodes_stm + 1))
             print('\r weight matrix of STM created successfully !', end='', flush=True)
 
-        # print('\r short term memory')
+        # print('\rshort term memory')
         # print('----------------------------------------------------------------')
         # print('start to train !', flush=True)
 
@@ -721,7 +844,7 @@ class Mtj:
                 dc_current1 = positive_dc_current
                 _, _, mz_list_chao, t_list2 = self.time_evolution(external_field=200, anisotropy_field=0,
                                                                   demagnetization_field=8400,
-                                                                  dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,
+                                                                  dc_amplitude=dc_current1, ac_amplitude=0,
                                                                   ac_frequency=32e9, time_consumed=time_consume_all,
                                                                   time_step=3e-13)
 
@@ -729,7 +852,7 @@ class Mtj:
                 dc_current1 = negative_dc_current
                 _, _, mz_list_chao, t_list2 = self.time_evolution(external_field=200, anisotropy_field=0,
                                                                   demagnetization_field=8400,
-                                                                  dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,
+                                                                  dc_amplitude=dc_current1, ac_amplitude=0,
                                                                   ac_frequency=32e9,
                                                                   time_consumed=time_consume_all,
                                                                   time_step=3e-13)
@@ -760,11 +883,11 @@ class Mtj:
             if s_in[i] == 1:
                 plus_visual_mz = plus_visual_mz + mz_list_chao
                 plus_time = plus_time + list(
-                    np.linspace(time_index, time_index + 3e-13 * (len(t_list2)-1), len(t_list2)))
+                    np.linspace(time_index, time_index + 3e-13 * (len(t_list2) - 1), len(t_list2)))
             else:
                 minus_visual_mz = minus_visual_mz + mz_list_chao
                 minus_time = minus_time + list(
-                    np.linspace(time_index, time_index + 3e-13 * (len(t_list2)-1), len(t_list2)))
+                    np.linspace(time_index, time_index + 3e-13 * (len(t_list2) - 1), len(t_list2)))
 
             time_index = time_index + t_list2[-1]
 
@@ -1020,9 +1143,9 @@ if __name__ == '__main__':
     # time evolution of resistance
     # ########################################################################################
     # initial state
-    a, b, c = 0.1, 0.1, 0
-    # t_step = 3e-13
-    time_consume = 7e-9
+    a, b, c = 0.1, 0.1, 1
+    t_step = 3e-13
+    time_consume = 5e-9
     extern_field = 200  # Unit: Oe
     ani_field = 0  # Unit: Oe
     dem_field = 8400  # Unit: Oe
@@ -1031,21 +1154,33 @@ if __name__ == '__main__':
     f_ac = 32e9
 
     mtj = Mtj(a, b, c)
-    # #################################################################################################
-    # try to calculate the ability of delay task
-    # #################################################################################################
-    delay_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    node_list = [10, 20, 30, 40, 50]
-    for node in node_list:
-        for delay in delay_list:
-            mtj.stm_train(number_wave=1000, nodes_stm=node, visual_process=False, save_index=True, superposition=delay,
-                          alert_index=False, time_consume_all=3e-8)
-            mtj.stm_test(test_number=30, nodes_stm=node, superposition=delay, visual_index=False)
-    # ################################################################################################
+    ac_current_list = np.linspace(0, 20, 21)
+    # ac_current_list = np.linspace(21, 100, 80)
+    le_list = []
+    for i in range(len(ac_current_list)):
+        le, _ = chaos_mine(ac_current1=ac_current_list[i], len_input_number=20)
+        le_list.append(le)
+        print('*****************************************************************************')
+        print('ac_list : {}'.format(ac_current_list[:i]))
+        print('le_list : {}'.format(le_list))
+
+    print('ac_list : {}'.format(ac_current_list))
+    print('le_ist : {}'.format(le_list))
+    plt.figure()
+    plt.plot(ac_current_list, le_list)
+    plt.show()
+
+    # delay_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    # node_list = [10, 20, 30, 40, 50]
+    # for node in node_list:
+    #     for i in delay_list:
+    #         mtj.stm_train(number_wave=1000, nodes_stm=node, visual_process=False, save_index=True, superposition=i,
+    #                       alert_index=False, time_consume_all=3e-8)
+    #         mtj.stm_test(test_number=30, nodes_stm=node, superposition=i, visual_index=False)
 
     # mx_list1, my_list1, mz_list1, t_list1 = mtj.time_evolution(extern_field, ani_field, dem_field, dc_current,
     #                                                            ac_amplitude=ac_current, ac_frequency=f_ac,
-    #                                                            time_consumed=time_consume, time_step=t_step)
+    #                                                            time_consumed=time_consume)
     #
     # # FIGURES
     # plt.figure()
@@ -1090,30 +1225,20 @@ if __name__ == '__main__':
     # plus_time, minus_time, time_index = [], [], 0
     # plus_time_switch, minus_time_switch = [], []
     # plus_visual_switch, minus_visual_switch = [], []
-    #
+    # mtj = Mtj(a, b, c)
     # positive_dc_current = 100
     # negative_dc_current = 200
     # input_signals = np.random.randint(0, 2, 20)
     # # input_signals = [0, 1, 0, 1, 0, 1, 0, 1]
     # mz_behavior = []
-    # a, b, c = 0.1, 0.1, 0
-    # # t_step = 3e-13
-    # time_consume = 5e-9
-    # extern_field = 200  # Unit: Oe
-    # ani_field = 0  # Unit: Oe
-    # dem_field = 8400  # Unit: Oe
-    # dc_current = 100
-    # ac_current = 100
-    # f_ac = 32e9
-    # mtj = Mtj(a, b, c)
     #
     # for j in track(range(len(input_signals))):
     #     if input_signals[j] == 1:
     #         dc_current1 = positive_dc_current
     #         _, _, mz_list_chao, t_list2 = mtj.time_evolution(external_field=200, anisotropy_field=0,
     #                                                          demagnetization_field=8400,
-    #                                                          dc_amplitude=dc_current1, ac_amplitude=ac_current,
-    #                                                          ac_frequency=f_ac, time_consumed=time_consume,
+    #                                                          dc_amplitude=dc_current1, ac_amplitude=0,
+    #                                                          ac_frequency=32e9, time_consumed=1e-8,
     #                                                          time_step=3e-13)
     #
     #         # _, _, mz_list_osc, t_list_osc = mtj.time_evolution(external_field=200, anisotropy_field=0,
@@ -1126,8 +1251,8 @@ if __name__ == '__main__':
     #         dc_current1 = negative_dc_current
     #         mx_list2, _, mz_list_chao, t_list2 = mtj.time_evolution(external_field=200, anisotropy_field=0,
     #                                                                 demagnetization_field=8400,
-    #                                                                 dc_amplitude=dc_current1, ac_amplitude=ac_current,
-    #                                                                 ac_frequency=f_ac, time_consumed=time_consume,
+    #                                                                 dc_amplitude=dc_current1, ac_amplitude=0,
+    #                                                                 ac_frequency=32e9, time_consumed=1e-8,
     #                                                                 time_step=3e-13)
     #
     #         # _, _, mz_list_osc, t_list_osc = mtj.time_evolution(external_field=200, anisotropy_field=0,

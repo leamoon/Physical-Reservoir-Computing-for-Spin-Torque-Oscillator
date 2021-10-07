@@ -157,13 +157,14 @@ if __name__ == '__main__':
     # find lyapunov
     # _, _, _, _, _, le_1 = r_le_curve(r=94, length_le=1000)
     # print('le: {}'.format(le_1))
-    r_list = np.linspace(0, 100, 1001)
+    r_list = np.linspace(96.1, 100, 40)
     # r_list = np.linspace(90, 100, 101)
     le_list_whole = []
     for i1 in r_list:
-        _, _, _, _, _, le_1 = r_le_curve(r=i1, length_le=5000)
+        _, _, _, _, _, le_1 = r_le_curve(r=i1, length_le=7000)
         le_list_whole.append(le_1)
         print('r={}, le={}'.format(i1, le_1))
+        print('le_list_whole : {}'.format(le_list_whole))
 
     plt.figure()
     plt.plot(r_list, le_list_whole)

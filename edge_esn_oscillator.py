@@ -686,8 +686,8 @@ class Mtj:
         if not os.path.exists(file_path):
             os.makedirs(file_path)
 
-        if os.path.exists('{}/STM_delay_{}_node_{}.npy'.format(file_path, superposition, nodes_stm)):
-            weight_out_stm = np.load('{}/STM_delay_{}_node_{}.npy'.format(file_path, superposition, nodes_stm))
+        if os.path.exists(f'{file_path}/STM_delay_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy'):
+            weight_out_stm = np.load(f'{file_path}/STM_delay_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy')
             print('###############################################')
             print('Loading weight matrix successfully !')
             print('shape of weight:{}'.format(weight_out_stm.shape))
@@ -821,7 +821,7 @@ class Mtj:
 
         # save weight matrix as .npy files
         if save_index:
-            np.save('{}/STM_delay_{}_node_{}.npy'.format(file_path, superposition, nodes_stm), weight_out_stm)
+            np.save(f'{file_path}/STM_delay_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy', weight_out_stm)
             print('Saved weight matrix file')
 
         # visualization of magnetization
@@ -854,7 +854,7 @@ class Mtj:
             email_alert(subject='Training Successfully !')
 
     def stm_test(self, test_number=80, nodes_stm=80, file_path='weight_matrix_oscillator_xuezhao', visual_index=True,
-                 alert_index=False, superposition=0, time_consume_all=1e-8):
+                 alert_index=False, superposition=0, time_consume_all=1e-8, ac_amplitude=0):
         """
         a function used to test the ability of classification of chaotic-MTJ echo state network
         :param test_number: the number of test waves form, default:80
@@ -864,11 +864,13 @@ class Mtj:
         :param alert_index: sending notification when it is True
         :param superposition: number of time interval or delay time
         :param time_consume_all: time consume in single step evolution
+        :param ac_amplitude: amplitude of ac term
         """
 
-        if os.path.exists('{}/STM_delay_{}_node_{}.npy'.format(file_path, superposition, nodes_stm)):
-            weight_out_stm = np.load('{}/STM_delay_{}_node_{}.npy'.format(file_path, superposition, nodes_stm))
-            print('Loading STM_delay_{}_node_{} matrix successfully !'.format(superposition, nodes_stm))
+        if os.path.exists(f'{file_path}/STM_delay_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy'):
+            weight_out_stm = np.load(f'{file_path}/STM_delay_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy')
+            print('Loading STM_delay_{}_node_{}_ac_{} matrix successfully !'.format(superposition, nodes_stm,
+                                                                                    ac_amplitude))
             print('shape of weight:{}'.format(weight_out_stm.shape))
             # print('weight: {}'.format(weight_out_stm))
             print('###############################################')
@@ -901,7 +903,7 @@ class Mtj:
                 dc_current1 = positive_dc_current
                 _, _, mz_list_chao, t_list2 = self.time_evolution(external_field=200, anisotropy_field=0,
                                                                   demagnetization_field=8400,
-                                                                  dc_amplitude=dc_current1, ac_amplitude=0,
+                                                                  dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,
                                                                   ac_frequency=32e9, time_consumed=time_consume_all,
                                                                   time_step=3e-13)
 
@@ -909,7 +911,7 @@ class Mtj:
                 dc_current1 = negative_dc_current
                 _, _, mz_list_chao, t_list2 = self.time_evolution(external_field=200, anisotropy_field=0,
                                                                   demagnetization_field=8400,
-                                                                  dc_amplitude=dc_current1, ac_amplitude=0,
+                                                                  dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,
                                                                   ac_frequency=32e9,
                                                                   time_consumed=time_consume_all,
                                                                   time_step=3e-13)
@@ -1034,13 +1036,9 @@ if __name__ == '__main__':
     # #################################################################################################
     # try to calculate the ability of delay task
     # #################################################################################################
-    delay_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    node_list = [10, 20, 30, 40, 50]
-    for node in node_list:
-        for delay in delay_list:
-            mtj.stm_train(number_wave=1000, nodes_stm=node, visual_process=False, save_index=True, superposition=delay,
-                          alert_index=False, time_consume_all=3e-8)
-            mtj.stm_test(test_number=30, nodes_stm=node, superposition=delay, visual_index=False)
+    mtj.stm_train(number_wave=1000, nodes_stm=10, visual_process=False, save_index=True, superposition=1,
+                  alert_index=False, time_consume_all=3e-8, ac_amplitude=9)
+    mtj.stm_test(test_number=30, nodes_stm=10, superposition=1, visual_index=False, ac_amplitude=9)
     # ################################################################################################
 
     # mx_list1, my_list1, mz_list1, t_list1 = mtj.time_evolution(extern_field, ani_field, dem_field, dc_current,
