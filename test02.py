@@ -1,6 +1,6 @@
-# import linecache
-# import matplotlib.pyplot as plt
-#
+import linecache
+import matplotlib.pyplot as plt
+
 # filename = "C:\\Users\\lemoon\\Desktop\\data.txt"
 # data = linecache.getlines(filename)
 # print(data)
@@ -197,74 +197,107 @@
 #     plt.xlabel('r')
 #     plt.ylabel(r'lyapunov exponent')
 #     plt.show()
+#
+# import numpy as np
+# import matplotlib.pyplot as plt
+#
+#
+# def lorenz_system(x, y, z, r, b=10, s=8/3):
+#     x_dot = b * (y - x)
+#     y_dot = r * x - y - x * z
+#     z_dot = x * y - s * z
+#     return x_dot, y_dot, z_dot
+#
+#
+# dr = 0.1  # parameter step size
+# r = np.arange(0, 100, dr)  # parameter range
+# dt = 0.0001  # time step
+# t = np.arange(0, 10, dt)  # time range
+#
+# # initialize solution arrays
+# xs = np.empty(len(t) + 1)
+# ys = np.empty(len(t) + 1)
+# zs = np.empty(len(t) + 1)
+#
+# # initial values x0,y0,z0 for the system
+# xs[0], ys[0], zs[0] = (0.1, 1, 1)
+#
+#
+# # Save the plot points coordinates and plot the with a single call to plt.plot
+# # instead of plotting them one at a time, as it's much more efficient
+# r_maxes = []
+# z_maxes = []
+# r_mins = []
+# z_mins = []
+#
+#
+# for R in r:
+#     # Print something to show everything is running
+#     print(f"{R=:.2f}")
+#     for i in range(len(t)):
+#         # approximate numerical solutions to system
+#         x_dot, y_dot, z_dot = lorenz_system(xs[i], ys[i], zs[i], R)
+#         xs[i + 1] = xs[i] + (x_dot * dt)
+#         ys[i + 1] = ys[i] + (y_dot * dt)
+#         zs[i + 1] = zs[i] + (z_dot * dt)
+#     # calculate and save the peak values of the z solution
+#     for i in range(1, len(zs) - 1):
+#         # save the local maxima
+#         if zs[i - 1] < zs[i] and zs[i] > zs[i + 1]:
+#             r_maxes.append(R)
+#             z_maxes.append(zs[i])
+#         # save the local minima
+#         elif zs[i - 1] > zs[i] and zs[i] < zs[i + 1]:
+#             r_mins.append(R)
+#             z_mins.append(zs[i])
+#
+#     # "use final values from one run as initial conditions for the next to stay near the attractor"
+#     xs[0], ys[0], zs[0] = xs[i], ys[i], zs[i]
+#
+# plt.figure('bifurcation diagram')
+# plt.scatter(r_maxes, z_maxes, color="black", s=0.5, alpha=0.2)
+# plt.scatter(r_mins, z_mins, color="red", s=0.5, alpha=0.2)
+# plt.ylabel('z')
+# plt.xlabel('r')
+# plt.show()
+#
+# # data from edge_of_chaos function (10, 10)
+# ac = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+# le_list = [0.3388121995759894, 0.2226802126833783, 0.3007483720479339, 0.3361457402053673, 0.2869299386624567,
+#            0.1552857113695012, 0.13296088402503375, -0.13001819375565857, -0.16882107492530746, 0.06420198407664596]
+#
+# # ac_list : [10, 20, 30, 40, 50]
+# # le_ist : [0.11183842709734167, 0.17573649972974237, -0.5657212939057461, -4.4685027459738205, -2.2474766215589654]
+# # 0 - 0.13095315887202247 (50, 20) (number of single pulse & single pulse)
+#
+# # ac_list : [10, 20, 30, 40, 50] (10, 10)
+# # le_ist : [0.036488114776717234, 0.048705251124909615, -0.5804592942694166, -3.901401053649296, -2.5519012107382144]
+#
+# # ac_list : [0, 10, 20, 30, 40, 50] (20, 10)
+# # le_ist : [0.2964860726664512, 0.16046283938060363, 0.2344893178071248, -0.3804237693494945, -4.3771779752924065, -2.224906850942539]
+#
+# # ac_list : [0, 10, 20] (30, 10)
+# # le_list : [0.2486824988360416, 0.1716793229920704, 0.18872539474924646]
+#
+# # ac_list : [10. 11. 12. 13. 14. 15. 16.] (10, 20)
+# # le_list : [0.020469099998307212, 0.07864216261737057, 0.10111182654755402, 0.07300741331009908, 0.030976847058986345, 0.010968224475518729, 0.09884175334667314]
+#
+# # ac_list : [10. 11. 12. 13.](10, 30)
+# # le_list : [-0.005437113199811362, 0.005715520183899198, 0.0472551284762762, 0.02975470418783931]
+#
+# ac_10 = [0.2434, 0.2305, 0.2918]
 
-import numpy as np
-import matplotlib.pyplot as plt
+s_in = [0, 0, 0, 1, 1, 1, 0, 0, 1, 1]
+fact = []
+for i in s_in:
+    if i == 1:
+        fact = fact + [200]*8
+    else:
+        fact = fact + [100]*8
 
-
-def lorenz_system(x, y, z, r, b=10, s=8/3):
-    x_dot = b * (y - x)
-    y_dot = r * x - y - x * z
-    z_dot = x * y - s * z
-    return x_dot, y_dot, z_dot
-
-
-dr = 0.1  # parameter step size
-r = np.arange(0, 100, dr)  # parameter range
-dt = 0.0001  # time step
-t = np.arange(0, 10, dt)  # time range
-
-# initialize solution arrays
-xs = np.empty(len(t) + 1)
-ys = np.empty(len(t) + 1)
-zs = np.empty(len(t) + 1)
-
-# initial values x0,y0,z0 for the system
-xs[0], ys[0], zs[0] = (0.1, 1, 1)
-
-
-# Save the plot points coordinates and plot the with a single call to plt.plot
-# instead of plotting them one at a time, as it's much more efficient
-r_maxes = []
-z_maxes = []
-r_mins = []
-z_mins = []
-
-
-for R in r:
-    # Print something to show everything is running
-    print(f"{R=:.2f}")
-    for i in range(len(t)):
-        # approximate numerical solutions to system
-        x_dot, y_dot, z_dot = lorenz_system(xs[i], ys[i], zs[i], R)
-        xs[i + 1] = xs[i] + (x_dot * dt)
-        ys[i + 1] = ys[i] + (y_dot * dt)
-        zs[i + 1] = zs[i] + (z_dot * dt)
-    # calculate and save the peak values of the z solution
-    for i in range(1, len(zs) - 1):
-        # save the local maxima
-        if zs[i - 1] < zs[i] and zs[i] > zs[i + 1]:
-            r_maxes.append(R)
-            z_maxes.append(zs[i])
-        # save the local minima
-        elif zs[i - 1] > zs[i] and zs[i] < zs[i + 1]:
-            r_mins.append(R)
-            z_mins.append(zs[i])
-
-    # "use final values from one run as initial conditions for the next to stay near the attractor"
-    xs[0], ys[0], zs[0] = xs[i], ys[i], zs[i]
-
-plt.figure('bifurcation diagram')
-plt.scatter(r_maxes, z_maxes, color="black", s=0.5, alpha=0.2)
-plt.scatter(r_mins, z_mins, color="red", s=0.5, alpha=0.2)
-plt.ylabel('z')
-plt.xlabel('r')
+plt.figure()
+plt.plot(fact)
+plt.ylabel('inputs / Oe')
+plt.xlabel('Time interval')
+plt.title('Actual input')
 plt.show()
-
-# data from edge_of_chaos function
-ac = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-le_list = [0.3388121995759894, 0.2226802126833783, 0.3007483720479339, 0.3361457402053673, 0.2869299386624567,
-           0.1552857113695012, 0.13296088402503375, -0.13001819375565857, -0.16882107492530746, 0.06420198407664596]
-
-# ac_list : [10, 20, 30, 40, 50]
-# le_ist : [0.11183842709734167, 0.17573649972974237, -0.5657212939057461, -4.4685027459738205, -2.2474766215589654]

@@ -1036,9 +1036,10 @@ if __name__ == '__main__':
     # #################################################################################################
     # try to calculate the ability of delay task
     # #################################################################################################
-    mtj.stm_train(number_wave=1000, nodes_stm=10, visual_process=False, save_index=True, superposition=1,
-                  alert_index=False, time_consume_all=3e-8, ac_amplitude=9)
-    mtj.stm_test(test_number=30, nodes_stm=10, superposition=1, visual_index=False, ac_amplitude=9)
+    # mtj.stm_train(number_wave=300, nodes_stm=16, visual_process=False, save_index=True, superposition=1,
+    #               alert_index=False, time_consume_all=3e-8, ac_amplitude=10)
+    mtj.stm_test(test_number=30, nodes_stm=16, superposition=1, visual_index=True, ac_amplitude=10,
+                 time_consume_all=3e-8)
     # ################################################################################################
 
     # mx_list1, my_list1, mz_list1, t_list1 = mtj.time_evolution(extern_field, ani_field, dem_field, dc_current,
