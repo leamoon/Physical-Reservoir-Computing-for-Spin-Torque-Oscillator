@@ -1,46 +1,22 @@
-import linecache
+import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+from rich.progress import track
 
-# filename = "C:\\Users\\lemoon\\Desktop\\data.txt"
-# data = linecache.getlines(filename)
-# print(data)
-# r_list, le_list = [], []
-# for i in data:
-#     a = i.split(',')[0].split('=')[-1]
-#     b = i.split(',')[1]
-#     b = b.split('=')[1].split('\n')[0]
-#     r_list.append(float(a))
-#     le_list.append(float(b))
-#
-# zero_index = [0]*len(le_list)
-# plt.figure()
-# plt.title('Maximum Lyapunov Exponent')
-# plt.xlabel('control parameter r')
-# plt.ylabel('Maximum Lyapunov Exponent')
-# plt.plot(r_list, le_list, c='red')
-# plt.plot(r_list, zero_index, c='black')
-# plt.ylim(-16, 3)
-# plt.show()
+"""
+this code is designed to calculate the lyapunov exponent function of Lorenz system.
 
-# import numpy as np
-# import matplotlib as mpl
-# import matplotlib.pyplot as plt
-# from rich.progress import track
-#
-# """
-# this code is designed to calculate the lyapunov exponent function of Lorenz system.
-#
-# We can package this function to judge edge of chaos in spintronic system.
-#
-# The Lorenz System:
-#
-# partial_x = sigma * (y - x)
-# partial_y = r*x - y - x*z
-# partial_z = x*y - batter*z
-#
-# """
-#
-#
+We can package this function to judge edge of chaos in spintronic system.
+
+The Lorenz System:
+
+partial_x = sigma * (y - x)
+partial_y = r*x - y - x*z
+partial_z = x*y - batter*z
+
+"""
+
+
 # def step_evolution(x0, y0, z0, r, t_step=0.01):
 #     # fourth Runge-Kutta
 #     sigma, beta = 10, 8/3
@@ -70,8 +46,8 @@ import matplotlib.pyplot as plt
 #     y_new = y0 + h/6*(k1_y + 2*k2_y + 2*k3_y + k4_y)
 #     z_new = z0 + h/6*(k1_z + 2*k2_z + 2*k3_z + k4_z)
 #     return x_new, y_new, z_new
-#
-#
+
+
 # def time_evolution(x0=0.1, y0=0, z0=0, r=40, time_consume=0.1, t_step=0.0001):
 #     number_interval = int(time_consume/t_step)
 #     x_list, y_list, z_list = [], [], []
@@ -82,8 +58,8 @@ import matplotlib.pyplot as plt
 #         y_list.append(y)
 #         z_list.append(z)
 #     return x_list, y_list, z_list
-#
-#
+
+
 # def lyapunov(r, x, y, z, perturbation):
 #     sigma, beta = 10, 8 / 3
 #     h1 = 0.002
@@ -118,8 +94,8 @@ import matplotlib.pyplot as plt
 #     lyapunov_exponent = np.dot(delta_perturbation, perturbation_new) / pow(np.linalg.norm(perturbation_new), 2)
 #
 #     return lyapunov_exponent, perturbation_new, x_new, y_new, z_new
-#
-#
+
+
 # def r_le_curve(r=28.0, x0=0.1, y0=0, z0=0, length_le=20):
 #     x, y, z = x0, y0, z0
 #     perturbation = np.random.rand(3, 1)
@@ -142,8 +118,8 @@ import matplotlib.pyplot as plt
 #             last_error = np.std(le_list_single)
 #
 #     return le_list_single, x, y, z, perturbation, le1
-#
-#
+
+
 # if __name__ == '__main__':
 #     # verify the code of Lorenz Attractor behavior
 #     mpl.rcParams["legend.fontsize"] = 10
@@ -156,7 +132,7 @@ import matplotlib.pyplot as plt
 #     xs, ys, zs = time_evolution(time_consume=1000, r=100)
 #     ax.plot3D(xs, ys, zs, label="Lorenz's strange attractor")
 #     plt.show()
-#
+
 #     # bifurcation diagram
 #     r_list = np.linspace(20, 100, 801)
 #     r_maxes, z_maxes = [], []
@@ -172,14 +148,14 @@ import matplotlib.pyplot as plt
 #                 z_min.append(zs[i2])
 #                 r_min.append(i1)
 #         print(i1)
-#
+
 #     plt.figure('bifurcation diagram')
 #     plt.scatter(r_maxes, z_maxes, color="black", s=0.5, alpha=0.2)
 #     plt.scatter(r_min, z_min, color="red", s=0.5, alpha=0.2)
 #     plt.xlabel('r')
 #     plt.ylabel('z')
 #     plt.show()
-#
+
 #     # find lyapunov
 #     # _, _, _, _, _, le_1 = r_le_curve(r=94, length_le=1000)
 #     # print('le: {}'.format(le_1))
@@ -191,13 +167,13 @@ import matplotlib.pyplot as plt
 #         le_list_whole.append(le_1)
 #         print('r={}, le={}'.format(i1, le_1))
 #         print('le_list_whole : {}'.format(le_list_whole))
-#
+
 #     plt.figure()
 #     plt.plot(r_list, le_list_whole)
 #     plt.xlabel('r')
 #     plt.ylabel(r'lyapunov exponent')
 #     plt.show()
-#
+
 # import numpy as np
 # import matplotlib.pyplot as plt
 #
@@ -260,44 +236,3 @@ import matplotlib.pyplot as plt
 # plt.ylabel('z')
 # plt.xlabel('r')
 # plt.show()
-#
-# # data from edge_of_chaos function (10, 10)
-# ac = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-# le_list = [0.3388121995759894, 0.2226802126833783, 0.3007483720479339, 0.3361457402053673, 0.2869299386624567,
-#            0.1552857113695012, 0.13296088402503375, -0.13001819375565857, -0.16882107492530746, 0.06420198407664596]
-#
-# # ac_list : [10, 20, 30, 40, 50]
-# # le_ist : [0.11183842709734167, 0.17573649972974237, -0.5657212939057461, -4.4685027459738205, -2.2474766215589654]
-# # 0 - 0.13095315887202247 (50, 20) (number of single pulse & single pulse)
-#
-# # ac_list : [10, 20, 30, 40, 50] (10, 10)
-# # le_ist : [0.036488114776717234, 0.048705251124909615, -0.5804592942694166, -3.901401053649296, -2.5519012107382144]
-#
-# # ac_list : [0, 10, 20, 30, 40, 50] (20, 10)
-# # le_ist : [0.2964860726664512, 0.16046283938060363, 0.2344893178071248, -0.3804237693494945, -4.3771779752924065, -2.224906850942539]
-#
-# # ac_list : [0, 10, 20] (30, 10)
-# # le_list : [0.2486824988360416, 0.1716793229920704, 0.18872539474924646]
-#
-# # ac_list : [10. 11. 12. 13. 14. 15. 16.] (10, 20)
-# # le_list : [0.020469099998307212, 0.07864216261737057, 0.10111182654755402, 0.07300741331009908, 0.030976847058986345, 0.010968224475518729, 0.09884175334667314]
-#
-# # ac_list : [10. 11. 12. 13.](10, 30)
-# # le_list : [-0.005437113199811362, 0.005715520183899198, 0.0472551284762762, 0.02975470418783931]
-#
-# ac_10 = [0.2434, 0.2305, 0.2918]
-
-s_in = [0, 0, 0, 1, 1, 1, 0, 0, 1, 1]
-fact = []
-for i in s_in:
-    if i == 1:
-        fact = fact + [200]*8
-    else:
-        fact = fact + [100]*8
-
-plt.figure()
-plt.plot(fact)
-plt.ylabel('inputs / Oe')
-plt.xlabel('Time interval')
-plt.title('Actual input')
-plt.show()

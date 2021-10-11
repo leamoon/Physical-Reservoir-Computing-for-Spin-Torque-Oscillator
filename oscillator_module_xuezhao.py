@@ -367,7 +367,8 @@ class Mtj:
     def time_evolution(self, dc_amplitude=420.21, ac_amplitude=0, time_consumed=1e-8):
         sol = scipy.integrate.solve_ivp(self.step_evolution, t_span=(0, time_consumed), y0=self.m,
                                         t_eval=np.linspace(0, time_consumed, int(time_consumed / self.t_step)),
-                                        args=[dc_amplitude, ac_amplitude])
+                                        args=[dc_amplitude, ac_amplitude], dense_output=True, atol=1e-10,
+                                        rtol=1e-6)
         t_list = sol.t
         mx_list, my_list, mz_list = sol.y
         # normalization
@@ -1172,11 +1173,11 @@ if __name__ == '__main__':
     ac_current = 0
     f_ac = 32e9
 
-    # mtj = Mtj(a, b, c)
-    # mtj.stm_train(number_wave=500, nodes_stm=16, visual_process=False, save_index=True, superposition=1,
-    #               alert_index=False, time_consume_all=3e-8, ac_amplitude=0)
-    # mtj.stm_test(test_number=30, nodes_stm=16, superposition=1, visual_index=True, time_consume_all=3e-8,
-    #              ac_amplitude=0)
+    mtj = Mtj(a, b, c)
+    mtj.stm_train(number_wave=500, nodes_stm=16, visual_process=False, save_index=True, superposition=1,
+                  alert_index=False, time_consume_all=1e-8, ac_amplitude=10)
+    mtj.stm_test(test_number=30, nodes_stm=16, superposition=1, visual_index=True, time_consume_all=1e-8,
+                 ac_amplitude=10)
 
     # chaos_mine()
     # # ac_current_list = np.linspace(10, 100, 91)
@@ -1199,14 +1200,14 @@ if __name__ == '__main__':
     # plt.plot(ac_current_list, le_list)
     # plt.show()
 
-    delay_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    node_list = [10, 16, 20, 30, 40, 50]
-    for node in node_list:
-        for i in delay_list:
-            mtj = Mtj(a, b, c)
-            mtj.stm_train(number_wave=800, nodes_stm=node, visual_process=False, save_index=True, superposition=i,
-                          alert_index=False, time_consume_all=3e-8)
-            # mtj.stm_test(test_number=30, nodes_stm=node, superposition=i, visual_index=False)
+    # delay_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    # node_list = [10, 16, 20, 30, 40, 50]
+    # for node in node_list:
+    #     for i in delay_list:
+    #         mtj = Mtj(a, b, c)
+    #         mtj.stm_train(number_wave=800, nodes_stm=node, visual_process=False, save_index=True, superposition=i,
+    #                       alert_index=False, time_consume_all=3e-8)
+    #         mtj.stm_test(test_number=30, nodes_stm=node, superposition=i, visual_index=False)
 
     # mx_list1, my_list1, mz_list1, t_list1 = mtj.time_evolution(dc_amplitude=dc_current, ac_amplitude=ac_current,
     #                                                            time_consumed=time_consume)
