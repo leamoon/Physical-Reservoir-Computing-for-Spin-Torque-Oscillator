@@ -243,12 +243,10 @@ def waveform_generator(current_limited, number_wave):
             wave_points = wave_points + tri_points
 
     print('wave:{}'.format(wave_points))
+    plt.figure('waveforms')
+    plt.plot(wave_points)
+    # plt.show()
 
-    # train_signal = []
-    # for i in random_pulse:
-    #     temp = [i] * 8
-    #     train_signal = train_signal + temp
-    # print('train_signal:{}'.format(train_signal))
     return wave_points, list(random_pulse)
 
 
@@ -292,11 +290,10 @@ def train_classification(a0, b0, c0, current_limited, number_wave, nodes_number)
 
         # create pulse list
         for i1 in range(len(s_in)):
-            mx_list, _, vol1, envelope_list, time_env_list, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0, m_z0,
-                                                                                                     magnitude=s_in[i1])
-            mx_list2, _, vol2, envelope_list2, time_env_list2, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0,
-                                                                                                        m_z0,
-                                                                                                        magnitude=-s_in[i1])
+            mx_list, _, vol1, envelope_list, _, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0, m_z0,
+                                                                                         magnitude=s_in[i1])
+            mx_list2, _, vol2, envelope_list2, _, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0, m_z0,
+                                                                                           magnitude=-s_in[i1])
             envelope_list = envelope_list + envelope_list2
             envelope_matrix = envelope_matrix + envelope_list
             # sampling the nodes from resistances list
@@ -390,15 +387,15 @@ def test_classification(a0, b0, c0, current_limited, test_number_wave, nodes_num
         y_out_list = []
         m_x0, m_y0, m_z0 = a0, b0, c0
         envelope_matrix = []
+        envelope_matrix_all = []    # get the intern process
         # used to get the figure
 
         # create pulse list
         for i1 in range(len(s_in)):
-            mx_list, _, vol1, envelope_list, time_env_list, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0, m_z0,
-                                                                                                     magnitude=s_in[i1])
-            mx_list2, _, vol2, envelope_list2, time_env_list2, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0,
-                                                                                                        m_z0,
-                                                                                                        magnitude=-s_in[i1])
+            mx_list, _, vol1, envelope_list, _, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0, m_z0,
+                                                                                         magnitude=s_in[i1])
+            mx_list2, _, vol2, envelope_list2, _, [m_x0, m_y0, m_z0], _ = do.evolution_mag(m_x0, m_y0, m_z0,
+                                                                                           magnitude=-s_in[i1])
 
             envelope_list = envelope_list + envelope_list2
             envelope_matrix = envelope_matrix + envelope_list
@@ -424,6 +421,8 @@ def test_classification(a0, b0, c0, current_limited, test_number_wave, nodes_num
                 x_matrix1 = np.append(x_matrix1, 1).reshape(-1, 1)
                 y_out = np.dot(weight_out_stm, x_matrix1)
                 y_out_list.append(y_out[0, 0])
+
+                envelope_matrix_all = envelope_matrix_all + envelope_matrix
                 envelope_matrix = []
 
         # calculate the error
@@ -432,6 +431,9 @@ def test_classification(a0, b0, c0, current_limited, test_number_wave, nodes_num
         print('----------------------------------------------------------------')
 
         # FIGURES
+        plt.figure('Responses of reservoirs')
+        plt.plot(envelope_matrix_all)
+
         plt.figure('Test results')
         plt.plot(train_signal, c='blue', label='target')
         plt.plot(y_out_list, c='green', label='module')
@@ -463,5 +465,6 @@ if __name__ == '__main__':
     # test_stm(1, -0.01, 0.01, delay_time=1, test_points=100, nodes_number_stm=23)
 
     # for classification task
-    train_classification(1, -0.01, 0.01, current_limited=0.8, number_wave=1000, nodes_number=200)
-    test_classification(1, -0.01, 0.01, current_limited=0.8, test_number_wave=80, nodes_number=200)
+    # train_classification(1, -0.01, 0.01, current_limited=0.8, number_wave=1000, nodes_number=200)
+    # test_classification(1, -0.01, 0.01, current_limited=0.8, test_number_wave=80, nodes_number=200)
+    test_classification(1, -0.01, 0.01, current_limited=0.8, test_number_wave=30, nodes_number=200)
