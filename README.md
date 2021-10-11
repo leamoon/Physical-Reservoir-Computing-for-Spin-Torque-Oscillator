@@ -46,7 +46,7 @@ Distributed under the MIT License.
 
 Xuezhao - wumaomaolemoon@gmail.com
 
-Project Link: [https://github.com/leamoon/ESN_mtj](https://github.com/leamoon/ESN_mtj)
+Project Link: [https://github.com/leamoon/Physical-Reservoir-Computing-for-MTJs](https://github.com/leamoon/Physical-Reservoir-Computing-for-MTJs)
 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
