@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" serverName="xuezhao@143.89.47.149:22 password" createEmptyFolders="true" remoteFilesAllowedToDisappearOnAutoupload="false">
+    <serverData>
+      <paths name="edge">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/xuezhao/Desktop/edge" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="xuezhao@143.89.47.149:22 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/Desktop/chaos" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="xuezhao@143.89.47.149:22 password (1)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/Desktop/chaos" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

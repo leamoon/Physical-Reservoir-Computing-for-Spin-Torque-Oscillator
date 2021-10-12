@@ -1,0 +1,644 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="8cf86972-bd51-45b2-a53e-ae399a7376ed" name="Changes" comment="change file name!&#10;&#10;find_edge_improved_random_input.py -&gt; edge_periodic.py&#10;test_for_edge.py -&gt; edge_random.py&#10;&#10;Submitter: Xuezhao&#10;&#10;Date: Oct 12">
+      <change beforePath="$PROJECT_DIR$/data_le.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/le_data.npy" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Jupyter Notebook" />
+        <option value="Python Script" />
+        <option value="package.json" />
+        <option value="Setup Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FlaskConsoleOptions" custom-start-script="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))">
+    <envs>
+      <env key="FLASK_APP" value="app" />
+    </envs>
+    <option name="myCustomStartScript" value="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))" />
+    <option name="myEnvs">
+      <map>
+        <entry key="FLASK_APP" value="app" />
+      </map>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="chaotic_algrithm" />
+      </map>
+    </option>
+    <option name="RECENT_COMMON_BRANCH" value="master" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="65aa0daa-56d7-4c66-9128-c46b2bfc1e7c" />
+        <option name="url" value="https://github.com/leamoon/ESN_mtj" />
+      </UrlAndAccount>
+    </option>
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/../../anaconda3/Lib/site-packages/nolitsa/lyapunov.py" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="ProjectId" id="1wTg1NhdbH5Dig5XCmjsTTAmlx1" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="ASKED_MARK_IGNORED_FILES_AS_EXCLUDED" value="true" />
+    <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="WebServerToolWindowPanel.toolwindow.highlight.mappings" value="true" />
+    <property name="WebServerToolWindowPanel.toolwindow.highlight.symlinks" value="true" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/chaotic_mtj.py" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="run.code.analysis.last.selected.profile" value="aDefault" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="two.files.diff.last.used.file" value="$PROJECT_DIR$/chaotic_mtj.py" />
+  </component>
+  <component name="RunManager" selected="Python.chaotic_mtj">
+    <configuration name="Classification of Oscillator RC" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="echo_state_network" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Classification of Oscillator RC.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Delay for classical RC" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="echo_state_network" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="D:\Python_projects\echo_state_network\Delay for classical RC.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Pary_check_near_chaos" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="echo_state_network" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Pary_check_near_chaos.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python" singleton="false">
+      <module name="echo_state_network" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="D:\anaconda3\python.exe" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="true" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="chaotic_mtj" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="echo_state_network" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/chaotic_mtj.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="device_oscillator" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="echo_state_network" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/device_oscillator.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="edge_periodic" type="PythonConfigurationType" factoryName="Python" singleton="false" temporary="true" nameIsGenerated="true">
+      <module name="echo_state_network" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="D:\anaconda3\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="D:\Python_projects\echo_state_network\edge_periodic.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="true" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="oscillator_module_xuezhao" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="echo_state_network" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/oscillator_module_xuezhao.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="true" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test02" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="echo_state_network" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test02.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.Delay for classical RC" />
+      <item itemvalue="Python.oscillator_module_xuezhao" />
+      <item itemvalue="Python.chaotic_mtj" />
+      <item itemvalue="Python.edge_periodic" />
+      <item itemvalue="Python.device_oscillator" />
+      <item itemvalue="Python.test02" />
+      <item itemvalue="Python.Pary_check_near_chaos" />
+      <item itemvalue="Python.Classification of Oscillator RC" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.Classification of Oscillator RC" />
+        <item itemvalue="Python.Pary_check_near_chaos" />
+        <item itemvalue="Python.test02" />
+        <item itemvalue="Python.device_oscillator" />
+        <item itemvalue="Python.chaotic_mtj" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8cf86972-bd51-45b2-a53e-ae399a7376ed" name="Changes" comment="" />
+      <created>1628487776247</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1628487776247</updated>
+      <workItem from="1631272317927" duration="1905000" />
+      <workItem from="1631274828389" duration="1174000" />
+      <workItem from="1631276024694" duration="3647000" />
+      <workItem from="1631279707622" duration="9177000" />
+      <workItem from="1631336848309" duration="4890000" />
+      <workItem from="1631345244724" duration="3161000" />
+      <workItem from="1631374241324" duration="1163000" />
+      <workItem from="1631424062095" duration="55000" />
+      <workItem from="1631424129881" duration="26320000" />
+      <workItem from="1631598240552" duration="9522000" />
+      <workItem from="1631618925390" duration="73921000" />
+      <workItem from="1631949671872" duration="479000" />
+      <workItem from="1631950200343" duration="2080000" />
+      <workItem from="1631969625682" duration="2852000" />
+      <workItem from="1632020474360" duration="5335000" />
+      <workItem from="1632105061241" duration="44511000" />
+      <workItem from="1632298935304" duration="48663000" />
+      <workItem from="1632559226242" duration="2982000" />
+      <workItem from="1632582115011" duration="5859000" />
+      <workItem from="1632620768814" duration="9583000" />
+      <workItem from="1632648878392" duration="49200000" />
+      <workItem from="1632826258933" duration="10267000" />
+      <workItem from="1632893256131" duration="3653000" />
+      <workItem from="1632906626498" duration="8623000" />
+      <workItem from="1632917474054" duration="36252000" />
+      <workItem from="1632998548212" duration="596000" />
+      <workItem from="1633000934718" duration="2829000" />
+      <workItem from="1633111440834" duration="201000" />
+      <workItem from="1633154184915" duration="3994000" />
+      <workItem from="1633223741023" duration="5774000" />
+      <workItem from="1633312064332" duration="32755000" />
+      <workItem from="1633405208366" duration="44353000" />
+      <workItem from="1633575228376" duration="22710000" />
+      <workItem from="1633609958638" duration="27748000" />
+      <workItem from="1633824732238" duration="31811000" />
+      <workItem from="1633918455442" duration="20699000" />
+      <workItem from="1633956537958" duration="175000" />
+      <workItem from="1633956738963" duration="4722000" />
+      <workItem from="1633972378613" duration="8604000" />
+      <workItem from="1634016525255" duration="5790000" />
+      <workItem from="1634031586221" duration="3077000" />
+      <workItem from="1634041305931" duration="117000" />
+    </task>
+    <task id="LOCAL-00001" summary="initial for echo state network">
+      <created>1628755179407</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1628755179407</updated>
+    </task>
+    <task id="LOCAL-00002" summary="initial for echo state network, which could work.&#10;&#10;Author: Xuezhao">
+      <created>1629174108076</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1629174108076</updated>
+    </task>
+    <task id="LOCAL-00003" summary="initial for echo state network, which could work.&#10;&#10;Author: Xuezhao">
+      <created>1629294948474</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1629294948474</updated>
+    </task>
+    <task id="LOCAL-00004" summary="improve codes&#10;&#10;Submitter: Xuezhao">
+      <created>1629598109023</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1629598109023</updated>
+    </task>
+    <task id="LOCAL-00005" summary="improve codes, and add the index of capacity&#10;&#10;Submitter: Xuezhao">
+      <created>1629689243694</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1629689243694</updated>
+    </task>
+    <task id="LOCAL-00006" summary="improve codes, and add the index of capacity&#10;&#10;Submitter: Xuezhao">
+      <created>1629697744930</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1629697744930</updated>
+    </task>
+    <task id="LOCAL-00007" summary="the MTJ module is including the thermal noises,&#10;&#10;the test.py file is a module of oscillator.&#10;&#10;Submitter: Xuezhao">
+      <created>1629950484552</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1629950484552</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Oscillation used to finish the classification task&#10;&#10;Submitter: Xuezhao">
+      <created>1630479126994</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1630479126994</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Oscillation used to finish the classification task, successfully!&#10;&#10;Submitter: Xuezhao">
+      <created>1630566087825</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1630566087825</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Chaotic part&#10;&#10;Submitter: Xuezhao">
+      <created>1631022106635</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1631022106635</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Add the Lyanuopv exponent&#10;&#10;Submitter: Xuezhao">
+      <created>1631281788019</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1631281788019</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Adding my own Lyapunov exponent&#10;&#10;Submitter: Xuezhao">
+      <created>1631676358686</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1631676358686</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Improve layout and files&#10;&#10;Submitter: Xuezhao">
+      <created>1631692480725</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1631692480725</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Improve layout and files&#10;&#10;Submitter: Xuezhao">
+      <created>1631692525579</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1631692525579</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Improve layout and files again&#10;&#10;Submitter: Xuezhao">
+      <created>1631949966800</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1631949966800</updated>
+    </task>
+    <task id="LOCAL-00016" summary="A new idea to build ESN by using chaotic region&#10; &#10;Submitter: Xuezhao">
+      <created>1632121061746</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1632121061746</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Improve some functions to make them easy to use&#10; &#10;Submitter: Xuezhao">
+      <created>1632621143601</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1632621143601</updated>
+    </task>
+    <task id="LOCAL-00018" summary="backup, a method of chaotic mtj seems to work&#10; &#10;Submitter: Xuezhao">
+      <created>1632971204114</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1632971204114</updated>
+    </task>
+    <task id="LOCAL-00019" summary="backup, a method of chaotic mtj seems to work&#10; &#10;Submitter: Xuezhao">
+      <created>1632987450709</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1632987450709</updated>
+    </task>
+    <task id="LOCAL-00020" summary="backup, a method of chaotic mtj seems to work&#10; &#10;Submitter: Xuezhao">
+      <created>1632987456099</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1632987456099</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Oscillator_module built by xuezhao&#10;&#10;And using it to build echo state network for real time learning&#10; &#10;Submitter: Xuezhao">
+      <created>1633430949668</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1633430949668</updated>
+    </task>
+    <task id="LOCAL-00022" summary="Oscillator_module built by xuezhao&#10;&#10;And using it to build echo state network for real time learning&#10;&#10;verify lyapunov function is suitable to my module or not.&#10; &#10;Submitter: Xuezhao">
+      <created>1633609351694</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1633609351694</updated>
+    </task>
+    <task id="LOCAL-00023" summary="Applying scipy to foster Runge-Kutta methods.&#10;&#10;Adding Lyapunov function.&#10; &#10;Submitter: Xuezhao">
+      <created>1633882983666</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1633882983666</updated>
+    </task>
+    <task id="LOCAL-00024" summary="Fixing lyapunov exponent algorithm up.&#10;&#10;Change improve_codes.py name as find_edge_improved_random_input.py&#10; &#10;Submitter: Xuezhao &#10;&#10;Date: Oct 11">
+      <created>1633961473700</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1633961473700</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Adding a parameter in chaos_mine function in find_edge_improved_random_input.py&#10;&#10;through changing 'input_mode' we can decide the input is random or periodic&#10;&#10;Submitter: Xuezhao &#10;&#10;Date: Oct 11">
+      <created>1633973553486</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1633973553486</updated>
+    </task>
+    <task id="LOCAL-00026" summary="Adding a parameter in chaos_mine function in find_edge_improved_random_input.py&#10;&#10;through changing 'input_mode' we can decide the input is random or periodic&#10;&#10;Updating the README.md&#10;&#10;Submitter: Xuezhao&#10;&#10;Date: Oct 12">
+      <created>1633974933328</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1633974933328</updated>
+    </task>
+    <task id="LOCAL-00027" summary="change file name!&#10;&#10;find_edge_improved_random_input.py -&gt; edge_periodic.py&#10;test_for_edge.py -&gt; edge_random.py&#10;&#10;Submitter: Xuezhao&#10;&#10;Date: Oct 12">
+      <created>1634026679172</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1634026679172</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ID_ORDER">
+      <list>
+        <option value="Default.Root" />
+        <option value="Default.Author" />
+        <option value="Default.Date" />
+        <option value="Default.Subject" />
+        <option value="Space.CommitStatus" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="chaotic_algrithm" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="initial for echo state network" />
+    <MESSAGE value="initial for echo state network, which could work.&#10;&#10;Author: Xuezhao" />
+    <MESSAGE value="improve codes&#10;&#10;Submitter: Xuezhao" />
+    <MESSAGE value="improve codes, and add the index of capacity&#10;&#10;Submitter: Xuezhao" />
+    <MESSAGE value="the MTJ module is including the thermal noises,&#10;&#10;the test.py file is a module of oscillator.&#10;&#10;Submitter: Xuezhao" />
+    <MESSAGE value="Oscillation used to finish the classification task&#10;&#10;Submitter: Xuezhao" />
+    <MESSAGE value="Oscillation used to finish the classification task, successfully!&#10;&#10;Submitter: Xuezhao" />
+    <MESSAGE value="Chaotic part&#10;&#10;Submitter: Xuezhao" />
+    <MESSAGE value="Add the Lyanuopv exponent&#10;&#10;Submitter: Xuezhao" />
+    <MESSAGE value="Adding my own Lyapunov exponent&#10;&#10;Submitter: Xuezhao" />
+    <MESSAGE value="Improve layout and files&#10;&#10;Submitter: Xuezhao" />
+    <MESSAGE value="Improve layout and files again&#10;&#10;Submitter: Xuezhao" />
+    <MESSAGE value="A new idea to build ESN by using chaotic region&#10; &#10;Submitter: Xuezhao" />
+    <MESSAGE value="Improve some functions to make them easy to use&#10; &#10;Submitter: Xuezhao" />
+    <MESSAGE value="backup, a method of chaotic mtj seems to work&#10; &#10;Submitter: Xuezhao" />
+    <MESSAGE value="Oscillator_module built by xuezhao&#10;&#10;And using it to build echo state network for real time learning&#10; &#10;Submitter: Xuezhao" />
+    <MESSAGE value="Oscillator_module built by xuezhao&#10;&#10;And using it to build echo state network for real time learning&#10;&#10;verify lyapunov function is suitable to my module or not.&#10; &#10;Submitter: Xuezhao" />
+    <MESSAGE value="Applying scipy to foster Runge-Kutta methods.&#10;&#10;Adding Lyapunov function.&#10; &#10;Submitter: Xuezhao" />
+    <MESSAGE value="Fixing lyapunov exponent algorithm up.&#10;&#10;Change improve_codes.py name as find_edge_improved_random_input.py&#10; &#10;Submitter: Xuezhao &#10;&#10;Date: Oct 11" />
+    <MESSAGE value="Adding a parameter in chaos_mine function in find_edge_improved_random_input.py&#10;&#10;through changing 'input_mode' we can decide the input is random or periodic&#10;&#10;Submitter: Xuezhao &#10;&#10;Date: Oct 11" />
+    <MESSAGE value="Adding a parameter in chaos_mine function in find_edge_improved_random_input.py&#10;&#10;through changing 'input_mode' we can decide the input is random or periodic&#10;&#10;Submitter: Xuezhao &#10;&#10;Date: Oct 12" />
+    <MESSAGE value="Adding a parameter in chaos_mine function in find_edge_improved_random_input.py&#10;&#10;through changing 'input_mode' we can decide the input is random or periodic&#10;&#10;Updating the README.md&#10;&#10;Submitter: Xuezhao&#10;&#10;Date: Oct 12" />
+    <MESSAGE value="change file name!&#10;&#10;find_edge_improved_random_input.py -&gt; edge_periodic.py&#10;test_for_edge.py -&gt; edge_random.py&#10;&#10;Submitter: Xuezhao&#10;&#10;Date: Oct 12" />
+    <option name="LAST_COMMIT_MESSAGE" value="change file name!&#10;&#10;find_edge_improved_random_input.py -&gt; edge_periodic.py&#10;test_for_edge.py -&gt; edge_random.py&#10;&#10;Submitter: Xuezhao&#10;&#10;Date: Oct 12" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/echo_state_network$test02.coverage" NAME="test02 Coverage Results" MODIFIED="1633681759433" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$xuezhao_finding_edge.coverage" NAME="xuezhao_finding_edge Coverage Results" MODIFIED="1633533336042" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$chaotic_MTJ.coverage" NAME="chaotic_MTJ Coverage Results" MODIFIED="1631445351707" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$oscillator_module_xuezhao.coverage" NAME="oscillator_module_xuezhao Coverage Results" MODIFIED="1633957329552" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$find_edge_improved_random_input__1_.coverage" NAME="find_edge_improved_random_input (1) Coverage Results" MODIFIED="1634024900328" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$test01.coverage" NAME="test01 Coverage Results" MODIFIED="1632981956054" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$chaotic_mtj.coverage" NAME="chaotic_mtj Coverage Results" MODIFIED="1633156261037" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$xuezhao_finding_edge__1_.coverage" NAME="xuezhao_finding_edge (1) Coverage Results" MODIFIED="1633679084218" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$improve_codes__1_.coverage" NAME="improve_codes (1) Coverage Results" MODIFIED="1633955557015" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$device_module.coverage" NAME="device_module Coverage Results" MODIFIED="1631281059135" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$test000.coverage" NAME="test000 Coverage Results" MODIFIED="1633003544873" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$edge_esn_oscillator.coverage" NAME="edge_esn_oscillator Coverage Results" MODIFIED="1633874763863" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$improve_codes.coverage" NAME="improve_codes Coverage Results" MODIFIED="1633961041598" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$test_for_edge.coverage" NAME="test_for_edge Coverage Results" MODIFIED="1634024689127" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$edge_random.coverage" NAME="edge_random Coverage Results" MODIFIED="1634032366854" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$Classification_of_Oscillator_RC.coverage" NAME="Classification of Oscillator RC Coverage Results" MODIFIED="1632122798337" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$double_chao_plus.coverage" NAME="double_chao_plus Coverage Results" MODIFIED="1632985473044" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$find_edge_improved_random_input.coverage" NAME="find_edge_improved_random_input Coverage Results" MODIFIED="1634016881755" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/echo_state_network$lyapunov_lorenz.coverage" NAME="lyapunov_lorenz Coverage Results" MODIFIED="1633576324968" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>
