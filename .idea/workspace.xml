@@ -5,7 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8cf86972-bd51-45b2-a53e-ae399a7376ed" name="Changes" comment="change file name!&#10;&#10;find_edge_improved_random_input.py -&gt; edge_periodic.py&#10;test_for_edge.py -&gt; edge_random.py&#10;&#10;Submitter: Xuezhao&#10;&#10;Date: Oct 12">
-      <change beforePath="$PROJECT_DIR$/data_le.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_le.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/data_le.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/edge_esn_oscillator.py" beforeDir="false" afterPath="$PROJECT_DIR$/edge_esn_oscillator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/edge_random.py" beforeDir="false" afterPath="$PROJECT_DIR$/edge_random.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/le_data.npy" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -37,7 +41,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="chaotic_algrithm" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
     <option name="RECENT_COMMON_BRANCH" value="master" />
@@ -90,10 +94,10 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="run.code.analysis.last.selected.profile" value="aDefault" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
     <property name="two.files.diff.last.used.file" value="$PROJECT_DIR$/chaotic_mtj.py" />
   </component>
-  <component name="RunManager" selected="Python.chaotic_mtj">
+  <component name="RunManager" selected="Python.edge_periodic (1)">
     <configuration name="Classification of Oscillator RC" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="echo_state_network" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -182,45 +186,45 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="chaotic_mtj" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="edge_esn_oscillator" type="PythonConfigurationType" factoryName="Python" singleton="false" temporary="true" nameIsGenerated="true">
       <module name="echo_state_network" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="D:\anaconda3\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/chaotic_mtj.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/edge_esn_oscillator.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="EMULATE_TERMINAL" value="true" />
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="device_oscillator" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="edge_periodic (1)" type="PythonConfigurationType" factoryName="Python" singleton="false" temporary="true" nameIsGenerated="true">
       <module name="echo_state_network" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="D:\anaconda3\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/device_oscillator.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/edge_periodic.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="EMULATE_TERMINAL" value="true" />
       <option name="MODULE_MODE" value="false" />
       <option name="REDIRECT_INPUT" value="false" />
       <option name="INPUT_FILE" value="" />
@@ -248,20 +252,20 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="oscillator_module_xuezhao" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="edge_random" type="PythonConfigurationType" factoryName="Python" singleton="false" temporary="true" nameIsGenerated="true">
       <module name="echo_state_network" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="D:\anaconda3\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/oscillator_module_xuezhao.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/edge_random.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="true" />
@@ -270,45 +274,22 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="test02" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="echo_state_network" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test02.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <list>
       <item itemvalue="Python.Delay for classical RC" />
-      <item itemvalue="Python.oscillator_module_xuezhao" />
-      <item itemvalue="Python.chaotic_mtj" />
       <item itemvalue="Python.edge_periodic" />
-      <item itemvalue="Python.device_oscillator" />
-      <item itemvalue="Python.test02" />
       <item itemvalue="Python.Pary_check_near_chaos" />
       <item itemvalue="Python.Classification of Oscillator RC" />
+      <item itemvalue="Python.edge_random" />
+      <item itemvalue="Python.edge_esn_oscillator" />
+      <item itemvalue="Python.edge_periodic (1)" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.edge_periodic (1)" />
+        <item itemvalue="Python.edge_random" />
+        <item itemvalue="Python.edge_esn_oscillator" />
         <item itemvalue="Python.Classification of Oscillator RC" />
         <item itemvalue="Python.Pary_check_near_chaos" />
-        <item itemvalue="Python.test02" />
-        <item itemvalue="Python.device_oscillator" />
-        <item itemvalue="Python.chaotic_mtj" />
       </list>
     </recent_temporary>
   </component>
@@ -362,6 +343,7 @@
       <workItem from="1634016525255" duration="5790000" />
       <workItem from="1634031586221" duration="3077000" />
       <workItem from="1634041305931" duration="117000" />
+      <workItem from="1634042470711" duration="4885000" />
     </task>
     <task id="LOCAL-00001" summary="initial for echo state network">
       <created>1628755179407</created>
@@ -580,7 +562,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="chaotic_algrithm" />
+                        <option value="master" />
                       </list>
                     </value>
                   </entry>
@@ -595,6 +577,9 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <ignored-roots>
+      <path value="$PROJECT_DIR$/nolitsa" />
+    </ignored-roots>
     <MESSAGE value="initial for echo state network" />
     <MESSAGE value="initial for echo state network, which could work.&#10;&#10;Author: Xuezhao" />
     <MESSAGE value="improve codes&#10;&#10;Submitter: Xuezhao" />
@@ -623,6 +608,7 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/echo_state_network$test02.coverage" NAME="test02 Coverage Results" MODIFIED="1633681759433" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/echo_state_network$xuezhao_finding_edge.coverage" NAME="xuezhao_finding_edge Coverage Results" MODIFIED="1633533336042" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Physical_Reservoir_Computing_for_MTJs$edge_random.coverage" NAME="edge_random Coverage Results" MODIFIED="1634043448735" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/echo_state_network$chaotic_MTJ.coverage" NAME="chaotic_MTJ Coverage Results" MODIFIED="1631445351707" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/echo_state_network$oscillator_module_xuezhao.coverage" NAME="oscillator_module_xuezhao Coverage Results" MODIFIED="1633957329552" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/echo_state_network$find_edge_improved_random_input__1_.coverage" NAME="find_edge_improved_random_input (1) Coverage Results" MODIFIED="1634024900328" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -639,6 +625,7 @@
     <SUITE FILE_PATH="coverage/echo_state_network$Classification_of_Oscillator_RC.coverage" NAME="Classification of Oscillator RC Coverage Results" MODIFIED="1632122798337" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/echo_state_network$double_chao_plus.coverage" NAME="double_chao_plus Coverage Results" MODIFIED="1632985473044" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/echo_state_network$find_edge_improved_random_input.coverage" NAME="find_edge_improved_random_input Coverage Results" MODIFIED="1634016881755" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Physical_Reservoir_Computing_for_MTJs$edge_esn_oscillator.coverage" NAME="edge_esn_oscillator Coverage Results" MODIFIED="1634048675363" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/echo_state_network$lyapunov_lorenz.coverage" NAME="lyapunov_lorenz Coverage Results" MODIFIED="1633576324968" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
