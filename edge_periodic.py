@@ -218,7 +218,7 @@ def edge_of_chaos(initial_dif=1e-8, len_input_number=10, time_consume_single=7e-
     return le_z, delta_t_diff
 
 
-def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0, f_ac=32e9, size=16):
+def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0, f_ac=32e9, size=16, input_mode='random'):
     """
     a function used to find edge of chaos, calculation should start at reservoirs rather than magnetization.
     :param initial_dif: the initial difference / perturbation
@@ -226,6 +226,7 @@ def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0, f_ac=3
     :param ac_current1: amplitude of ac current, unit: Oe
     :param f_ac: frequency of ac stt term
     :param size: size of reservoirs
+    :param input_mode: random input or periodic input
     :return: largest lyapunov exponent
     """
 
@@ -272,18 +273,21 @@ def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0, f_ac=3
         trace_perturbation.m = state_perturbation[-1, :]
 
         # random input dc amplitude
-        s_in = np.random.randint(0, 2, 1)[0]
-        if s_in == 0:
-            dc_current_input = positive_dc_current
-        elif s_in == 1:
-            dc_current_input = negative_dc_current
-        else:
-            print('some errors in s_in in chaos_mine')
+        if input_mode == 'random':
+            s_in = np.random.randint(0, 2, 1)[0]
+            if s_in == 0:
+                dc_current_input = positive_dc_current
+            elif s_in == 1:
+                dc_current_input = negative_dc_current
+            else:
+                print('some errors in s_in in chaos_mine')
 
-        # if i1 % 2 == 0:
-        #     dc_current_input = positive_dc_current
-        # else:
-        #     dc_current_input = negative_dc_current
+        elif input_mode == 'periodic':
+            if i1 % 2 == 0:
+                dc_current_input = positive_dc_current
+            else:
+                dc_current_input = negative_dc_current
+
         state = trace.get_reservoirs(dc_current=dc_current_input, ac_current=ac_current1,
                                      consuming_time=time_consume_single, size=size, f_ac=f_ac)
         state_perturbation = trace_perturbation.get_reservoirs(dc_current=dc_current_input, ac_current=ac_current1,
@@ -305,7 +309,7 @@ def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0, f_ac=3
         # info
         print('##################################### info ########################################')
         print('ac amplitude: {} Oe  f_ac : {} Hz  dc : {} Oe'.format(ac_current1, f_ac, dc_current_input))
-        print('State : {}  State_perturbation: {}'.format(state[-1, :], state_perturbation[-1, :]))
+        print('input mode: {}'.format(input_mode))
         print('Epoch: {} Current value : {} Average value: {}'.format(i1 + 1, le, np.mean(le_buffer)))
 
         if i1 == 100:
@@ -1194,13 +1198,14 @@ if __name__ == '__main__':
     # ##########################################################################################
     # variable: ac amplitude
     try:
-        # ac_amplitude_list = np.linspace(10.1, 20, 200)
-        # ac_amplitude_list = [3, 4, 5, 6, 7, 8, 9, 10]
-        ac_amplitude_list = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        # ac_amplitude_list = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        # ac_amplitude_list = np.linspace(51, 60, 10)
+        ac_amplitude_list = np.linspace(52.1, 53, 10)
         largest_lyapunov_exponent = []
         frequency_ac_term = 32e9
         for ac_stt in track(ac_amplitude_list):
-            mle = chaos_mine(ac_current1=ac_stt, f_ac=frequency_ac_term, size=16, time_consume_single=1e-8)
+            mle = chaos_mine(ac_current1=ac_stt, f_ac=frequency_ac_term, size=16, time_consume_single=1e-8,
+                             input_mode='periodic')
             largest_lyapunov_exponent.append(mle)
             np.save('mle_list_f_{}'.format(frequency_ac_term), largest_lyapunov_exponent)
             print(largest_lyapunov_exponent)
@@ -1215,7 +1220,8 @@ if __name__ == '__main__':
     #     print(ac_frequency_list)
     #     largest_lyapunov_exponent = []
     #     for f_ac_term in track(ac_frequency_list):
-    #         mle = chaos_mine(ac_current1=0, f_ac=f_ac_term)
+    #         mle = chaos_mine(ac_current1=10, f_ac=f_ac_term, size=16, time_consume_single=1e-8,
+    #                          input_mode='periodic')
     #         largest_lyapunov_exponent.append(mle)
     #         np.save('mle_list_fre', largest_lyapunov_exponent)
     #         print(largest_lyapunov_exponent)
