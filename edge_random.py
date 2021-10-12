@@ -218,18 +218,21 @@ def edge_of_chaos(initial_dif=1e-8, len_input_number=10, time_consume_single=7e-
     return le_z, delta_t_diff
 
 
-def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0):
+def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0, f_ac=32e9, size=16, input_mode='random'):
     """
     a function used to find edge of chaos, calculation should start at reservoirs rather than magnetization.
     :param initial_dif: the initial difference / perturbation
     :param time_consume_single:  time used to make evolution of magnetization
     :param ac_current1: amplitude of ac current, unit: Oe
+    :param f_ac: frequency of ac stt term
+    :param size: size of reservoirs
+    :param input_mode: random input or periodic input
     :return: largest lyapunov exponent
     """
 
     # hyper parameters
-    positive_dc_current = 100
-    negative_dc_current = 200
+    positive_dc_current = 200
+    negative_dc_current = 100
     time_step = 3e-13
 
     # random initial state to test my algorithm
@@ -239,9 +242,9 @@ def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0):
     trace = Mtj(initial_state[0], initial_state[1], initial_state[2])
     trace_perturbation = Mtj(initial_state[0], initial_state[1], initial_state[2])
     state = trace.get_reservoirs(dc_current=positive_dc_current, ac_current=ac_current1,
-                                 consuming_time=time_consume_single, size=16)
+                                 consuming_time=time_consume_single, size=size, f_ac=f_ac)
     state_perturbation = trace_perturbation.get_reservoirs(dc_current=positive_dc_current, ac_current=ac_current1,
-                                                           consuming_time=time_consume_single, size=16)
+                                                           consuming_time=time_consume_single, size=size, f_ac=f_ac)
 
     # adding perturbation
     state_perturbation[-1, :] = state_perturbation[-1, :] + np.array([0, 0, initial_dif])
@@ -270,22 +273,32 @@ def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0):
         trace_perturbation.m = state_perturbation[-1, :]
 
         # random input dc amplitude
-        s_in = np.random.randint(0, 2, 1)[0]
-        if s_in == 1:
-            dc_current_input = positive_dc_current
-        elif s_in == 0:
-            dc_current_input = negative_dc_current
+        if input_mode == 'random':
+            s_in = np.random.randint(0, 2, 1)[0]
+            if s_in == 0:
+                dc_current_input = positive_dc_current
+            elif s_in == 1:
+                dc_current_input = negative_dc_current
+            else:
+                print('some errors in s_in in chaos_mine')
+
+        elif input_mode == 'periodic':
+            if i1 % 2 == 0:
+                dc_current_input = positive_dc_current
+            else:
+                dc_current_input = negative_dc_current
+
         state = trace.get_reservoirs(dc_current=dc_current_input, ac_current=ac_current1,
-                                     consuming_time=time_consume_single, size=16)
+                                     consuming_time=time_consume_single, size=size, f_ac=f_ac)
         state_perturbation = trace_perturbation.get_reservoirs(dc_current=dc_current_input, ac_current=ac_current1,
-                                                               consuming_time=time_consume_single, size=16)
+                                                               consuming_time=time_consume_single, size=size, f_ac=f_ac)
         # here only calculate the last reservoir state
         difference_trace = np.linalg.norm(state_perturbation[-1, :] - state[-1, :])
         if difference_trace == 0:
             print('Error : the initial difference is too small')
             sys.exit()
 
-        le = np.log(abs(difference_trace / real_initial_dif))
+        le = np.log(difference_trace / real_initial_dif)
         le_buffer.append(le)
 
         # reset trace_perturbation to avoid numerical overflow
@@ -295,12 +308,15 @@ def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0):
 
         # info
         print('##################################### info ########################################')
-        print('State : {}  State_perturbation: {}'.format(state[-1, :], state_perturbation[-1, :]))
+        print('ac amplitude: {} Oe  f_ac : {} Hz  dc : {} Oe'.format(ac_current1, f_ac, dc_current_input))
+        print('input mode: {}'.format(input_mode))
         print('Epoch: {} Current value : {} Average value: {}'.format(i1 + 1, le, np.mean(le_buffer)))
 
         if i1 == 100:
             le_buffer = []
             print('clear buffer')
+
+    return np.mean(le_buffer)
 
 
 class Mtj:
@@ -345,10 +361,11 @@ class Mtj:
         self.ac_frequency = ac_frequency
         self.stt_amplitude = dc_amplitude + ac_amplitude * np.cos(time_ac * ac_frequency)
 
-    def step_evolution(self, time_ac, magnetization, dc_amplitude, ac_amplitude):
+    def step_evolution(self, time_ac, magnetization, dc_amplitude, ac_amplitude, f_ac):
         # time evolution from differential equation
         self.m = magnetization/np.linalg.norm(magnetization)
         self.x0, self.y0, self.z0 = self.m
+        self.ac_frequency = f_ac
         self.parameters_calculation(time_ac=time_ac, dc_amplitude=dc_amplitude, ac_amplitude=ac_amplitude)
 
         x_axis = np.array([1, 0, 0])
@@ -364,10 +381,11 @@ class Mtj:
         delta1_m_reduce = np.divide(delta_m, (1 + pow(self.damping_factor, 2)))
         return delta1_m_reduce
 
-    def time_evolution(self, dc_amplitude=420.21, ac_amplitude=0, time_consumed=1e-8):
+    def time_evolution(self, dc_amplitude=420.21, ac_amplitude=0, time_consumed=1e-8, f_ac=32e9):
         sol = scipy.integrate.solve_ivp(self.step_evolution, t_span=(0, time_consumed), y0=self.m,
                                         t_eval=np.linspace(0, time_consumed, int(time_consumed / self.t_step)),
-                                        args=[dc_amplitude, ac_amplitude])
+                                        args=[dc_amplitude, ac_amplitude, f_ac], dense_output=True, atol=1e-10,
+                                        rtol=1e-6)
         t_list = sol.t
         mx_list, my_list, mz_list = sol.y
         # normalization
@@ -377,9 +395,9 @@ class Mtj:
         self.m = np.array([self.x0, self.y0, self.z0])
         return mx_list, my_list, mz_list, t_list
 
-    def get_reservoirs(self, dc_current=100, ac_current=0, consuming_time=1e-8, size=16):
+    def get_reservoirs(self, dc_current=100, ac_current=0, consuming_time=1e-8, size=16, f_ac=32e9):
         mx_list, my_list, mz_list, _ = self.time_evolution(dc_amplitude=dc_current, ac_amplitude=ac_current,
-                                                           time_consumed=consuming_time)
+                                                           time_consumed=consuming_time, f_ac=f_ac)
         try:
             index_list_high, index_list_low = [], []
 
@@ -829,7 +847,7 @@ class Mtj:
         plt.show()
 
     def stm_train(self, number_wave, nodes_stm, file_path='weight_matrix_oscillator_xuezhao', visual_process=False,
-                  save_index=True, alert_index=False, superposition=0, time_consume_all=1e-8, ac_amplitude=0):
+                  save_index=True, alert_index=False, superposition=0, time_consume_all=1e-8):
         """
         a function used to train weight matrix of readout layer in classification task
         :param file_path: the path of weight_matrix
@@ -840,7 +858,6 @@ class Mtj:
         :param alert_index: sending notification or not after training successfully
         :param superposition: the number of delay or time interval
         :param time_consume_all: time consume in single step evolution
-        :param ac_amplitude: amplitude of ac stt term
         """
         if not os.path.exists(file_path):
             os.makedirs(file_path)
@@ -879,12 +896,13 @@ class Mtj:
             if s_in[i] == 1:
                 dc_current1 = positive_dc_current
                 _, _, mz_list, t_list2 = self.time_evolution(
-                    dc_amplitude=dc_current1, ac_amplitude=ac_amplitude, time_consumed=time_consume_all)
+                    dc_amplitude=dc_current1, ac_amplitude=0, time_consumed=time_consume_all)
 
             else:
                 dc_current1 = negative_dc_current
                 _, _, mz_list, t_list2 = self.time_evolution(
-                    dc_amplitude=dc_current1, ac_amplitude=ac_amplitude, time_consumed=time_consume_all)
+                    dc_amplitude=dc_current1, ac_amplitude=0,
+                    time_consumed=time_consume_all)
 
             try:
                 mz_list_all, t_list_whole = [], []
@@ -910,11 +928,11 @@ class Mtj:
 
             # for figures
             if s_in[i] == 1:
-                plus_visual_mz = plus_visual_mz + list(mz_list)
+                plus_visual_mz = plus_visual_mz + mz_list
                 plus_time = plus_time + list(
                     np.linspace(time_index, time_index + 3e-13 * (len(t_list2) - 1), len(t_list2)))
             else:
-                minus_visual_mz = minus_visual_mz + list(mz_list)
+                minus_visual_mz = minus_visual_mz + mz_list
                 minus_time = minus_time + list(
                     np.linspace(time_index, time_index + 3e-13 * (len(t_list2) - 1), len(t_list2)))
 
@@ -1006,7 +1024,7 @@ class Mtj:
             email_alert(subject='Training Successfully !')
 
     def stm_test(self, test_number=80, nodes_stm=80, file_path='weight_matrix_oscillator_xuezhao', visual_index=True,
-                 alert_index=False, superposition=0, time_consume_all=1e-8, ac_amplitude=0):
+                 alert_index=False, superposition=0, time_consume_all=1e-8):
         """
         a function used to test the ability of classification of chaotic-MTJ echo state network
         :param test_number: the number of test waves form, default:80
@@ -1016,7 +1034,6 @@ class Mtj:
         :param alert_index: sending notification when it is True
         :param superposition: number of time interval or delay time
         :param time_consume_all: time consume in single step evolution
-        :param ac_amplitude: amplitude of ac stt term
         """
 
         if os.path.exists('{}/STM_delay_{}_node_{}.npy'.format(file_path, superposition, nodes_stm)):
@@ -1029,6 +1046,10 @@ class Mtj:
         else:
             print('\rno valid weight data !', end='', flush=True)
             return 0
+
+        # print('\rSTM task')
+        # print('----------------------------------------------------------------')
+        # print('start to test !', flush=True)
 
         # fabricate the input, target, and output signals
         y_out_list, x_final_matrix, plus_visual_mz, minus_visual_mz = [], [], [], []
@@ -1049,12 +1070,12 @@ class Mtj:
             if s_in[i_1] == 1:
                 dc_current1 = positive_dc_current
                 _, _, mz_list, t_list2 = self.time_evolution(
-                    dc_amplitude=dc_current1, ac_amplitude=ac_amplitude, time_consumed=time_consume_all)
+                    dc_amplitude=dc_current1, ac_amplitude=0, time_consumed=time_consume_all)
 
             else:
                 dc_current1 = negative_dc_current
                 _, _, mz_list, t_list2 = self.time_evolution(
-                    dc_amplitude=dc_current1, ac_amplitude=ac_amplitude, time_consumed=time_consume_all)
+                    dc_amplitude=dc_current1, ac_amplitude=0, time_consumed=time_consume_all)
 
             try:
                 mz_list_all, t_list_whole = [], []
@@ -1080,11 +1101,11 @@ class Mtj:
 
             # for figures
             if s_in[i_1] == 1:
-                plus_visual_mz = plus_visual_mz + list(mz_list)
+                plus_visual_mz = plus_visual_mz + mz_list
                 plus_time = plus_time + list(
                     np.linspace(time_index, time_index + 3e-13 * (len(t_list2) - 1), len(t_list2)))
             else:
-                minus_visual_mz = minus_visual_mz + list(mz_list)
+                minus_visual_mz = minus_visual_mz + mz_list
                 minus_time = minus_time + list(
                     np.linspace(time_index, time_index + 3e-13 * (len(t_list2) - 1), len(t_list2)))
 
@@ -1162,23 +1183,64 @@ if __name__ == '__main__':
     # time evolution of resistance
     # ########################################################################################
     # initial state
-    a, b, c = 0.1, 0.1, 0
-    t_step = 3e-13
-    time_consume = 1e-8
-    extern_field = 200  # Unit: Oe
-    ani_field = 0  # Unit: Oe
-    dem_field = 8400  # Unit: Oe
-    dc_current = 100
-    ac_current = 0
-    f_ac = 32e9
+    # a, b, c = 0.1, 0.1, 0
+    # t_step = 3e-13
+    # time_consume = 1e-8
+    # extern_field = 200  # Unit: Oe
+    # ani_field = 0  # Unit: Oe
+    # dem_field = 8400  # Unit: Oe
+    # dc_current = 100
+    # ac_current = 0
+    # f_ac = 32e9
 
+    # ##########################################################################################
+    # finding critical line
+    # ##########################################################################################
+    # variable: ac amplitude
+    try:
+        # ac_amplitude_list = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        # ac_amplitude_list = np.linspace(51, 60, 10)
+        ac_amplitude_list = np.linspace(57.1, 59, 20)
+        largest_lyapunov_exponent = []
+        frequency_ac_term = 32e9
+        for ac_stt in track(ac_amplitude_list):
+            mle = chaos_mine(ac_current1=ac_stt, f_ac=frequency_ac_term, size=16, time_consume_single=1e-8,
+                             input_mode='random')
+            largest_lyapunov_exponent.append(mle)
+            np.save('mle_list_f_{}'.format(frequency_ac_term), largest_lyapunov_exponent)
+            print(largest_lyapunov_exponent)
+
+    except Exception as error_message:
+        sys.exit(error_message)
+
+    # variable: ac frequency
+    # try:
+    #     ac_frequency_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    #     ac_frequency_list = [i*1e9 for i in ac_frequency_list]
+    #     print(ac_frequency_list)
+    #     largest_lyapunov_exponent = []
+    #     for f_ac_term in track(ac_frequency_list):
+    #         mle = chaos_mine(ac_current1=10, f_ac=f_ac_term, size=16, time_consume_single=1e-8,
+    #                          input_mode='periodic')
+    #         largest_lyapunov_exponent.append(mle)
+    #         np.save('mle_list_fre', largest_lyapunov_exponent)
+    #         print(largest_lyapunov_exponent)
+    #
+    # except Exception as error_message:
+    #     sys.exit(error_message)
+
+    # ##########################################################################################
+
+    # try:
+    #     len_input_signal = int(sys.argv[2])
+    #     number_input_signal = int(sys.argv[1])
+    # except IndexError:
+    #     print('no any parameter inputted, setting default values: len_input=10, number_input=10')
+    #     len_input_signal = 10  # single pulse
+    #     number_input_signal = 10  # number of single pulse
+    #
     # mtj = Mtj(a, b, c)
-    # mtj.stm_train(number_wave=500, nodes_stm=16, visual_process=False, save_index=True, superposition=1,
-    #               alert_index=False, time_consume_all=3e-8, ac_amplitude=0)
-    # mtj.stm_test(test_number=30, nodes_stm=16, superposition=1, visual_index=True, time_consume_all=3e-8,
-    #              ac_amplitude=0)
 
-    # chaos_mine()
     # # ac_current_list = np.linspace(10, 100, 91)
     # ac_current_list = [0, 10, 20, 30, 40, 50]
     # le_list = []
@@ -1199,14 +1261,13 @@ if __name__ == '__main__':
     # plt.plot(ac_current_list, le_list)
     # plt.show()
 
-    delay_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    node_list = [16, 20, 30, 40, 50]
-    for node in node_list:
-        for i in delay_list:
-            mtj = Mtj(a, b, c)
-            mtj.stm_train(number_wave=800, nodes_stm=node, visual_process=False, save_index=True, superposition=i,
-                          alert_index=False, time_consume_all=3e-8)
-            # mtj.stm_test(test_number=30, nodes_stm=node, superposition=i, visual_index=False)
+    # delay_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    # node_list = [10, 20, 30, 40, 50]
+    # for node in node_list:
+    #     for i in delay_list:
+    #         mtj.stm_train(number_wave=1000, nodes_stm=node, visual_process=False, save_index=True, superposition=i,
+    #                       alert_index=False, time_consume_all=3e-8)
+    #         mtj.stm_test(test_number=30, nodes_stm=node, superposition=i, visual_index=False)
 
     # mx_list1, my_list1, mz_list1, t_list1 = mtj.time_evolution(dc_amplitude=dc_current, ac_amplitude=ac_current,
     #                                                            time_consumed=time_consume)
