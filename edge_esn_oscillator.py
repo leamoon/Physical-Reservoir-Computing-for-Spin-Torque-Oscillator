@@ -127,10 +127,10 @@ def real_time_generator(task='Delay', superposition_number=1, length_signals=100
                     train_signal = train_signal + temp_signal
                     train_signal[np.argwhere(train_signal == 2)] = 0
 
-        print('############################################################')
-        print('inputs :{}'.format(s_in))
-        print('target :{}'.format(train_signal))
-        print('############################################################')
+        # print('############################################################')
+        # print('inputs :{}'.format(s_in))
+        # print('target :{}'.format(train_signal))
+        # print('############################################################')
 
         return s_in, train_signal
 
@@ -448,7 +448,7 @@ class Mtj:
         """
 
         # define the g parameters, to simplified latter calculation
-        temp_magnetization = [self.x0, self.y0, self.z0]    # record the states
+        temp_magnetization = [self.x0, self.y0, self.z0]  # record the states
         self.x0, self.y0, self.z0 = 0.1, 0.1, 1
         mode = pow(self.x0, 2) + pow(self.y0, 2) + pow(self.z0, 2)
         self.x0 = self.x0 / np.sqrt(mode)
@@ -457,8 +457,8 @@ class Mtj:
         self.m = np.array([self.x0, self.y0, self.z0])
         self.time_evolution(dc_amplitude=dc_amplitude, ac_amplitude=ac_amplitude, time_consumed=current_t)
 
-        self.stt_amplitude = self.dc_amplitude + self.ac_amplitude*np.cos(self.ac_frequency*current_t)
-        stt_partial = -self.ac_amplitude*self.ac_frequency*np.sin(self.ac_frequency*current_t)
+        self.stt_amplitude = self.dc_amplitude + self.ac_amplitude * np.cos(self.ac_frequency * current_t)
+        stt_partial = -self.ac_amplitude * self.ac_frequency * np.sin(self.ac_frequency * current_t)
 
         g1 = (-self.gyo_ratio * self.z0 * self.y0 * self.demagnetization_field -
               self.damping_factor * self.gyo_ratio * (self.x0 * self.external_field +
@@ -466,7 +466,7 @@ class Mtj:
                                                       self.demagnetization_field * pow(self.z0, 2)) * self.x0 +
               self.damping_factor * self.gyo_ratio * (self.external_field + self.anisotropy_field * self.x0) -
               (pow(self.y0, 2) + pow(self.z0, 2)) * self.stt_amplitude * self.damping_factor) / (
-                         1 + self.damping_factor ** 2)
+                     1 + self.damping_factor ** 2)
 
         g2 = (-self.gyo_ratio * (-self.x0 * self.z0 * self.demagnetization_field +
                                  self.z0 * self.external_field + self.z0 * self.x0 * self.anisotropy_field) -
@@ -506,8 +506,8 @@ class Mtj:
                                                                                               )) +
                         self.damping_factor * self.gyo_ratio * self.anisotropy_field * g1 -
                         self.stt_amplitude * self.damping_factor * (2 * self.y0 * g2 + 2 * self.z0 * g3) +
-                        self.damping_factor*(pow(self.y0, 2)+pow(self.z0, 2))*stt_partial) / (
-                                   1 + self.damping_factor ** 2)
+                        self.damping_factor * (pow(self.y0, 2) + pow(self.z0, 2)) * stt_partial) / (
+                               1 + self.damping_factor ** 2)
 
         partial_g2_mx = (-self.gyo_ratio * (-self.z0 * self.demagnetization_field + self.z0 * self.anisotropy_field) -
                          self.damping_factor * self.gyo_ratio * (self.y0 * self.external_field +
@@ -532,11 +532,11 @@ class Mtj:
                                                                 2 * g1 * self.x0 * self.y0 * self.anisotropy_field +
                                                                 pow(self.x0, 2) * g2 * self.anisotropy_field +
                                                                 self.demagnetization_field * g2 * pow(self.z0, 2) +
-                                                                self.demagnetization_field*2*self.z0 * g3 * self.y0) -
+                                                                self.demagnetization_field * 2 * self.z0 * g3 * self.y0) -
                         self.damping_factor * self.gyo_ratio * self.stt_amplitude * g3 -
-                        self.damping_factor*self.gyo_ratio*stt_partial*self.z0 +
+                        self.damping_factor * self.gyo_ratio * stt_partial * self.z0 +
                         self.damping_factor * self.stt_amplitude * (self.x0 * g2 + self.y0 * g1) +
-                        self.damping_factor*stt_partial*self.x0*self.y0) / (1 + self.damping_factor ** 2)
+                        self.damping_factor * stt_partial * self.x0 * self.y0) / (1 + self.damping_factor ** 2)
 
         partial_g3_mx = (self.gyo_ratio * self.y0 * self.anisotropy_field -
                          self.damping_factor * self.gyo_ratio * (
@@ -549,12 +549,12 @@ class Mtj:
 
         partial_g3_mz = (-self.damping_factor * self.gyo_ratio * (self.x0 * self.external_field +
                                                                   self.anisotropy_field * pow(self.x0, 2) +
-                                                                  self.demagnetization_field * pow(self.z0, 3)*3) +
+                                                                  self.demagnetization_field * pow(self.z0, 3) * 3) +
                          self.damping_factor * self.gyo_ratio * self.demagnetization_field +
                          self.stt_amplitude * self.damping_factor * self.x0) / (1 + self.damping_factor ** 2)
 
         partial_g3_t = (self.gyo_ratio * (
-                    g2 * self.external_field + self.anisotropy_field * (self.x0 * g2 + g1 * self.y0)) -
+                g2 * self.external_field + self.anisotropy_field * (self.x0 * g2 + g1 * self.y0)) -
                         self.damping_factor * self.gyo_ratio * (g1 * self.z0 * self.external_field +
                                                                 g3 * self.x0 * self.external_field +
                                                                 self.anisotropy_field * g3 * pow(self.x0, 2) +
@@ -562,10 +562,10 @@ class Mtj:
                                                                 self.demagnetization_field * g3 * 3 * pow(self.z0, 2)) +
                         self.damping_factor * self.gyo_ratio * (self.demagnetization_field * g3 +
                                                                 self.stt_amplitude * g2) +
-                        self.damping_factor*self.gyo_ratio*stt_partial*self.y0 +
+                        self.damping_factor * self.gyo_ratio * stt_partial * self.y0 +
                         self.stt_amplitude * self.damping_factor * (g1 * self.z0 + g3 * self.x0) +
-                        self.damping_factor*self.x0*self.z0*stt_partial) / (
-                                   1 + self.damping_factor ** 2)
+                        self.damping_factor * self.x0 * self.z0 * stt_partial) / (
+                               1 + self.damping_factor ** 2)
 
         # initial orthogonal matrix
         if delta_x is None:
@@ -588,7 +588,7 @@ class Mtj:
     def lyapunov_exponent(self, calculation_time=10000, cal_t_step=3e-13, dc_amplitude=269, ac_amplitude=0):
 
         delta_x = None
-        h = 6e-13   # time_step of Runge-Kutta
+        h = 6e-13  # time_step of Runge-Kutta
 
         for i in range(int(calculation_time)):
             # find corresponding magnetization to the current_t
@@ -607,7 +607,7 @@ class Mtj:
                                                    delta_x=delta_x1 + h * k3,
                                                    dc_amplitude=dc_amplitude, ac_amplitude=ac_amplitude)
 
-            delta_x = delta_x1 + h/6*(k1+2*k2+2*k3+k4)
+            delta_x = delta_x1 + h / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
             v_matrix, delta_x = gram_schmidt(delta_x)
             print(i)
 
@@ -629,7 +629,7 @@ class Mtj:
         temp2 = np.dot(delta_x.T, delta_x)
         print('temp2: {}'.format(temp2))
         eigenvalue_x, _ = np.linalg.eig(temp2)
-        lyapunov_exponent = [np.log(abs(i))/2/calculation_time for i in eigenvalue_x]
+        lyapunov_exponent = [np.log(abs(i)) / 2 / calculation_time for i in eigenvalue_x]
 
         return eigenvalue_x, lyapunov_exponent
 
@@ -714,7 +714,7 @@ class Mtj:
             # calculation time
             if i % 20 == 0:
                 print('-------------------------------------------------------------')
-                print('progress : {:.3} % classification training'.format(i/len(s_in)*100))
+                print('progress : {:.3} % classification training'.format(i / len(s_in) * 100))
                 print('-------------------------------------------------------------')
 
         # update weight
@@ -845,8 +845,10 @@ class Mtj:
         plt.xlabel('Time')
         plt.show()
 
-    def stm_train(self, number_wave, nodes_stm, file_path='weight_matrix_oscillator_xuezhao', visual_process=False,
-                  save_index=True, alert_index=False, superposition=0, time_consume_all=1e-8, ac_amplitude=0.0):
+    def real_time_train(self, number_wave, nodes_stm, file_path='weight_matrix_oscillator_xuezhao',
+                        visual_process=False,
+                        save_index=True, alert_index=False, superposition=0, time_consume_all=1e-8, ac_amplitude=0.0,
+                        f_ac=32e9, recover_weight=False, task='Delay'):
         """
         a function used to train weight matrix of readout layer in classification task
         :param file_path: the path of weight_matrix
@@ -858,16 +860,22 @@ class Mtj:
         :param superposition: the number of delay or time interval
         :param time_consume_all: time consume in single step evolution
         :param ac_amplitude: amplitude of ac term
+        :param f_ac: frequency of ac stt term
+        :param recover_weight: boolean, recover all of weight data if True
+        :param task: delay task or parity task
         """
         if not os.path.exists(file_path):
             os.makedirs(file_path)
 
-        if os.path.exists(f'{file_path}/STM_delay_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy'):
-            weight_out_stm = np.load(f'{file_path}/STM_delay_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy')
+        if os.path.exists(f'{file_path}/STM_{task}_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy'):
+            weight_out_stm = np.load(f'{file_path}/STM_{task}_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy')
             print('###############################################')
-            print('Loading weight matrix successfully !')
-            print('shape of weight:{}'.format(weight_out_stm.shape))
+            print(f'{file_path}/STM_{task}_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy already exists !')
+            # print('shape of weight:{}'.format(weight_out_stm.shape))
             print('###############################################')
+
+            if not recover_weight:
+                return 0
 
         else:
             # think about bias term
@@ -882,22 +890,25 @@ class Mtj:
         positive_dc_current = 200
         negative_dc_current = 100
 
-        s_in, train_signal = real_time_generator(task='Delay', superposition_number=superposition,
+        s_in, train_signal = real_time_generator(task=f'{task}', superposition_number=superposition,
                                                  length_signals=number_wave)
+        # pre training
+        self.time_evolution(dc_amplitude=positive_dc_current, ac_amplitude=ac_amplitude,
+                            time_consumed=time_consume_all,
+                            f_ac=f_ac)
 
-        # print('---------------------------------------------------------------')
         trace_mz = []
 
         for i in track(range(len(s_in))):
             if s_in[i] == 1:
                 dc_current1 = positive_dc_current
                 _, _, mz_list_chao, t_list2 = self.time_evolution(dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,
-                                                                  time_consumed=time_consume_all)
+                                                                  time_consumed=time_consume_all, f_ac=f_ac)
 
             else:
                 dc_current1 = negative_dc_current
                 _, _, mz_list_chao, t_list2 = self.time_evolution(dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,
-                                                                  time_consumed=time_consume_all)
+                                                                  time_consumed=time_consume_all, f_ac=f_ac)
 
             try:
                 mz_list_all, t_list_whole = [], []
@@ -928,11 +939,11 @@ class Mtj:
             if s_in[i] == 1:
                 plus_visual_mz = plus_visual_mz + mz_list_chao
                 plus_time = plus_time + list(
-                    np.linspace(time_index, time_index + 3e-13 * (len(t_list2)-1), len(t_list2)))
+                    np.linspace(time_index, time_index + 3e-13 * (len(t_list2) - 1), len(t_list2)))
             else:
                 minus_visual_mz = minus_visual_mz + mz_list_chao
                 minus_time = minus_time + list(
-                    np.linspace(time_index, time_index + 3e-13 * (len(t_list2)-1), len(t_list2)))
+                    np.linspace(time_index, time_index + 3e-13 * (len(t_list2) - 1), len(t_list2)))
 
             time_index = time_index + t_list2[-1]
 
@@ -989,7 +1000,7 @@ class Mtj:
 
         # save weight matrix as .npy files
         if save_index:
-            np.save(f'{file_path}/STM_delay_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy', weight_out_stm)
+            np.save(f'{file_path}/STM_{task}_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy', weight_out_stm)
             print('Saved weight matrix file')
 
         # visualization of magnetization
@@ -1021,8 +1032,10 @@ class Mtj:
         if alert_index:
             email_alert(subject='Training Successfully !')
 
-    def stm_test(self, test_number=80, nodes_stm=80, file_path='weight_matrix_oscillator_xuezhao', visual_index=True,
-                 alert_index=False, superposition=0, time_consume_all=1e-8, ac_amplitude=0.0):
+    def real_time_test(self, test_number=80, nodes_stm=80, file_path='weight_matrix_oscillator_xuezhao',
+                       visual_index=True,
+                       alert_index=False, superposition=0, time_consume_all=1e-8, ac_amplitude=0.0, f_ac=32e9,
+                       task='Delay'):
         """
         a function used to test the ability of classification of chaotic-MTJ echo state network
         :param test_number: the number of test waves form, default:80
@@ -1033,14 +1046,15 @@ class Mtj:
         :param superposition: number of time interval or delay time
         :param time_consume_all: time consume in single step evolution
         :param ac_amplitude: amplitude of ac term
+        :param f_ac: frequency of ac stt term
+        :param task: delay task or parity check task
         """
 
-        if os.path.exists(f'{file_path}/STM_delay_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy'):
-            weight_out_stm = np.load(f'{file_path}/STM_delay_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy')
-            print('Loading STM_delay_{}_node_{}_ac_{} matrix successfully !'.format(superposition, nodes_stm,
-                                                                                    ac_amplitude))
+        if os.path.exists(f'{file_path}/STM_{task}_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy'):
+            weight_out_stm = np.load(f'{file_path}/STM_{task}_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy')
+            print('Loading STM_{}_{}_node_{}_ac_{} matrix successfully !'.format(task, superposition, nodes_stm,
+                                                                                 ac_amplitude))
             print('shape of weight:{}'.format(weight_out_stm.shape))
-            # print('weight: {}'.format(weight_out_stm))
             print('###############################################')
 
         else:
@@ -1055,23 +1069,25 @@ class Mtj:
         positive_dc_current = 200
         negative_dc_current = 100
 
-        s_in, train_signal = real_time_generator(task='Delay', superposition_number=superposition,
+        s_in, train_signal = real_time_generator(task=f'{task}', superposition_number=superposition,
                                                  length_signals=test_number)
 
         trace_mz = []
-
+        # pre training
+        self.time_evolution(dc_amplitude=positive_dc_current, ac_amplitude=ac_amplitude,
+                            f_ac=f_ac, time_consumed=time_consume_all)
         # time_consume_all = 1e-8
 
         for i_1 in track(range(len(s_in))):
             if s_in[i_1] == 1:
                 dc_current1 = positive_dc_current
                 _, _, mz_list_chao, t_list2 = self.time_evolution(dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,
-                                                                  f_ac=32e9, time_consumed=time_consume_all)
+                                                                  f_ac=f_ac, time_consumed=time_consume_all)
 
             else:
                 dc_current1 = negative_dc_current
                 _, _, mz_list_chao, t_list2 = self.time_evolution(dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,
-                                                                  f_ac=32e9,
+                                                                  f_ac=f_ac,
                                                                   time_consumed=time_consume_all)
 
             try:
@@ -1191,14 +1207,20 @@ if __name__ == '__main__':
     # ac_current = 0
     # f_ac = 32e9
 
-    mtj = Mtj()
     # #################################################################################################
     # try to calculate the ability of delay task
     # #################################################################################################
-    mtj.stm_train(number_wave=500, nodes_stm=16, visual_process=False, save_index=True, superposition=1,
-                  alert_index=False, time_consume_all=1e-8, ac_amplitude=52.7)
-    mtj.stm_test(test_number=30, nodes_stm=16, superposition=1, visual_index=True, ac_amplitude=52.7,
-                 time_consume_all=1e-8)
+    superposition_list = [0, 1, 2]
+    ac_stt_list = np.linspace(0, 100, 101)
+    for ac_stt in ac_stt_list:
+        for number in superposition_list:
+            mtj = Mtj()
+            mtj.real_time_train(number_wave=500, nodes_stm=16, visual_process=False, save_index=True, alert_index=False,
+                                superposition=number, time_consume_all=1e-8, ac_amplitude=round(ac_stt, 2),
+                                task='Parity')
+
+    # mtj.stm_test(test_number=30, nodes_stm=16, superposition=1, visual_index=True, ac_amplitude=57.8,
+    #              time_consume_all=1e-8)
     # ################################################################################################
 
     # mx_list1, my_list1, mz_list1, t_list1 = mtj.time_evolution(extern_field, ani_field, dem_field, dc_current,
