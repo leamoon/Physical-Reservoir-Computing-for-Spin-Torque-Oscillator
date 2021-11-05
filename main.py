@@ -1,6 +1,6 @@
 import os
 import sys
-import edge_esn_oscillator
+from edge_esn_oscillator import *
 import pandas as pd
 import numpy as np
 from rich.progress import track
@@ -16,28 +16,28 @@ if __name__ == '__main__':
     # ##################################################################################################
     # collecting real time task result
     # ##################################################################################################
-    ac_list = np.round(np.linspace(25, 41.9, 170), 1)
-    print(ac_list)
-    covariance_list = []
-    for ac_value in ac_list:
-        mtj = edge_esn_oscillator.Mtj()
-        mtj.real_time_train(number_wave=10, nodes_stm=16, visual_process=True, save_index=False,
-                            alert_index=False, superposition=2, time_consume_all=1e-9,
-                            file_path='weight_matrix_interpolation',
-                            ac_amplitude=ac_value, task='Parity', recover_weight=True)
-
-        capacity = mtj.real_time_test(test_number=100, nodes_stm=16, superposition=2,
-                                      visual_index=False, file_path='weight_matrix_interpolation',
-                                      ac_amplitude=ac_value, time_consume_all=6e-9, task='Parity')
-        print(capacity)
-        covariance_list.append(capacity)
-    df = pd.DataFrame({'ac': ac_list, 'capacity': covariance_list})
-    df.to_excel('parity2_25_41.9.xlsx')
+    # ac_list = np.round(np.linspace(25, 41.9, 170), 1)
+    # print(ac_list)
+    # covariance_list = []
+    # for ac_value in ac_list:
+    #     mtj = Mtj()
+    #     mtj.real_time_train(number_wave=10, nodes_stm=16, visual_process=True, save_index=False,
+    #                         alert_index=False, superposition=2, time_consume_all=1e-9,
+    #                         file_path='weight_matrix_interpolation',
+    #                         ac_amplitude=ac_value, task='Parity', recover_weight=True)
+    #
+    #     capacity = mtj.real_time_test(test_number=100, nodes_stm=16, superposition=2,
+    #                                   visual_index=False, file_path='weight_matrix_interpolation',
+    #                                   ac_amplitude=ac_value, time_consume_all=6e-9, task='Parity')
+    #     print(capacity)
+    #     covariance_list.append(capacity)
+    # df = pd.DataFrame({'ac': ac_list, 'capacity': covariance_list})
+    # df.to_excel('parity2_25_41.9.xlsx')
 
     # ##################################################################################################
     # #### find best evolution time
-    # get_best_time(task='Delay')
-    # get_best_time(task='Parity')
+    get_best_time(task='Delay', re_train=True)
+    # get_best_time(task='Parity', re_train=True)
     # ##################################################################################################
     # #### find best reservoirs info: size
     # get_best_reservoir_info(task='Delay', max_time=6)

@@ -313,7 +313,7 @@ def get_best_time(task='Delay', re_train=False):
     superposition_time = [1, 2, 3, 4]
     node = 16
     file_path = 'weight_matrix_time'
-    time_list = [1e-9, 2e-9, 3e-9, 4e-9, 20e-9, 50e-9]
+    time_list = [2e-9, 3e-9, 4e-9, 6e-9, 7e-9, 10e-9, 20e-9, 50e-9]
     for time_cal in range(10):
         for time_evolution in time_list:
             file_save_path = os.path.join(file_path, f'{time_evolution}')
@@ -321,12 +321,13 @@ def get_best_time(task='Delay', re_train=False):
             for superposition_number in superposition_time:
                 mtj = Mtj()
                 mtj.real_time_train(number_wave=500, nodes_stm=node, visual_process=False, save_index=True,
-                                    alert_index=False, superposition=superposition_number, time_consume_all=6e-9,
+                                    alert_index=False, superposition=superposition_number,
+                                    time_consume_all=time_evolution,
                                     file_path=file_save_path,
                                     ac_amplitude=0.0, task=task, recover_weight=re_train)
                 capacity = mtj.real_time_test(test_number=100, nodes_stm=node, superposition=superposition_number,
                                               visual_index=False, file_path=file_save_path,
-                                              ac_amplitude=0.0, time_consume_all=6e-9, task=task)
+                                              ac_amplitude=0.0, time_consume_all=time_evolution, task=task)
                 capacity_list.append(capacity)
 
             data = pd.DataFrame({'superposition': superposition_time, 'covariance': capacity_list})

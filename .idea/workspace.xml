@@ -4,79 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8cf86972-bd51-45b2-a53e-ae399a7376ed" name="Changes" comment="[I] edge_esn_oscillator.py&#10;achieve parity check task and delay task in a function.&#10;function name become real_time_train and real_time_test&#10;&#10;Submitter: Xuezhao&#10;&#10;Date: Oct 13">
-      <change afterPath="$PROJECT_DIR$/Plotting.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
+    <list default="true" id="8cf86972-bd51-45b2-a53e-ae399a7376ed" name="Changes" comment="[I] edge_esn_oscillator.py&#10;[D] edge_periodic.py&#10;[D] data files, saving in another folder&#10;&#10;Submitter: Xuezhao&#10;&#10;Date: Oct 13">
       <change beforePath="$PROJECT_DIR$/.idea/echo_state_network.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/echo_state_network.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/webServers.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.run/improve_codes.run.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Classification of Classical RC.py" beforeDir="false" afterPath="$PROJECT_DIR$/Classification of Classical RC.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Oscillation_linear.py" beforeDir="false" afterPath="$PROJECT_DIR$/Oscillation_linear.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Pary_check_near_chaos.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pary_check_near_chaos.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RC for stable switching.py" beforeDir="false" afterPath="$PROJECT_DIR$/RC for stable switching.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chaos_regions.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/chaotic_mtj.py" beforeDir="false" afterPath="$PROJECT_DIR$/chaotic_mtj.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/compare.py" beforeDir="false" afterPath="$PROJECT_DIR$/compare.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_le.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/device_module.py" beforeDir="false" afterPath="$PROJECT_DIR$/device_module.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/device_oscillator.py" beforeDir="false" afterPath="$PROJECT_DIR$/device_oscillator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/device_thermal.py" beforeDir="false" afterPath="$PROJECT_DIR$/device_thermal.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/double_chao_plus.py" beforeDir="false" afterPath="$PROJECT_DIR$/double_chao_plus.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/edge_esn_oscillator.py" beforeDir="false" afterPath="$PROJECT_DIR$/edge_esn_oscillator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/edge_periodic.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/edge_random.py" beforeDir="false" afterPath="$PROJECT_DIR$/edge_random.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/le_data.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mle_list_f_30000000000.0.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/oscillator_module_xuezhao.py" beforeDir="false" afterPath="$PROJECT_DIR$/oscillator_module_xuezhao.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyESN.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyESN.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test02.py" beforeDir="false" afterPath="$PROJECT_DIR$/test02.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_chaos/weight_out_STM_double.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_chaos/weight_out_classification.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_chaos_back/weight_out_classification.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_0_node_10.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_0_node_16.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_0_node_16_ac_0.0.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_0_node_16_ac_57.8.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_0_node_20.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_10_node_10.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_10_node_16.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_1_node_10.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_1_node_16.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_1_node_16_ac_0.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_1_node_16_ac_52.7.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_1_node_16_ac_57.8.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_1_node_20.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_2_node_10.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_2_node_16_ac_0.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_2_node_16_ac_52.7.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_2_node_16_ac_57.8.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_2_node_20.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_2_node_30_ac_52.4.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_2_node_30_ac_52.7.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_2_node_50_ac_0.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_2_node_50_ac_52.4.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_2_node_50_ac_52.7.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_2_node_50_ac_57.8.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_3_node_10.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_3_node_16.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_3_node_20.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_4_node_10.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_4_node_16.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_4_node_20.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_5_node_10.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_5_node_16.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_5_node_20.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_6_node_10.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_6_node_16.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_7_node_10.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_7_node_16.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_8_node_10.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_8_node_16.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_9_node_10.npy" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/weight_matrix_oscillator_xuezhao/STM_delay_9_node_16.npy" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/edge_random.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -132,7 +66,6 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/edge_esn_oscillator.py" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/edge_random.py" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectId" id="1wTg1NhdbH5Dig5XCmjsTTAmlx1" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
@@ -161,10 +94,10 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="run.code.analysis.last.selected.profile" value="aDefault" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
     <property name="two.files.diff.last.used.file" value="$PROJECT_DIR$/edge_periodic.py" />
   </component>
-  <component name="RunManager" selected="Python.edge_esn_oscillator">
+  <component name="RunManager" selected="Python.main">
     <configuration name="Delay for classical RC" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="echo_state_network" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -353,8 +286,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.edge_esn_oscillator" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.edge_esn_oscillator" />
         <item itemvalue="Python.test02" />
         <item itemvalue="Python.Plotting" />
         <item itemvalue="Python.test_information_theory" />
@@ -451,7 +384,7 @@
       <workItem from="1636082537173" duration="862000" />
       <workItem from="1636083495496" duration="761000" />
       <workItem from="1636094412752" duration="2009000" />
-      <workItem from="1636099031967" duration="2102000" />
+      <workItem from="1636099031967" duration="12113000" />
     </task>
     <task id="LOCAL-00001" summary="initial for echo state network">
       <created>1628755179407</created>
@@ -656,7 +589,14 @@
       <option name="project" value="LOCAL" />
       <updated>1634109468223</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="[I] edge_esn_oscillator.py&#10;[D] edge_periodic.py&#10;[D] data files, saving in another folder&#10;&#10;Submitter: Xuezhao&#10;&#10;Date: Oct 13">
+      <created>1636101716144</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1636101716144</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -702,7 +642,6 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$/nolitsa" />
     </ignored-roots>
-    <MESSAGE value="initial for echo state network" />
     <MESSAGE value="initial for echo state network, which could work.&#10;&#10;Author: Xuezhao" />
     <MESSAGE value="improve codes&#10;&#10;Submitter: Xuezhao" />
     <MESSAGE value="improve codes, and add the index of capacity&#10;&#10;Submitter: Xuezhao" />
@@ -727,7 +666,8 @@
     <MESSAGE value="change file name!&#10;&#10;find_edge_improved_random_input.py -&gt; edge_periodic.py&#10;test_for_edge.py -&gt; edge_random.py&#10;&#10;Submitter: Xuezhao&#10;&#10;Date: Oct 12" />
     <MESSAGE value="[I] edge_esn_oscillator.py -&gt; test to&#10;calculate in edge of chaos&#10;&#10;Submitter: Xuezhao&#10;&#10;Date: Oct 12" />
     <MESSAGE value="[I] edge_esn_oscillator.py&#10;achieve parity check task and delay task in a function.&#10;function name become real_time_train and real_time_test&#10;&#10;Submitter: Xuezhao&#10;&#10;Date: Oct 13" />
-    <option name="LAST_COMMIT_MESSAGE" value="[I] edge_esn_oscillator.py&#10;achieve parity check task and delay task in a function.&#10;function name become real_time_train and real_time_test&#10;&#10;Submitter: Xuezhao&#10;&#10;Date: Oct 13" />
+    <MESSAGE value="[I] edge_esn_oscillator.py&#10;[D] edge_periodic.py&#10;[D] data files, saving in another folder&#10;&#10;Submitter: Xuezhao&#10;&#10;Date: Oct 13" />
+    <option name="LAST_COMMIT_MESSAGE" value="[I] edge_esn_oscillator.py&#10;[D] edge_periodic.py&#10;[D] data files, saving in another folder&#10;&#10;Submitter: Xuezhao&#10;&#10;Date: Oct 13" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/echo_state_network$test02.coverage" NAME="test02 Coverage Results" MODIFIED="1633681759433" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -737,7 +677,7 @@
     <SUITE FILE_PATH="coverage/Physical_Reservoir_Computing_for_MTJs$test_information_theory.coverage" NAME="test_information_theory Coverage Results" MODIFIED="1635419832668" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Physical_Reservoir_Computing_for_MTJs$edge_periodic__1_.coverage" NAME="edge_periodic (1) Coverage Results" MODIFIED="1635402515949" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/echo_state_network$improve_codes__1_.coverage" NAME="improve_codes (1) Coverage Results" MODIFIED="1633955557015" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Physical_Reservoir_Computing_for_MTJs$main.coverage" NAME="main Coverage Results" MODIFIED="1636100488294" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Physical_Reservoir_Computing_for_MTJs$main.coverage" NAME="main Coverage Results" MODIFIED="1636123870989" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/echo_state_network$improve_codes.coverage" NAME="improve_codes Coverage Results" MODIFIED="1633961041598" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/echo_state_network$lyapunov_lorenz.coverage" NAME="lyapunov_lorenz Coverage Results" MODIFIED="1633576324968" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/echo_state_network$xuezhao_finding_edge.coverage" NAME="xuezhao_finding_edge Coverage Results" MODIFIED="1633533336042" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -756,6 +696,6 @@
     <SUITE FILE_PATH="coverage/echo_state_network$Classification_of_Oscillator_RC.coverage" NAME="Classification of Oscillator RC Coverage Results" MODIFIED="1632122798337" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/echo_state_network$double_chao_plus.coverage" NAME="double_chao_plus Coverage Results" MODIFIED="1632985473044" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/echo_state_network$find_edge_improved_random_input.coverage" NAME="find_edge_improved_random_input Coverage Results" MODIFIED="1634016881755" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Physical_Reservoir_Computing_for_MTJs$edge_esn_oscillator.coverage" NAME="edge_esn_oscillator Coverage Results" MODIFIED="1636100645586" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Physical_Reservoir_Computing_for_MTJs$edge_esn_oscillator.coverage" NAME="edge_esn_oscillator Coverage Results" MODIFIED="1636123861548" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
