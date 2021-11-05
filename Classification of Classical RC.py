@@ -51,8 +51,8 @@ def waveform_generator(current_limited, number_wave):
     print('wave:{}'.format(wave_points))
 
     # train_signal = []
-    # for i in random_pulse:
-    #     temp = [i] * 8
+    # for ac_value in random_pulse:
+    #     temp = [ac_value] * 8
     #     train_signal = train_signal + temp
     # print('train_signal:{}'.format(train_signal))
     return wave_points, list(random_pulse)
@@ -116,14 +116,14 @@ if __name__ == '__main__':
 
     # calculate capacity
     # cor_list = []
-    # for i in range(0, 21):
-    #     cor = test_delay(input_size=1000, delay_time=i)
+    # for ac_value in range(0, 21):
+    #     cor = test_delay(input_size=1000, delay_time=ac_value)
     #     cor_list.append(cor)
     #     print('-----------------------------------------------------')
-    #     print('delay = {}'.format(i))
+    #     print('delay = {}'.format(ac_value))
     #     print('-----------------------------------------------------')
     # print(cor_list)
-    # print('capacity_STM:{}'.format(sum([i * i for i in cor_list])))
+    # print('capacity_STM:{}'.format(sum([ac_value * ac_value for ac_value in cor_list])))
     #
     # plt.figure()
     # delay_time_list = np.linspace(0, 20, 21)
@@ -132,6 +132,6 @@ if __name__ == '__main__':
     # plt.fill_between(delay_time_list, cor_list, alpha=0.5, color='red')
     # plt.ylabel('quality')
     # plt.xlabel('delay time')
-    # plt.text(1, 0.6, 'capacity={:.2f}'.format(sum([i * i for i in cor_list])), c='blue')
+    # plt.text(1, 0.6, 'capacity={:.2f}'.format(sum([ac_value * ac_value for ac_value in cor_list])), c='blue')
     # plt.show()
     test_delay()

@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import pandas
 import scipy
 import scipy.integrate
 import numpy as np
@@ -218,7 +219,7 @@ def edge_of_chaos(initial_dif=1e-8, len_input_number=10, time_consume_single=7e-
     return le_z, delta_t_diff
 
 
-def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0, f_ac=32e9, size=16, input_mode='random'):
+def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0.0, f_ac=32e9, size=16, input_mode='random'):
     """
     a function used to find edge of chaos, calculation should start at reservoirs rather than magnetization.
     :param initial_dif: the initial difference / perturbation
@@ -265,9 +266,11 @@ def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0, f_ac=3
         iteration_number = int(sys.argv[1])
     except IndexError or ValueError:
         print('default iteration_number=1000')
-        iteration_number = 1000
+        iteration_number = 20000
 
     le_buffer = []
+    le_save_excel, index_excel = [], []
+
     for i1 in range(iteration_number):
         trace.m = state[-1, :]
         trace_perturbation.m = state_perturbation[-1, :]
@@ -315,6 +318,12 @@ def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0, f_ac=3
         if i1 == 100:
             le_buffer = []
             print('clear buffer')
+
+        if i1 % 100 == 1:
+            le_save_excel.append(np.mean(le_buffer))
+            index_excel.append(i1)
+            df = pandas.DataFrame({'Time': index_excel, 'Le': le_save_excel})
+            df.to_excel('lyapunov_random_ac{}_{}.xlsx'.format(ac_current1, input_mode))
 
     return np.mean(le_buffer)
 
@@ -381,7 +390,7 @@ class Mtj:
         delta1_m_reduce = np.divide(delta_m, (1 + pow(self.damping_factor, 2)))
         return delta1_m_reduce
 
-    def time_evolution(self, dc_amplitude=420.21, ac_amplitude=0, time_consumed=1e-8, f_ac=32e9):
+    def time_evolution(self, dc_amplitude=420.21, ac_amplitude=0.0, time_consumed=1e-8, f_ac=32e9):
         sol = scipy.integrate.solve_ivp(self.step_evolution, t_span=(0, time_consumed), y0=self.m,
                                         t_eval=np.linspace(0, time_consumed, int(time_consumed / self.t_step)),
                                         args=[dc_amplitude, ac_amplitude, f_ac], dense_output=True, atol=1e-10,
@@ -395,7 +404,7 @@ class Mtj:
         self.m = np.array([self.x0, self.y0, self.z0])
         return mx_list, my_list, mz_list, t_list
 
-    def get_reservoirs(self, dc_current=100, ac_current=0, consuming_time=1e-8, size=16, f_ac=32e9):
+    def get_reservoirs(self, dc_current=100, ac_current=0.0, consuming_time=1e-8, size=16, f_ac=32e9):
         mx_list, my_list, mz_list, _ = self.time_evolution(dc_amplitude=dc_current, ac_amplitude=ac_current,
                                                            time_consumed=consuming_time, f_ac=f_ac)
         try:
@@ -1198,16 +1207,16 @@ if __name__ == '__main__':
     # ##########################################################################################
     # variable: ac amplitude
     try:
-        # ac_amplitude_list = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+        ac_amplitude_list = [58.2]
         # ac_amplitude_list = np.linspace(51, 60, 10)
-        ac_amplitude_list = np.linspace(57.1, 59, 20)
+        # ac_amplitude_list = np.linspace(57.1, 59, 20)
+        # ac_amplitude_list = [58]
         largest_lyapunov_exponent = []
         frequency_ac_term = 32e9
         for ac_stt in track(ac_amplitude_list):
             mle = chaos_mine(ac_current1=ac_stt, f_ac=frequency_ac_term, size=16, time_consume_single=1e-8,
                              input_mode='random')
             largest_lyapunov_exponent.append(mle)
-            np.save('mle_list_f_{}'.format(frequency_ac_term), largest_lyapunov_exponent)
             print(largest_lyapunov_exponent)
 
     except Exception as error_message:
@@ -1216,12 +1225,12 @@ if __name__ == '__main__':
     # variable: ac frequency
     # try:
     #     ac_frequency_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-    #     ac_frequency_list = [i*1e9 for i in ac_frequency_list]
+    #     ac_frequency_list = [ac_value*1e9 for ac_value in ac_frequency_list]
     #     print(ac_frequency_list)
     #     largest_lyapunov_exponent = []
     #     for f_ac_term in track(ac_frequency_list):
-    #         mle = chaos_mine(ac_current1=10, f_ac=f_ac_term, size=16, time_consume_single=1e-8,
-    #                          input_mode='periodic')
+    #         mle = chaos_mine(ac_current1=57.8, f_ac=f_ac_term, size=16, time_consume_single=1e-8,
+    #                          input_mode='random')
     #         largest_lyapunov_exponent.append(mle)
     #         np.save('mle_list_fre', largest_lyapunov_exponent)
     #         print(largest_lyapunov_exponent)
@@ -1244,12 +1253,12 @@ if __name__ == '__main__':
     # # ac_current_list = np.linspace(10, 100, 91)
     # ac_current_list = [0, 10, 20, 30, 40, 50]
     # le_list = []
-    # for i in range(len(ac_current_list)):
-    #     le, _ = edge_of_chaos(ac_current1=ac_current_list[i], len_input_number=number_input_signal,
+    # for ac_value in range(len(ac_current_list)):
+    #     le, _ = edge_of_chaos(ac_current1=ac_current_list[ac_value], len_input_number=number_input_signal,
     #                           len_input_pattern=len_input_signal)
     #     le_list.append(le)
     #     print('*****************************************************************************')
-    #     print('ac_list : {}'.format(ac_current_list[:i + 1]))
+    #     print('ac_list : {}'.format(ac_current_list[:ac_value + 1]))
     #     print('le_list : {}'.format(le_list))
     #     np.save('le_data.npy', le_list)
     #     np.save('ac_data.npy', ac_current_list)
@@ -1264,10 +1273,10 @@ if __name__ == '__main__':
     # delay_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     # node_list = [10, 20, 30, 40, 50]
     # for node in node_list:
-    #     for i in delay_list:
-    #         mtj.stm_train(number_wave=1000, nodes_stm=node, visual_process=False, save_index=True, superposition=i,
+    #     for ac_value in delay_list:
+    #         mtj.stm_train(number_wave=1000, nodes_stm=node, visual_process=False, save_index=True, superposition=ac_value,
     #                       alert_index=False, time_consume_all=3e-8)
-    #         mtj.stm_test(test_number=30, nodes_stm=node, superposition=i, visual_index=False)
+    #         mtj.stm_test(test_number=30, nodes_stm=node, superposition=ac_value, visual_index=False)
 
     # mx_list1, my_list1, mz_list1, t_list1 = mtj.time_evolution(dc_amplitude=dc_current, ac_amplitude=ac_current,
     #                                                            time_consumed=time_consume)
@@ -1352,8 +1361,8 @@ if __name__ == '__main__':
     #         #                                                    time_step=3e-13)
     #     # normalization
     #     mz_list_all = mz_list
-    #     # mz_list_all = [i / max(map(abs, mz_list_all)) for i in mz_list_all]
-    #     # t_list_osc = [i + t_list2[-1] for i in t_list_osc]
+    #     # mz_list_all = [ac_value / max(map(abs, mz_list_all)) for ac_value in mz_list_all]
+    #     # t_list_osc = [ac_value + t_list2[-1] for ac_value in t_list_osc]
     #     t_list_whole = t_list2
     #
     #     # for figures
@@ -1405,18 +1414,18 @@ if __name__ == '__main__':
     #                                                  ac_frequency=f_ac, time_consumed=time_consume, time_step=t_step)
     #     try:
     #         max_extreme, min_extreme = [], []
-    #         for i in range(len(mz_list1)):
-    #             if i != 0 and i != len(mz_list1)-1:
-    #                 if mz_list1[i] > mz_list1[i-1] and mz_list1[i] > mz_list1[i+1]:
-    #                     max_extreme.append(mz_list1[i])
-    #                 elif mz_list1[i] < mz_list1[i-1] and mz_list1[i] < mz_list1[i+1]:
-    #                     min_extreme.append(mz_list1[i])
+    #         for ac_value in range(len(mz_list1)):
+    #             if ac_value != 0 and ac_value != len(mz_list1)-1:
+    #                 if mz_list1[ac_value] > mz_list1[ac_value-1] and mz_list1[ac_value] > mz_list1[ac_value+1]:
+    #                     max_extreme.append(mz_list1[ac_value])
+    #                 elif mz_list1[ac_value] < mz_list1[ac_value-1] and mz_list1[ac_value] < mz_list1[ac_value+1]:
+    #                     min_extreme.append(mz_list1[ac_value])
     #
     #         length_extreme = min(len(max_extreme), len(min_extreme))
     #         print('length:{}'.format(length_extreme))
     #         # resistance_dif_list = []
-    #         for i in range(length_extreme):
-    #             resistance_dif_list.append(max_extreme[i])
+    #         for ac_value in range(length_extreme):
+    #             resistance_dif_list.append(max_extreme[ac_value])
     #
     #     except Exception as e:
     #         print('error in finding max_extreme or min_extreme: {}'.format(e))
@@ -1461,7 +1470,7 @@ if __name__ == '__main__':
     # # plt.plot(le_t_list, c='pink', label='m_t')
     # # plt.plot(le_x_list, c='orange', label='m_x')
     # # plt.plot(le_y_list, c='green', label='m_y')
-    # x1 = [0 for i in dc_current_list]
+    # x1 = [0 for ac_value in dc_current_list]
     # plt.plot(x1, ls='--', label='zero line', c='black')
     # plt.legend()
     # plt.show()

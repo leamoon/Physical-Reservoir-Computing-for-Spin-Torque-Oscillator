@@ -96,7 +96,7 @@ class ESN:
     def _update(self, state, input_pattern, output_pattern):
         """
         performs one update step.
-        i.e., computes the next network state by applying the recurrent weights
+        ac_value.e., computes the next network state by applying the recurrent weights
         to the last state & and feeding in the current input and output patterns
         return: the state of reservoir in next time interval
         """

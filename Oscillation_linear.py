@@ -289,8 +289,8 @@ if __name__ == '__main__':
 
     # current_list = np.linspace(0, 1, 20)
     # resist_diff_list = []
-    # for i in current_list:
-    #     mx_list, t_list, vol_list, [mx, my, mz], _, r_d = evolution_mag(1, 0.01, 0.01, magnitude=i)
+    # for ac_value in current_list:
+    #     mx_list, t_list, vol_list, [mx, my, mz], _, r_d = evolution_mag(1, 0.01, 0.01, magnitude=ac_value)
     #     # plt.figure()
     #     # plt.plot(t_list, vol_list)
     #     # plt.show()

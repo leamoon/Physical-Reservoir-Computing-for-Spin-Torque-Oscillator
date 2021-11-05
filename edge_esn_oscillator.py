@@ -1,7 +1,7 @@
 import os
 import sys
 import numpy as np
-import time
+import pandas as pd
 import scipy
 import scipy.integrate
 import matplotlib.pyplot as plt
@@ -9,6 +9,8 @@ from smtplib import SMTP_SSL
 from email.mime.text import MIMEText
 from email.header import Header
 from rich.progress import track
+from scipy.interpolate import interp1d
+from scipy.signal import argrelmax
 
 
 def email_alert(subject='Default', receiver='wumaomaolemoon@gmail.com'):
@@ -77,15 +79,14 @@ def waveform_generator(number_wave):
     random_pulse = np.random.randint(0, 2, int(number_wave))
     print('random:{}'.format(random_pulse))
     wave_points = []
-    for i in random_pulse:
-        if i == 0:
+    for pulse in random_pulse:
+        if pulse == 0:
             # sine function
-            sine_points = [268, 268.5, 269, 268.5, 268, 267.5, 267, 267.5]
-            # sine_points = [268, 268.5, 269, 268.5, 268, 268.5, 267, 268.5]
+            sine_points = [120, 150, 180, 200, 180, 150, 120, 100]
             wave_points = wave_points + sine_points
-        elif i == 1:
+        elif pulse == 1:
             # square function
-            square_points = [269] * 4 + [267] * 4
+            square_points = [200] * 4 + [100] * 4
             wave_points = wave_points + square_points
 
     print('wave:{}'.format(wave_points))
@@ -97,7 +98,10 @@ def waveform_generator(number_wave):
         temp2 = [j1] * 20
         wave_signals = wave_signals + temp2
     temp1 = np.linspace(0, len(wave_signals) - 1, len(wave_signals))
+    plt.title(r'input waveform')
     plt.plot(temp1, wave_signals)
+    plt.xlabel(r'Time')
+    plt.ylabel(r'inputs')
     # plt.scatter(temp1, wave_signals)
 
     return wave_points, list(random_pulse)
@@ -122,8 +126,8 @@ def real_time_generator(task='Delay', superposition_number=1, length_signals=100
 
             elif task == 'Parity':
                 train_signal = s_in
-                for i in range(1, superposition_number + 1):
-                    temp_signal = np.append(s_in[-int(i):], s_in[:-int(i)])
+                for super_value in range(1, superposition_number + 1):
+                    temp_signal = np.append(s_in[-int(super_value):], s_in[:-int(super_value)])
                     train_signal = train_signal + temp_signal
                     train_signal[np.argwhere(train_signal == 2)] = 0
 
@@ -139,86 +143,8 @@ def real_time_generator(task='Delay', superposition_number=1, length_signals=100
         sys.exit(0)
 
 
-def edge_of_chaos(initial_dif=1e-8, len_input_number=10, time_consume_single=7e-9, len_input_pattern=10,
-                  ac_current1=0):
-    """
-    a function used to find edge of chaos, target is magnetization itself not reservoirs
-    :param initial_dif: the initial difference / perturbation
-    :param len_input_number:  the number of calculation times over different inputs sequence
-    :param time_consume_single:  time used to make evolution of magnetization
-    :param len_input_pattern:  lengthen of single input signal
-    :param ac_current1: amplitude of ac current, unit: Oe
-    :return: largest lyapunov exponent
-    """
-
-    positive_dc_current = 100
-    negative_dc_current = 200
-    delta_t_diff = []
-
-    t_step = 3e-13
-    print('Time lengthen : {}'.format(int(time_consume_single / t_step)))
-
-    for i in range(len_input_number):
-        t1 = time.time()
-        trace_perturbation = Mtj()
-        mtj2 = Mtj()
-        # trace1 and trace2 in attractor
-        trace_perturbation.time_evolution(time_consumed=1e-8, dc_amplitude=positive_dc_current,
-                                          ac_amplitude=ac_current1)
-        mtj2.time_evolution(time_consumed=1e-8, dc_amplitude=positive_dc_current,
-                            ac_amplitude=ac_current1)
-        # introduce a perturbation
-        trace_perturbation.z0 += initial_dif
-        mode = np.sqrt(pow(trace_perturbation.x0, 2) + pow(trace_perturbation.y0, 2) + pow(trace_perturbation.z0, 2))
-        trace_perturbation.x0, trace_perturbation.z0 = trace_perturbation.x0 / mode, trace_perturbation.z0 / mode
-        trace_perturbation.y0 = trace_perturbation.y0 / mode
-        initial_dif_real = np.sqrt(
-            pow(trace_perturbation.x0 - mtj2.x0, 2) + pow(trace_perturbation.y0 - mtj2.y0, 2) + pow(
-                trace_perturbation.z0 - mtj2.z0, 2))
-        # print('initial perturbation : {}'.format(initial_dif_real))
-
-        s_in = np.random.randint(0, 2, len_input_pattern)
-        single_delta_t = []
-        # print('single input:{}'.format(s_in))
-        for j in s_in:
-            if j == 1:
-                dc_current1 = positive_dc_current
-            elif j == 0:
-                dc_current1 = negative_dc_current
-
-            trace_perturbation.time_evolution(time_consumed=time_consume_single, dc_amplitude=dc_current1,
-                                              ac_amplitude=ac_current1)
-            mtj2.time_evolution(time_consumed=time_consume_single, dc_amplitude=dc_current1, ac_amplitude=ac_current1)
-
-            # calculate error and reset
-            diff_temp = np.sqrt(
-                pow((trace_perturbation.x0 - mtj2.x0), 2) + pow(trace_perturbation.y0 - mtj2.y0, 2) + pow(
-                    trace_perturbation.z0 - mtj2.z0, 2))
-            trace_perturbation.x0 = mtj2.x0 + initial_dif_real / diff_temp * (trace_perturbation.x0 - mtj2.x0)
-            trace_perturbation.y0 = mtj2.y0 + initial_dif_real / diff_temp * (trace_perturbation.y0 - mtj2.y0)
-            trace_perturbation.z0 = mtj2.z0 + initial_dif_real / diff_temp * (trace_perturbation.z0 - mtj2.z0)
-            mode = np.sqrt(
-                pow(trace_perturbation.x0, 2) + pow(trace_perturbation.y0, 2) + pow(trace_perturbation.z0, 2))
-            trace_perturbation.x0, trace_perturbation.z0 = trace_perturbation.x0 / mode, trace_perturbation.z0 / mode
-            trace_perturbation.y0 = trace_perturbation.y0 / mode
-            single_delta_t.append(np.log(diff_temp / initial_dif_real))
-            # print('each log d1/d0 : {}'.format(single_delta_t))
-
-        delta_t_diff.append(np.mean(single_delta_t))
-        t2 = time.time()
-        print('delta_t_: {}  ac_current: {}  time_used: {:.3f}s'.format(delta_t_diff[i], ac_current1, t2 - t1))
-        print('##################################################################')
-
-    # calculate lyapunov exponent
-    le_z = np.mean(delta_t_diff)
-    print('******************************************************************')
-    print('le_z : {}'.format(le_z))
-    print('delta_t_diff : {}'.format(delta_t_diff))
-    print('******************************************************************')
-    return le_z, delta_t_diff
-
-
-def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0, f_ac=32e9, size=16, input_mode='random'):
+def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0.0, f_ac=32e9, size=16, input_mode='random',
+               save_as_excel=True):
     """
     a function used to find edge of chaos, calculation should start at reservoirs rather than magnetization.
     :param initial_dif: the initial difference / perturbation
@@ -227,6 +153,7 @@ def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0, f_ac=3
     :param f_ac: frequency of ac stt term
     :param size: size of reservoirs
     :param input_mode: random input or periodic input
+    :param save_as_excel: save data in excel file if True
     :return: largest lyapunov exponent
     """
 
@@ -246,10 +173,15 @@ def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0, f_ac=3
     state_perturbation = trace_perturbation.get_reservoirs(dc_current=positive_dc_current, ac_current=ac_current1,
                                                            consuming_time=time_consume_single, size=size, f_ac=f_ac)
 
-    # adding perturbation
+    # adding perturbation and normalization for reservoir states
     state_perturbation[-1, :] = state_perturbation[-1, :] + np.array([0, 0, initial_dif])
     state_perturbation[-1, :] = state_perturbation[-1, :] / np.linalg.norm(state_perturbation[-1, :])
     real_initial_dif = np.linalg.norm(state_perturbation[-1, :] - state[-1, :])
+
+    # adding perturbation and normalization for magnetization
+    trace_perturbation.m = trace_perturbation.m + np.array([0, 0, initial_dif])
+    trace_perturbation.m = trace_perturbation.m / np.linalg.norm(trace_perturbation.m)
+    real_initial_dif_mag = np.linalg.norm(trace_perturbation.m - trace.m)
 
     # info
     print('######################--info--################################')
@@ -268,9 +200,12 @@ def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0, f_ac=3
         iteration_number = 1000
 
     le_buffer = []
+    le_save_excel, index_excel = [], []
+
+    # judge the input mode: periodic or random
     for i1 in range(iteration_number):
-        trace.m = state[-1, :]
-        trace_perturbation.m = state_perturbation[-1, :]
+        # trace.m = state[-1, :]
+        # trace_perturbation.m = state_perturbation[-1, :]
 
         # random input dc amplitude
         if input_mode == 'random':
@@ -288,6 +223,10 @@ def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0, f_ac=3
             else:
                 dc_current_input = negative_dc_current
 
+        else:
+            print('error in input model in lyapunov calculation parts')
+            sys.exit()
+
         state = trace.get_reservoirs(dc_current=dc_current_input, ac_current=ac_current1,
                                      consuming_time=time_consume_single, size=size, f_ac=f_ac)
         state_perturbation = trace_perturbation.get_reservoirs(dc_current=dc_current_input, ac_current=ac_current1,
@@ -302,21 +241,96 @@ def chaos_mine(initial_dif=1e-8, time_consume_single=1e-8, ac_current1=0, f_ac=3
         le_buffer.append(le)
 
         # reset trace_perturbation to avoid numerical overflow
-        state_perturbation[-1, :] = state[-1, :] + real_initial_dif / difference_trace * (state_perturbation[-1,
-                                                                                          :] - state[-1, :])
-        state_perturbation[-1, :] = state_perturbation[-1, :] / np.linalg.norm(state_perturbation[-1, :])
+        difference_trace_mag = np.linalg.norm(trace_perturbation.m - trace.m)
+        trace_perturbation.m = trace.m + real_initial_dif_mag / difference_trace_mag * (
+                trace_perturbation.m - trace.m)
+        trace_perturbation.m = trace_perturbation.m / np.linalg.norm(trace_perturbation.m)
 
         # info
-        print('##################################### info ########################################')
-        print('ac amplitude: {} Oe  f_ac : {} Hz  dc : {} Oe'.format(ac_current1, f_ac, dc_current_input))
-        print('input mode: {}'.format(input_mode))
-        print('Epoch: {} Current value : {} Average value: {}'.format(i1 + 1, le, np.mean(le_buffer)))
+        if i1 % 100 == 1:
+            print('##################################### info ########################################')
+            print('ac amplitude: {} Oe  f_ac : {} Hz  dc : {} Oe'.format(ac_current1, f_ac, dc_current_input))
+            print('input mode: {}'.format(input_mode))
+            print('Epoch: {} Current value : {} Average value: {}'.format(i1 + 1, le, np.mean(le_buffer)))
 
         if i1 == 100:
             le_buffer = []
             print('clear buffer')
 
+        if i1 % 100 == 1 and save_as_excel:
+            le_save_excel.append(np.mean(le_buffer))
+            index_excel.append(i1)
+            df = pd.DataFrame({'Time': index_excel, 'Le': le_save_excel})
+            df.to_excel('lyapunov_random_ac{}_{}_f_{}.xlsx'.format(ac_current1, input_mode, f_ac))
+
+        # stop iteration if error less than 0.001
+        if i1 % 100 == 1 and len(le_save_excel) >= 2:
+            last_le_mean = le_save_excel[-2]
+            current_le_mean = le_save_excel[-1]
+            if float('{:.2}'.format(last_le_mean)) == float('{:.2}'.format(current_le_mean)):
+                print(' lyapunov number is converged')
+                break
+
     return np.mean(le_buffer)
+
+
+def get_best_reservoir_info(task='Delay', max_time=6, re_train=False):
+    """
+    a function used to find best reservoir size of echo state network
+    :param task: Delay task or Parity task
+    :param max_time: the maximum superposition time of memory covariance
+    :param re_train: an indication of whether re-training or not
+    """
+    superposition_time = np.linspace(0, max_time, max_time + 1, dtype=int)
+    # superposition_time = [2, 3, 4, 5, 6]
+    node_list = [10, 20, 30, 40, 50, 70, 90, 100]
+    for superposition_number in superposition_time:
+        cov_list = []
+        for node in node_list:
+            capacity_list = []
+            for number in range(1):
+                mtj_demo = Mtj()
+
+                mtj_demo.real_time_train(number_wave=500, nodes_stm=node, visual_process=False, save_index=True,
+                                         alert_index=False, superposition=superposition_number, time_consume_all=6e-9,
+                                         file_path='weight_matrix_interpolation',
+                                         ac_amplitude=0.0, task=task, recover_weight=re_train)
+
+                covariance = mtj_demo.real_time_test(test_number=100, nodes_stm=node,
+                                                     superposition=superposition_number,
+                                                     visual_index=False, file_path='weight_matrix_interpolation',
+                                                     ac_amplitude=0.0, time_consume_all=6e-9, task=task)
+                capacity_list.append(covariance)
+            cov_list.append(np.mean(capacity_list))
+
+        data = {'node': node_list, 'covariance': cov_list}
+        df = pd.DataFrame(data)
+        df.to_excel(f'Best_size_{task}_{superposition_number}.xlsx')
+        print(f'{task}_{superposition_number} save successfully !')
+
+
+def get_best_time(task='Delay', re_train=False):
+    superposition_time = [1, 2, 3, 4]
+    node = 16
+    file_path = 'weight_matrix_time'
+    time_list = [1e-9, 2e-9, 3e-9, 4e-9, 20e-9, 50e-9]
+    for time_cal in range(10):
+        for time_evolution in time_list:
+            file_save_path = os.path.join(file_path, f'{time_evolution}')
+            capacity_list = []
+            for superposition_number in superposition_time:
+                mtj = Mtj()
+                mtj.real_time_train(number_wave=500, nodes_stm=node, visual_process=False, save_index=True,
+                                    alert_index=False, superposition=superposition_number, time_consume_all=6e-9,
+                                    file_path=file_save_path,
+                                    ac_amplitude=0.0, task=task, recover_weight=re_train)
+                capacity = mtj.real_time_test(test_number=100, nodes_stm=node, superposition=superposition_number,
+                                              visual_index=False, file_path=file_save_path,
+                                              ac_amplitude=0.0, time_consume_all=6e-9, task=task)
+                capacity_list.append(capacity)
+
+            data = pd.DataFrame({'superposition': superposition_time, 'covariance': capacity_list})
+            data.to_excel(f'Finding_best_time_{time_cal}_{time_evolution}_{task}.xlsx')
 
 
 class Mtj:
@@ -395,7 +409,7 @@ class Mtj:
         self.m = np.array([self.x0, self.y0, self.z0])
         return mx_list, my_list, mz_list, t_list
 
-    def get_reservoirs(self, dc_current=100, ac_current=0, consuming_time=1e-8, size=16, f_ac=32e9):
+    def get_reservoirs(self, dc_current=100, ac_current=0.0, consuming_time=1e-8, size=16, f_ac=32e9):
         mx_list, my_list, mz_list, _ = self.time_evolution(dc_amplitude=dc_current, ac_amplitude=ac_current,
                                                            time_consumed=consuming_time, f_ac=f_ac)
         try:
@@ -532,7 +546,8 @@ class Mtj:
                                                                 2 * g1 * self.x0 * self.y0 * self.anisotropy_field +
                                                                 pow(self.x0, 2) * g2 * self.anisotropy_field +
                                                                 self.demagnetization_field * g2 * pow(self.z0, 2) +
-                                                                self.demagnetization_field * 2 * self.z0 * g3 * self.y0) -
+                                                                self.demagnetization_field * 2 * self.z0 * g3 * self.y0
+                                                                ) -
                         self.damping_factor * self.gyo_ratio * self.stt_amplitude * g3 -
                         self.damping_factor * self.gyo_ratio * stt_partial * self.z0 +
                         self.damping_factor * self.stt_amplitude * (self.x0 * g2 + self.y0 * g1) +
@@ -633,217 +648,219 @@ class Mtj:
 
         return eigenvalue_x, lyapunov_exponent
 
-    def classification_train(self, number_wave, nodes_classification):
+    def classification_test(self, test_number, node_classification, file_path='weight_matrix_classification',
+                            visual_process=False, time_consume_all=1e-8, ac_amplitude=0.0, f_ac=32e9):
         """
         a function used to train weight matrix of readout layer in classification task
-        :param number_wave: number of wave forms
-        :param nodes_classification: Size of reservoirs
+        :param file_path: the path of weight_matrix
+        :param test_number: number of wave forms
+        :param node_classification: Size of reservoirs
+        :param visual_process: showing the process figures if it is True, default as False
+        :param time_consume_all: time consume in single step evolution
+        :param ac_amplitude: amplitude of ac term
+        :param f_ac: frequency of ac stt term
         """
 
-        if os.path.exists('weight_matrix_chaos/weight_out_classification.npy'):
-            weight_out_stm = np.load('weight_matrix_chaos/weight_out_classification.npy')
-            print('\r' + 'Loading weight_out_classification matrix successfully !', end='', flush=True)
+        if os.path.exists(f'{file_path}/classification_ac_{ac_amplitude}_node_{node_classification}.npy'):
+            weight_out_stm = np.load(f'{file_path}/classification_ac_{ac_amplitude}_node_{node_classification}.npy')
+            print('###############################################')
+            print(f'{file_path}/classification_ac_{ac_amplitude}_node_{node_classification}.npy loading !')
+            print('###############################################')
+
+        else:
+            sys.exit(r'No weight data!')
+
+        # fabricate the input, target, and output signals
+        y_out_list = []
+        s_in, train_signal = waveform_generator(test_number)
+
+        # pre training
+        self.time_evolution(dc_amplitude=100, ac_amplitude=ac_amplitude,
+                            time_consumed=time_consume_all, f_ac=f_ac)
+
+        mz_list_eight_points = []
+
+        for i in track(range(len(s_in))):
+            _, _, mz_list_chao, t_list2 = self.time_evolution(dc_amplitude=s_in[i], ac_amplitude=ac_amplitude,
+                                                              time_consumed=time_consume_all, f_ac=f_ac)
+            mz_list_eight_points = np.append(mz_list_eight_points, mz_list_chao)
+
+            if (i + 1) % 8 == 0:
+                try:
+                    mz_list_all = mz_list_eight_points[argrelmax(mz_list_eight_points)]
+                    xp = np.linspace(1, len(mz_list_all), len(mz_list_all))
+                    fp = mz_list_all
+                    sampling_x_values = np.linspace(1, len(mz_list_all), node_classification)
+                    # linear slinear quadratic cubic
+                    f = interp1d(xp, fp, kind='quadratic')
+                    x_matrix1 = f(sampling_x_values)
+
+                except Exception as ErrorMessage:
+                    print('Error in sampling')
+                    sys.exit(ErrorMessage)
+
+                # add bias term
+                try:
+                    x_matrix1 = np.append(x_matrix1.T, 1).reshape(-1, 1)
+                    y_out = np.dot(weight_out_stm, x_matrix1)
+                    y_out_list.append(y_out[0, 0])
+
+                except ValueError as error:
+                    print('----------------------------------------')
+                    print('error from readout layer: {}'.format(error))
+                    print('Please check for your weight file at {}'.format(file_path))
+                    print('________________________________________')
+                    return 0
+
+        output_result = np.where(np.array(y_out_list) > 0.5, 1, 0)
+        result_compare = (train_signal == output_result)
+        accuracy = len(np.argwhere(result_compare)) / len(result_compare)
+        print(f'accuracy: {accuracy}%')
+
+        # visualization of magnetization
+        if visual_process:
+            plt.figure('output')
+            plt.title('real output')
+            plt.plot(output_result)
+            plt.ylabel('Output signals')
+            plt.xlabel('Time')
+
+            plt.figure('target output')
+            plt.title('target signals')
+            plt.plot(train_signal)
+            plt.ylabel('target signals')
+            plt.xlabel('Time')
+
+            plt.figure('original output')
+            plt.title('Original Output')
+            plt.plot(y_out_list)
+            plt.ylabel('Output signals')
+            plt.xlabel('Time')
+            plt.show()
+
+        return accuracy
+
+    def classification_train(self, number_wave, node_classification, file_path='weight_matrix_classification',
+                             visual_process=False, save_index=True, time_consume_all=1e-8, ac_amplitude=0.0,
+                             f_ac=32e9, recover_weight=False):
+        """
+        a function used to train weight matrix of readout layer in classification task
+        :param file_path: the path of weight_matrix
+        :param number_wave: number of wave forms
+        :param node_classification: Size of reservoirs
+        :param visual_process: showing the process figures if it is True, default as False
+        :param save_index: save weight matrix file or not
+        :param time_consume_all: time consume in single step evolution
+        :param ac_amplitude: amplitude of ac term
+        :param f_ac: frequency of ac stt term
+        :param recover_weight: boolean, recover all of weight data if True
+        """
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+
+        if os.path.exists(f'{file_path}/classification_ac_{ac_amplitude}_node_{node_classification}.npy'):
+            weight_out_stm = np.load(f'{file_path}/classification_ac_{ac_amplitude}_node_{node_classification}.npy')
+            print('###############################################')
+            print(f'{file_path}/classification_ac_{ac_amplitude}_node_{node_classification}.npy already exists !')
+            print('###############################################')
+
+            if not recover_weight:
+                return 0
+            else:
+                print('NO MATTER to retrain again !')
 
         else:
             # think about bias term
-            weight_out_stm = np.random.randint(-1, 2, (1, nodes_classification + 1))
-            print('\r weight matrix of STM created successfully !', end='', flush=True)
-
-        print('\rClassification')
-        print('----------------------------------------------------------------')
-        print('start to train !', flush=True)
+            weight_out_stm = np.random.randint(-1, 2, (1, node_classification + 1))
+            print('\r weight matrix of classification task created successfully !', end='', flush=True)
 
         # fabricate the input, target, and output signals
-        y_out_list, x_final_matrix, resistance_dif_mat = [], [], []
+        y_out_list, x_final_matrix = [], []
+        trace_reservoirs, trace_mz = [], []
+
         s_in, train_signal = waveform_generator(number_wave)
-        print('---------------------------------------------------------------')
+
+        # pre training
+        self.time_evolution(dc_amplitude=100, ac_amplitude=ac_amplitude,
+                            time_consumed=time_consume_all, f_ac=f_ac)
+
+        mz_list_eight_points = []
 
         for i in track(range(len(s_in))):
-            mx_list2, my_list2, mz_list2, t_list2 = self.time_evolution(dc_amplitude=s_in[i], ac_amplitude=20,
-                                                                        f_ac=32e9, time_consumed=1e-8)
+            _, _, mz_list_chao, t_list2 = self.time_evolution(dc_amplitude=s_in[i], ac_amplitude=ac_amplitude,
+                                                              time_consumed=time_consume_all, f_ac=f_ac)
+            mz_list_eight_points = np.append(mz_list_eight_points, mz_list_chao)
+            trace_mz = np.append(trace_mz, mz_list_chao)
 
-            try:
-                max_extreme1, min_extreme1, resistance_dif_list1 = [], [], []
-                for i1 in range(len(mz_list2)):
-                    if i1 != 0 and i1 != len(mz_list2) - 1:
-                        if mz_list2[i1] > mz_list2[i1 - 1] and mz_list2[i1] > mz_list2[i1 + 1]:
-                            max_extreme1.append(mz_list2[i])
-                        elif mz_list2[i1] < mz_list2[i1 - 1] and mz_list2[i1] < mz_list2[i1 + 1]:
-                            min_extreme1.append(mz_list2[i1])
-
-                length_extreme1 = min(len(max_extreme1), len(min_extreme1))
-                print('length of extreme points:{}'.format(length_extreme1))
-
-                if length_extreme1 > 25:
-                    length_extreme1 = 25
-                else:
-                    print('length of sampling consequence is error')
-
-                for i1 in range(length_extreme1):
-                    resistance_dif_list1.append(max_extreme1[i1] - min_extreme1[i1])
-
-                print('resist: {}'.format(resistance_dif_list1))
-                resistance_dif_mat = resistance_dif_mat + resistance_dif_list1
-
-            except Exception as error:
-                print('error in finding max_extreme1 or min_extreme: {}'.format(error))
-                print('max_point :{}'.format(len(max_extreme1)))
-                print('min_point :{}'.format(len(min_extreme1)))
-
-            # sampling points
             if (i + 1) % 8 == 0:
-                number_interval = int(len(resistance_dif_mat) / nodes_classification)
-                if number_interval < 1:
-                    number_interval = 1
-                x_matrix1 = np.array(resistance_dif_mat[1: len(resistance_dif_mat):number_interval])
-                resistance_dif_mat = []
+                try:
+                    mz_list_all = mz_list_eight_points[argrelmax(mz_list_eight_points)]
+                    trace_reservoirs = np.append(trace_reservoirs, mz_list_all)
+                    xp = np.linspace(1, len(mz_list_all), len(mz_list_all))
+                    fp = mz_list_all
+                    sampling_x_values = np.linspace(1, len(mz_list_all), node_classification)
+                    # linear slinear quadratic cubic
+                    f = interp1d(xp, fp, kind='quadratic')
+                    x_matrix1 = f(sampling_x_values)
 
-                while len(x_matrix1) != nodes_classification:
-                    if len(x_matrix1) > nodes_classification:
-                        x_matrix1 = x_matrix1[:-1]
-                    else:
-                        x_matrix1 = np.append(x_matrix1, x_matrix1[-1])
-                x_matrix1 = np.reshape(x_matrix1, (nodes_classification, 1))
+                except Exception as ErrorMessage:
+                    print('Error in sampling')
+                    sys.exit(ErrorMessage)
 
                 # add bias term
-                x_matrix1 = np.append(x_matrix1.T, 1).reshape(-1, 1)
-                y_out = np.dot(weight_out_stm, x_matrix1)
-                y_out_list.append(y_out[0, 0])
-                x_final_matrix.append(x_matrix1.T.tolist()[0])
+                try:
+                    x_matrix1 = np.append(x_matrix1.T, 1).reshape(-1, 1)
+                    y_out = np.dot(weight_out_stm, x_matrix1)
+                    y_out_list.append(y_out[0, 0])
+                    x_final_matrix.append(x_matrix1.T.tolist()[0])
 
-            # calculation time
-            if i % 20 == 0:
-                print('-------------------------------------------------------------')
-                print('progress : {:.3} % classification training'.format(i / len(s_in) * 100))
-                print('-------------------------------------------------------------')
+                except ValueError as error:
+                    print('----------------------------------------')
+                    print('error from readout layer: {}'.format(error))
+                    print('Please check for your weight file at {}'.format(file_path))
+                    print('________________________________________')
+                    return 0
 
         # update weight
         y_train_matrix = np.array(train_signal).reshape(1, len(train_signal))
         x_final_matrix = np.asmatrix(x_final_matrix).T
         weight_out_stm = np.dot(y_train_matrix, np.linalg.pinv(x_final_matrix))
 
-        # save weight matrix as .npy files
-        np.save('weight_matrix_chaos/weight_out_classification.npy', weight_out_stm)
+        y_test = np.dot(weight_out_stm, x_final_matrix)
+        print('train result:{}'.format(y_test))
 
-        # calculate the error
-        error_learning = np.var(np.array(train_signal) - np.array(y_out_list))
-        print('error:{}'.format(error_learning))
+        print('##################################################################')
         print('Trained successfully !')
-        print('----------------------------------------------------------------')
-        email_alert(subject='Training Successfully !')
+        print('##################################################################')
 
-    def classification_test(self, test_number=80, nodes_classification=80):
-        """
-        a function used to test the ability of classification of chaotic-MTJ echo state network
-        :param test_number: the number of test waves form, default:80
-        :param nodes_classification: Size of classification, default:80
-        """
+        # save weight matrix as .npy files
+        if save_index:
+            np.save(f'{file_path}/classification_ac_{ac_amplitude}_node_{node_classification}.npy', weight_out_stm)
+            print('Saved weight matrix file')
 
-        if os.path.exists('weight_matrix_chaos/weight_out_classification.npy'):
-            weight_out_stm = np.load('weight_matrix_chaos/weight_out_classification.npy')
-            print('\r' + 'Loading weight_out_classification matrix successfully !', end='', flush=True)
-            print(weight_out_stm)
+        # visualization of magnetization
+        if visual_process:
+            plt.figure('Trace of mz')
+            plt.title('reservoirs states')
+            plt.xlabel('Time interval')
+            plt.ylabel(r'$m_z$')
+            t1 = np.linspace(0, len(trace_mz) - 1, len(trace_mz))
+            plt.scatter(t1, trace_mz)
+            # plt.show()
 
-        else:
-            print('\rno valid weight data !', end='', flush=True)
-            return 0
+            plt.figure('visual')
+            plt.title('Magnetization Behavior')
+            plt.xlabel('Time')
+            plt.ylabel(r'$m_z$')
+            t1 = np.linspace(0, len(trace_reservoirs) - 1, len(trace_reservoirs))
+            plt.scatter(t1, trace_reservoirs)
 
-        print('\rClassification')
-        print('----------------------------------------------------------------')
-        print('start to test !', flush=True)
-
-        # fabricate the input, target, and output signals
-        y_out_list, x_final_matrix, resistance_dif_mat = [], [], []
-        s_in, train_signal = waveform_generator(test_number)
-        print('---------------------------------------------------------------')
-
-        for i in track(range(len(s_in))):
-            mx_list2, my_list2, mz_list2, t_list2 = self.time_evolution(dc_amplitude=s_in[i], ac_amplitude=20,
-                                                                        f_ac=32e9, time_consumed=1e-8)
-
-            try:
-                max_extreme1, min_extreme1, resistance_dif_list1 = [], [], []
-                for i1 in range(len(mz_list2)):
-                    if i1 != 0 and i1 != len(mz_list2) - 1:
-                        if mz_list2[i1] > mz_list2[i1 - 1] and mz_list2[i1] > mz_list2[i1 + 1]:
-                            max_extreme1.append(mz_list2[i])
-                        elif mz_list2[i1] < mz_list2[i1 - 1] and mz_list2[i1] < mz_list2[i1 + 1]:
-                            min_extreme1.append(mz_list2[i1])
-
-                length_extreme1 = min(len(max_extreme1), len(min_extreme1))
-                print('length of extreme points:{}'.format(length_extreme1))
-
-                # ensure the sampling points
-                if length_extreme1 > 25:
-                    length_extreme1 = 25
-                else:
-                    print('length of consequence is error')
-
-                for i1 in range(length_extreme1):
-                    resistance_dif_list1.append(max_extreme1[i1] - min_extreme1[i1])
-                resistance_dif_mat = resistance_dif_mat + resistance_dif_list1
-
-            except Exception as error:
-                print('error in finding max_extreme1 or min_extreme: {}'.format(error))
-                print('max_point :{}'.format(len(max_extreme1)))
-                print('min_point :{}'.format(len(min_extreme1)))
-
-            # sampling points
-            if (i + 1) % 8 == 0:
-
-                if length_extreme1 > nodes_classification:
-                    print('the nodes number is too large ')
-
-                number_interval = int(len(resistance_dif_mat) / nodes_classification)
-                if number_interval < 1:
-                    number_interval = 1
-                x_matrix1 = np.array(resistance_dif_mat[1: len(resistance_dif_mat):number_interval])
-                resistance_dif_mat = []
-
-                while len(x_matrix1) != nodes_classification:
-                    if len(x_matrix1) > nodes_classification:
-                        x_matrix1 = x_matrix1[:-1]
-                    else:
-                        x_matrix1 = np.append(x_matrix1, x_matrix1[-1])
-                x_matrix1 = np.reshape(x_matrix1, (nodes_classification, 1))
-
-                # add bias term
-                x_matrix1 = np.append(x_matrix1.T, 1).reshape(-1, 1)
-                y_out = np.dot(weight_out_stm, x_matrix1)
-                print('y_out :{}'.format(y_out))
-                y_out_list.append(y_out[0, 0])
-
-            print('-------------------------------------------------------------')
-            print('progress : {} % classification testing'.format(i / len(s_in) * 100))
-            print('-------------------------------------------------------------')
-
-        # calculate the error
-        error_learning = np.var(np.array(train_signal) - np.array(y_out_list))
-        print('Test Error:{}'.format(error_learning))
-        print('----------------------------------------------------------------')
-
-        # FIGURES
-        plt.figure('Test results')
-        plt.plot(train_signal, c='blue', label='target')
-        plt.plot(y_out_list, c='green', label='module')
-        plt.ylabel('Index')
-        plt.xlabel('Time')
-        plt.legend()
-        # plt.show()
-
-        plt.figure('Comparison')
-        plt.subplot(2, 1, 1)
-        plt.plot(train_signal, c='blue', label='target & input')
-        plt.legend()
-        plt.ylabel('Index')
-        plt.xlabel('Time')
-
-        plt.subplot(2, 1, 2)
-        plt.plot(y_out_list, c='red', label='module')
-        plt.legend()
-        plt.ylabel('Index')
-        plt.xlabel('Time')
-        plt.show()
+            plt.figure('input')
+            plt.title('input signals')
+            plt.plot(s_in)
+            plt.ylabel('inputs')
+            plt.xlabel('Time')
+            plt.show()
 
     def real_time_train(self, number_wave, nodes_stm, file_path='weight_matrix_oscillator_xuezhao',
                         visual_process=False,
@@ -871,11 +888,12 @@ class Mtj:
             weight_out_stm = np.load(f'{file_path}/STM_{task}_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy')
             print('###############################################')
             print(f'{file_path}/STM_{task}_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy already exists !')
-            # print('shape of weight:{}'.format(weight_out_stm.shape))
             print('###############################################')
 
             if not recover_weight:
                 return 0
+            else:
+                print('NO MATTER to retrain again !')
 
         else:
             # think about bias term
@@ -912,7 +930,10 @@ class Mtj:
 
             try:
                 mz_list_all, t_list_whole = [], []
-                extreme_high, extreme_low = [], []
+                if 'extreme_high' not in locals().keys():
+                    extreme_high, extreme_low = [], []
+                else:
+                    extreme_high, extreme_low = [extreme_high[-1]], [extreme_low[-1]]
 
                 mz_list_chao, t_list2 = list(mz_list_chao), list(t_list2)
 
@@ -930,10 +951,9 @@ class Mtj:
             except Exception as error:
                 print('error from sampling curve :{}'.format(error))
                 mz_list_all = mz_list_chao
+                sys.exit(error)
 
-            # print('mz_list_all:{}'.format(mz_list_all))
-            # print('len of mz sampling points :{}'.format(len(mz_list_all)))
-            trace_mz = trace_mz + mz_list_all
+            # trace_mz = trace_mz + mz_list_all
 
             # for figures
             if s_in[i] == 1:
@@ -949,15 +969,17 @@ class Mtj:
 
             # sampling points
             try:
-                if len(mz_list_all) < nodes_stm:
-                    print('the nodes number is too large')
-                    print('len of mz_list_all : {}'.format(len(mz_list_all)))
-                    print('length of nodes number : {}'.format(nodes_stm))
-                    return 0
+                xp = np.linspace(1, len(mz_list_all), len(mz_list_all))
+                fp = mz_list_all
+                sampling_x_values = np.linspace(1, len(mz_list_all), nodes_stm)
+                # x_matrix1 = np.interp(sampling_x_values, xp, fp)
+                # linear slinear quadratic cubic
+                f = interp1d(xp, fp, kind='quadratic')
+                x_matrix1 = f(sampling_x_values)
 
-                number_interval = int(len(mz_list_all) / nodes_stm)
-                final_numbers = number_interval * nodes_stm
-                x_matrix1 = np.array(mz_list_all[0: final_numbers: number_interval])
+                trace_mz = trace_mz + list(x_matrix1)
+                # print(f'before: {mz_list_all}')
+                # print(f'after: {x_matrix1}')
 
             except Exception as error:
                 print('---------------------------------------')
@@ -1009,8 +1031,8 @@ class Mtj:
             plt.title('reservoirs states')
             plt.xlabel('Time interval')
             plt.ylabel(r'$m_z$')
-            # t1 = np.linspace(0, len(trace_mz) - 1, len(trace_mz))
-            plt.plot(trace_mz)
+            t1 = np.linspace(0, len(trace_mz) - 1, len(trace_mz))
+            plt.scatter(t1, trace_mz)
             # plt.show()
 
             plt.figure('visual')
@@ -1048,6 +1070,7 @@ class Mtj:
         :param ac_amplitude: amplitude of ac term
         :param f_ac: frequency of ac stt term
         :param task: delay task or parity check task
+        :return mean square error between train signals and output signals
         """
 
         if os.path.exists(f'{file_path}/STM_{task}_{superposition}_node_{nodes_stm}_ac_{ac_amplitude}.npy'):
@@ -1092,7 +1115,10 @@ class Mtj:
 
             try:
                 mz_list_all, t_list_whole = [], []
-                extreme_high, extreme_low = [], []
+                if 'extreme_high' not in locals().keys():
+                    extreme_high, extreme_low = [], []
+                else:
+                    extreme_high, extreme_low = [extreme_high[-1]], [extreme_low[-1]]
                 mz_list_chao, t_list2 = list(mz_list_chao), list(t_list2)
                 for i1 in range(len(mz_list_chao)):
                     if i1 != 0 and i1 != len(mz_list_chao) - 1:
@@ -1127,15 +1153,13 @@ class Mtj:
 
             # sampling points
             try:
-                if len(mz_list_all) < nodes_stm:
-                    print('the nodes number is too large')
-                    print('len of mz_list_all : {}'.format(len(mz_list_all)))
-                    print('length of nodes number : {}'.format(nodes_stm))
-                    return 0
-
-                number_interval = int(len(mz_list_all) / nodes_stm)
-                final_numbers = number_interval * nodes_stm
-                x_matrix1 = np.array(mz_list_all[0: final_numbers: number_interval])
+                xp = np.linspace(1, len(mz_list_all), len(mz_list_all))
+                fp = mz_list_all
+                sampling_x_values = np.linspace(1, len(mz_list_all), nodes_stm)
+                # x_matrix1 = np.interp(sampling_x_values, xp, fp)
+                # linear slinear quadratic cubic
+                f = interp1d(xp, fp, kind='quadratic')
+                x_matrix1 = f(sampling_x_values)
 
             except Exception as error:
                 print('---------------------------------------')
@@ -1159,9 +1183,12 @@ class Mtj:
 
         # calculate the error
         # error_learning = np.var(np.array(train_signal) - np.array(y_out_list))
-        error_learning = (np.square(np.array(train_signal) - np.array(y_out_list))).mean()
+        error_learning = (
+            np.square(np.array(train_signal[superposition:]) - np.array(y_out_list)[superposition:])).mean()
         print('Test Error:{}'.format(error_learning))
         print('----------------------------------------------------------------')
+
+        capacity = pow(np.corrcoef(y_out_list[superposition:], train_signal[superposition:])[0, 1], 2)
 
         if alert_index:
             email_alert(subject='error of STM : {}'.format(error_learning))
@@ -1191,242 +1218,4 @@ class Mtj:
             plt.xlabel('Time')
             plt.show()
 
-
-if __name__ == '__main__':
-    # ########################################################################################
-    # time evolution of resistance
-    # ########################################################################################
-    # initial state
-    # a, b, c = 0.1, 0.1, 0
-    # # t_step = 3e-13
-    # time_consume = 7e-9
-    # extern_field = 200  # Unit: Oe
-    # ani_field = 0  # Unit: Oe
-    # dem_field = 8400  # Unit: Oe
-    # dc_current = 100
-    # ac_current = 0
-    # f_ac = 32e9
-
-    # #################################################################################################
-    # try to calculate the ability of delay task
-    # #################################################################################################
-    superposition_list = [0, 1, 2]
-    ac_stt_list = np.linspace(0, 100, 101)
-    for ac_stt in ac_stt_list:
-        for number in superposition_list:
-            mtj = Mtj()
-            mtj.real_time_train(number_wave=500, nodes_stm=16, visual_process=False, save_index=True, alert_index=False,
-                                superposition=number, time_consume_all=1e-8, ac_amplitude=round(ac_stt, 2),
-                                task='Parity')
-
-    # mtj.stm_test(test_number=30, nodes_stm=16, superposition=1, visual_index=True, ac_amplitude=57.8,
-    #              time_consume_all=1e-8)
-    # ################################################################################################
-
-    # mx_list1, my_list1, mz_list1, t_list1 = mtj.time_evolution(extern_field, ani_field, dem_field, dc_current,
-    #                                                            ac_amplitude=ac_current, ac_frequency=f_ac,
-    #                                                            time_consumed=time_consume, time_step=t_step)
-    #
-    # # FIGURES
-    # plt.figure()
-    # plt.plot(mx_list1, c='red', label='mx')
-    # plt.legend()
-    # plt.ylabel('mx')
-    # plt.xlabel('Time:ns')
-    # plt.ylim(-1, 1)
-    #
-    # plt.figure()
-    # plt.plot(my_list1, c='purple', label='my')
-    # plt.legend()
-    # plt.ylabel('my')
-    # plt.xlabel('Time:ns')
-    # plt.ylim(-1, 1)
-    #
-    # plt.figure()
-    # plt.plot(mz_list1, c='orange', label='mz')
-    # plt.legend()
-    # plt.ylabel('mz')
-    # plt.xlabel('Time: {}s'.format(t_step))
-    # plt.ylim(-1, 1)
-    #
-    # plt.figure('chaos')
-    # plt.scatter(my_list1[int(len(my_list1) / 5):], mz_list1[int(len(mz_list1) / 5):], c='red')
-    # plt.ylabel('$m_Z$')
-    # plt.xlabel('$m_Y$')
-    # plt.ylim(-1, 1)
-    # plt.xlim(-1, 1)
-    #
-    # plt.show()
-    # #############################################################################################
-
-    # #############################################################################################
-    # mtj.classification_train(number_wave=300, nodes_classification=100)
-    # mtj.classification_test(test_number=50, nodes_classification=100)
-
-    # ################################################################################
-    # finding best values to build esn
-    # ################################################################################
-    # y_out_list, x_final_matrix, plus_visual_mz, minus_visual_mz = [], [], [], []
-    # plus_time, minus_time, time_index = [], [], 0
-    # plus_time_switch, minus_time_switch = [], []
-    # plus_visual_switch, minus_visual_switch = [], []
-    #
-    # positive_dc_current = 100
-    # negative_dc_current = 200
-    # input_signals = np.random.randint(0, 2, 20)
-    # # input_signals = [0, 1, 0, 1, 0, 1, 0, 1]
-    # mz_behavior = []
-    # a, b, c = 0.1, 0.1, 0
-    # # t_step = 3e-13
-    # time_consume = 5e-9
-    # extern_field = 200  # Unit: Oe
-    # ani_field = 0  # Unit: Oe
-    # dem_field = 8400  # Unit: Oe
-    # dc_current = 100
-    # ac_current = 100
-    # f_ac = 32e9
-    # mtj = Mtj(a, b, c)
-    #
-    # for j in track(range(len(input_signals))):
-    #     if input_signals[j] == 1:
-    #         dc_current1 = positive_dc_current
-    #         _, _, mz_list_chao, t_list2 = mtj.time_evolution(external_field=200, anisotropy_field=0,
-    #                                                          demagnetization_field=8400,
-    #                                                          dc_amplitude=dc_current1, ac_amplitude=ac_current,
-    #                                                          ac_frequency=f_ac, time_consumed=time_consume,
-    #                                                          time_step=3e-13)
-    #
-    #         # _, _, mz_list_osc, t_list_osc = mtj.time_evolution(external_field=200, anisotropy_field=0,
-    #         #                                                    demagnetization_field=8400, dc_amplitude=220,
-    #         #                                                    ac_amplitude=0, ac_frequency=32e9,
-    #         #                                                    time_consumed=7e-10,
-    #         #                                                    time_step=3e-13)
-    #
-    #     else:
-    #         dc_current1 = negative_dc_current
-    #         mx_list2, _, mz_list_chao, t_list2 = mtj.time_evolution(external_field=200, anisotropy_field=0,
-    #                                                                 demagnetization_field=8400,
-    #                                                                 dc_amplitude=dc_current1, ac_amplitude=ac_current,
-    #                                                                 ac_frequency=f_ac, time_consumed=time_consume,
-    #                                                                 time_step=3e-13)
-    #
-    #         # _, _, mz_list_osc, t_list_osc = mtj.time_evolution(external_field=200, anisotropy_field=0,
-    #         #                                                    demagnetization_field=8400, dc_amplitude=220,
-    #         #                                                    ac_amplitude=0, ac_frequency=32e9,
-    #         #                                                    time_consumed=7e-10,
-    #         #                                                    time_step=3e-13)
-    #     # normalization
-    #     mz_list_all = mz_list_chao
-    #     # mz_list_all = [i / max(map(abs, mz_list_all)) for i in mz_list_all]
-    #     # t_list_osc = [i + t_list2[-1] for i in t_list_osc]
-    #     t_list_whole = t_list2
-    #
-    #     # for figures
-    #     if input_signals[j] == 1:
-    #         plus_visual_mz = plus_visual_mz + mz_list_all
-    #         plus_time = plus_time + list(
-    #             np.linspace(time_index, time_index + 3e-13 * len(t_list_whole), len(t_list_whole)))
-    #         # plus_time_switch = plus_time_switch + list(
-    #         #     np.linspace(time_index, time_index + 3e-13 * len(t_list_whole), len(t_list_whole)))[
-    #         #                                       -len(t_list_osc):]
-    #         # plus_visual_switch = plus_visual_switch + mz_list_all[-len(mz_list_osc):]
-    #     else:
-    #         minus_visual_mz = minus_visual_mz + mz_list_all
-    #         minus_time = minus_time + list(
-    #             np.linspace(time_index, time_index + 3e-13 * len(t_list_whole), len(t_list_whole)))
-    #         # minus_time_switch = minus_time_switch + list(
-    #         #     np.linspace(time_index, time_index + 3e-13 * len(t_list_whole), len(t_list_whole)))[
-    #         #                                         -len(t_list_osc):]
-    #         # minus_visual_switch = minus_visual_switch + mz_list_all[-len(mz_list_osc):]
-    #
-    #     time_index = time_index + t_list_whole[-1]
-    #
-    # # plt.legend()
-    # plt.figure('visual')
-    # plt.scatter(minus_time, minus_visual_mz, label='{}'.format(negative_dc_current), s=2, c='red')
-    # plt.scatter(plus_time, plus_visual_mz, label='{}'.format(positive_dc_current), s=2, c='blue')
-    # # plt.scatter(minus_time_switch, minus_visual_switch, c='green', s=2)
-    # # plt.scatter(plus_time_switch, plus_visual_switch, c='green', s=2)
-    # plt.legend()
-    #
-    # # plt.figure('input')
-    # # plt.plot(input_signals)
-    # plt.show()
-
-    # #############################################################################################
-    # dc_current_list = [268, 269, 268, 267, 268, 269, 268, 267, 268, 269, 268, 267, 269, 269, 267, 267,
-    #                    269, 269, 267, 267]
-    #
-    # plt.figure('resistance difference')
-    # plt.title('Response for different dc current')
-    # plt.xlabel('Time interval')
-    # plt.ylabel('resistance difference')
-    # plt.ylim(-1, 1)
-    # print('dc_list : {}'.format(dc_current_list))
-    # resistance_dif_list = []
-    # for j in range(len(dc_current_list)):
-    #     _, _, mz_list1, t_list1 = mtj.time_evolution(extern_field, ani_field, dem_field,
-    #                                                  dc_amplitude=dc_current_list[j], ac_amplitude=ac_current,
-    #                                                  ac_frequency=f_ac, time_consumed=time_consume, time_step=t_step)
-    #     try:
-    #         max_extreme, min_extreme = [], []
-    #         for i in range(len(mz_list1)):
-    #             if i != 0 and i != len(mz_list1)-1:
-    #                 if mz_list1[i] > mz_list1[i-1] and mz_list1[i] > mz_list1[i+1]:
-    #                     max_extreme.append(mz_list1[i])
-    #                 elif mz_list1[i] < mz_list1[i-1] and mz_list1[i] < mz_list1[i+1]:
-    #                     min_extreme.append(mz_list1[i])
-    #
-    #         length_extreme = min(len(max_extreme), len(min_extreme))
-    #         print('length:{}'.format(length_extreme))
-    #         # resistance_dif_list = []
-    #         for i in range(length_extreme):
-    #             resistance_dif_list.append(max_extreme[i])
-    #
-    #     except Exception as e:
-    #         print('error in finding max_extreme or min_extreme: {}'.format(e))
-    #         print('max_point :{}'.format(len(max_extreme)))
-    #         print('min_point :{}'.format(len(min_extreme)))
-    #
-    # # plt.figure('resistance difference')
-    # temp1 = np.linspace(0, len(resistance_dif_list)-1, len(resistance_dif_list))
-    # plt.plot(temp1, resistance_dif_list, c='blue')
-    # # plt.scatter(temp1, resistance_dif_list, c='blue')
-    # plt.legend()
-    # plt.figure('input')
-    # plt.plot(dc_current_list)
-    # plt.show()
-    # #############################################################################################
-
-    # #############################################################################################
-    # calculation of lyapunov exponent
-    # #############################################################################################
-    # le_t_list, le_z_list, le_x_list, le_y_list = [], [], [], []
-    # dc_current_list = np.linspace(200, 400, 201)
-    # # dc_current_list = [200, 201, 202, 269, 258]
-    # for j in track(range(len(dc_current_list))):
-    #     eigen_values, le_list = mtj.lyapunov_exponent(calculation_time=500, cal_t_step=3e-13,
-    #                                                   dc_amplitude=dc_current_list[j], ac_amplitude=20)
-    #     le_t_list.append(le_list[3])
-    #     le_z_list.append(le_list[2])
-    #     le_x_list.append(le_list[0])
-    #     le_y_list.append(le_list[1])
-    #
-    # plt.figure()
-    # plt.title('Maximum Lyapunov exponent')
-    # plt.xlabel(r'dc current $t$')
-    # plt.ylabel(r'Lyapunov exponent')
-    # print('__________________________________')
-    # print('le_x :{}'.format(le_x_list))
-    # print('le_y :{}'.format(le_y_list))
-    # print('le_z :{}'.format(le_z_list))
-    # print('le_t :{}'.format(le_t_list))
-    # print('__________________________________')
-    # plt.plot(le_z_list, c='blue', label='m_z')
-    # # plt.plot(le_t_list, c='pink', label='m_t')
-    # # plt.plot(le_x_list, c='orange', label='m_x')
-    # # plt.plot(le_y_list, c='green', label='m_y')
-    # x1 = [0 for i in dc_current_list]
-    # plt.plot(x1, ls='--', label='zero line', c='black')
-    # plt.legend()
-    # plt.show()
+        return capacity

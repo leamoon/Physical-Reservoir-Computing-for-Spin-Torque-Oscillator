@@ -340,11 +340,11 @@ def test_pc_task(a0, b0, c0, delay_time=1, test_points=100, bias_pc=1):
 if __name__ == '__main__':
     m_x, m_y, m_z = 1, 0.01, 0.01
     # for delay time task without demagnetization
-    # for i in range(0, 5):
-    # train_stm(m_x, m_y, m_z, delay_time=i, nodes_number_stm=50)
-    # test_stm(m_x, m_y, m_z, delay_time=i, test_points=100)
-    # train_pc_task(m_x, m_y, m_z, delay_time=i, nodes_number_pc=50)
-    # test_stm(m_x, m_y, m_z, delay_time=i)
+    # for ac_value in range(0, 5):
+    # train_stm(m_x, m_y, m_z, delay_time=ac_value, nodes_number_stm=50)
+    # test_stm(m_x, m_y, m_z, delay_time=ac_value, test_points=100)
+    # train_pc_task(m_x, m_y, m_z, delay_time=ac_value, nodes_number_pc=50)
+    # test_stm(m_x, m_y, m_z, delay_time=ac_value)
 
     # for PC task without demagnetization
     # train_pc_task(m_x, m_y, m_z, delay_time=1, nodes_number_pc=50)
@@ -354,17 +354,17 @@ if __name__ == '__main__':
     # a test of comparison
     # test code
     # capacity_stm, capacity_pc = [], []
-    # for i in range(0, 21):
-    #     cor1 = test_stm(m_x, m_y, m_z, delay_time=i, test_points=100)
+    # for ac_value in range(0, 21):
+    #     cor1 = test_stm(m_x, m_y, m_z, delay_time=ac_value, test_points=100)
     #     capacity_stm.append(cor1)
     #     print('---------------------------------------')
-    #     print(f'delay time = {i}  STM!')
+    #     print(f'delay time = {ac_value}  STM!')
     #     print('---------------------------------------')
     #
-    #     cor2 = test_pc_task(m_x, m_y, m_z, delay_time=i, test_points=100)
+    #     cor2 = test_pc_task(m_x, m_y, m_z, delay_time=ac_value, test_points=100)
     #     capacity_pc.append(cor2)
     #     print('---------------------------------------')
-    #     print(f'delay time = {i}  PC !')
+    #     print(f'delay time = {ac_value}  PC !')
     #     print('correlation:{}'.format(cor2))
     #     print('---------------------------------------')
 

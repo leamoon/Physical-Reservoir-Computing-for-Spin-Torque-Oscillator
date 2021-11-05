@@ -1183,12 +1183,12 @@ if __name__ == '__main__':
     # # ac_current_list = np.linspace(10, 100, 91)
     # ac_current_list = [0, 10, 20, 30, 40, 50]
     # le_list = []
-    # for i in range(len(ac_current_list)):
-    #     le, _ = edge_of_chaos(ac_current1=ac_current_list[i], len_input_number=number_input_signal,
+    # for ac_value in range(len(ac_current_list)):
+    #     le, _ = edge_of_chaos(ac_current1=ac_current_list[ac_value], len_input_number=number_input_signal,
     #                           len_input_pattern=len_input_signal)
     #     le_list.append(le)
     #     print('*****************************************************************************')
-    #     print('ac_list : {}'.format(ac_current_list[:i + 1]))
+    #     print('ac_list : {}'.format(ac_current_list[:ac_value + 1]))
     #     print('le_list : {}'.format(le_list))
     #     np.save('le_data.npy', le_list)
     #     np.save('ac_data.npy', ac_current_list)
@@ -1203,11 +1203,11 @@ if __name__ == '__main__':
     # delay_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     # node_list = [10, 16, 20, 30, 40, 50]
     # for node in node_list:
-    #     for i in delay_list:
+    #     for ac_value in delay_list:
     #         mtj = Mtj(a, b, c)
-    #         mtj.stm_train(number_wave=800, nodes_stm=node, visual_process=False, save_index=True, superposition=i,
+    #         mtj.stm_train(number_wave=800, nodes_stm=node, visual_process=False, save_index=True, superposition=ac_value,
     #                       alert_index=False, time_consume_all=3e-8)
-    #         mtj.stm_test(test_number=30, nodes_stm=node, superposition=i, visual_index=False)
+    #         mtj.stm_test(test_number=30, nodes_stm=node, superposition=ac_value, visual_index=False)
 
     # mx_list1, my_list1, mz_list1, t_list1 = mtj.time_evolution(dc_amplitude=dc_current, ac_amplitude=ac_current,
     #                                                            time_consumed=time_consume)
@@ -1292,8 +1292,8 @@ if __name__ == '__main__':
     #         #                                                    time_step=3e-13)
     #     # normalization
     #     mz_list_all = mz_list
-    #     # mz_list_all = [i / max(map(abs, mz_list_all)) for i in mz_list_all]
-    #     # t_list_osc = [i + t_list2[-1] for i in t_list_osc]
+    #     # mz_list_all = [ac_value / max(map(abs, mz_list_all)) for ac_value in mz_list_all]
+    #     # t_list_osc = [ac_value + t_list2[-1] for ac_value in t_list_osc]
     #     t_list_whole = t_list2
     #
     #     # for figures
@@ -1345,18 +1345,18 @@ if __name__ == '__main__':
     #                                                  ac_frequency=f_ac, time_consumed=time_consume, time_step=t_step)
     #     try:
     #         max_extreme, min_extreme = [], []
-    #         for i in range(len(mz_list1)):
-    #             if i != 0 and i != len(mz_list1)-1:
-    #                 if mz_list1[i] > mz_list1[i-1] and mz_list1[i] > mz_list1[i+1]:
-    #                     max_extreme.append(mz_list1[i])
-    #                 elif mz_list1[i] < mz_list1[i-1] and mz_list1[i] < mz_list1[i+1]:
-    #                     min_extreme.append(mz_list1[i])
+    #         for ac_value in range(len(mz_list1)):
+    #             if ac_value != 0 and ac_value != len(mz_list1)-1:
+    #                 if mz_list1[ac_value] > mz_list1[ac_value-1] and mz_list1[ac_value] > mz_list1[ac_value+1]:
+    #                     max_extreme.append(mz_list1[ac_value])
+    #                 elif mz_list1[ac_value] < mz_list1[ac_value-1] and mz_list1[ac_value] < mz_list1[ac_value+1]:
+    #                     min_extreme.append(mz_list1[ac_value])
     #
     #         length_extreme = min(len(max_extreme), len(min_extreme))
     #         print('length:{}'.format(length_extreme))
     #         # resistance_dif_list = []
-    #         for i in range(length_extreme):
-    #             resistance_dif_list.append(max_extreme[i])
+    #         for ac_value in range(length_extreme):
+    #             resistance_dif_list.append(max_extreme[ac_value])
     #
     #     except Exception as e:
     #         print('error in finding max_extreme or min_extreme: {}'.format(e))
@@ -1401,7 +1401,7 @@ if __name__ == '__main__':
     # # plt.plot(le_t_list, c='pink', label='m_t')
     # # plt.plot(le_x_list, c='orange', label='m_x')
     # # plt.plot(le_y_list, c='green', label='m_y')
-    # x1 = [0 for i in dc_current_list]
+    # x1 = [0 for ac_value in dc_current_list]
     # plt.plot(x1, ls='--', label='zero line', c='black')
     # plt.legend()
     # plt.show()

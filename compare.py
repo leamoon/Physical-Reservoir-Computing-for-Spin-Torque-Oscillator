@@ -35,7 +35,7 @@ def waveform_generator(current_limited, number_wave):
             # square function
             square_points = [current_limited] * 4 + [-current_limited] * 4
             wave_points = wave_points + square_points
-        # elif i == 2:
+        # elif ac_value == 2:
         #     # cos function
         #     cos_points = [0, -current_limited / 2, -current_limited, -current_limited / 2, 0,
         #                   current_limited / 2, current_limited, current_limited / 2]

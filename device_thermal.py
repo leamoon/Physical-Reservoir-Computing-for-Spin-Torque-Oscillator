@@ -219,10 +219,10 @@ if __name__ == '__main__':
     # print(input_density)
     # m_x0, m_y0, m_z0 = 1, 0.1, 0.1
     # # mx_matrix = []
-    # for i in input_density:
+    # for ac_value in input_density:
     #     mx_matrix = []
     #     m_x0, m_y0, m_z0 = 1, 0.1, 0.1
-    #     mx_list, m_x0, m_y0, m_z0, _ = module_evolution(30000, m_x=m_x0, m_y=m_y0, m_z=m_z0, current_density=i)
+    #     mx_list, m_x0, m_y0, m_z0, _ = module_evolution(30000, m_x=m_x0, m_y=m_y0, m_z=m_z0, current_density=ac_value)
     #     mx_matrix = mx_matrix + list(mx_list[:-1])
     #     print('last_state: mx, my, mz = {}, {}, {}'.format(m_x0, m_y0, m_z0))
     #

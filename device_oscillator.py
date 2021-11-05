@@ -170,26 +170,26 @@ def evolution_mag(m_x, m_y, m_z, direc_current=-0.836, magnitude=0.0, h_x=0.3, f
     # # try one period:
     # envelope_list2, time_env_list2 = [], []
     # index_point_extreme = []
-    # for i in range(len(envelope_list1)):
-    #     if i != 0 and i != len(envelope_list1) - 1:
-    #         if envelope_list1[i - 1] < envelope_list1[i] and envelope_list1[i] > envelope_list1[i + 1]:
+    # for ac_value in range(len(envelope_list1)):
+    #     if ac_value != 0 and ac_value != len(envelope_list1) - 1:
+    #         if envelope_list1[ac_value - 1] < envelope_list1[ac_value] and envelope_list1[ac_value] > envelope_list1[ac_value + 1]:
     #             # find the index of extreme point
-    #             index_point_extreme.append(i)
+    #             index_point_extreme.append(ac_value)
 
     # debug
     # print(len(index_point_extreme))
 
-    # for i in range(len(envelope_list1)):
-    #     if index_point_extreme[1] >= i >= index_point_extreme[0]:
-    #         envelope_list2.append(envelope_list1[i])
-    #         time_env_list2.append(time_env_list1[i])
+    # for ac_value in range(len(envelope_list1)):
+    #     if index_point_extreme[1] >= ac_value >= index_point_extreme[0]:
+    #         envelope_list2.append(envelope_list1[ac_value])
+    #         time_env_list2.append(time_env_list1[ac_value])
 
     # debug
     # print(len(time_env_list2))
 
     # normalization
-    # envelope_list1 = [i/max(np.abs(envelope_list1)) for i in envelope_list1]
-    # voltage_list = [i/max(np.abs(voltage_list)) for i in voltage_list]
+    # envelope_list1 = [ac_value/max(np.abs(envelope_list1)) for ac_value in envelope_list1]
+    # voltage_list = [ac_value/max(np.abs(voltage_list)) for ac_value in voltage_list]
     return mx_list, t_list, voltage_list, envelope_list1, time_env_list1, [mx, my, mz], my_list
 
 
@@ -248,9 +248,9 @@ if __name__ == '__main__':
 
     # amplitude_list = []
     # current_list = np.linspace(-11, 11, 50)
-    # for i in current_list:
+    # for ac_value in current_list:
     #     mx_matrix1, time_matrix1, voltage_matrix1, trace_list1, trace_time1, _, _ = evolution_mag(1, 0.01, 0.01,
-    #                                                                                               direc_current=i,
+    #                                                                                               direc_current=ac_value,
     #                                                                                               magnitude=0)
     #     if trace_list1:
     #         amplitude_list.append(np.max(trace_list1))

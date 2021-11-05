@@ -534,9 +534,9 @@ if __name__ == '__main__':
     # #############################################################################################
     # le_t_list, le_z_list, le_x_list, le_y_list = [], [], [], []
     # length_cal = 1000
-    # for i in range(len(t_list1)-length_cal):
-    #     le_x, le_y, le_z, le_t = mtj.lyapunov_exponent(current_time=t_list1[i], length_n=10,
-    #                                                    cal_t_step=t_step, index_time=int(i),
+    # for ac_value in range(len(t_list1)-length_cal):
+    #     le_x, le_y, le_z, le_t = mtj.lyapunov_exponent(current_time=t_list1[ac_value], length_n=10,
+    #                                                    cal_t_step=t_step, index_time=int(ac_value),
     #                                                    current_magnetization=[mx_list1,
     #                                                                           my_list1,
     #                                                                           mz_list1])
@@ -546,8 +546,8 @@ if __name__ == '__main__':
     #     le_y_list.append(le_y)
     #
     #     # time index
-    #     if i % 1000 == 0:
-    #         print('Process: {:.3} %  Calculating Lyapunov Exponent'.format((i + 1) / len(t_list1) * 100))
+    #     if ac_value % 1000 == 0:
+    #         print('Process: {:.3} %  Calculating Lyapunov Exponent'.format((ac_value + 1) / len(t_list1) * 100))
     #
     # print('max :{}'.format(np.max(le_z_list)))
     # plt.figure()
@@ -558,7 +558,7 @@ if __name__ == '__main__':
     # plt.plot(t_list1[:-int(length_cal)], le_t_list, c='pink', label='m_t')
     # # plt.plot(t_list1[:-int(length_cal)], le_x_list, c='orange', label='m_x')
     # # plt.plot(t_list1[:-int(length_cal)], le_y_list, c='green', label='m_y')
-    # time_consequence = [0 for i in t_list1]
+    # time_consequence = [0 for ac_value in t_list1]
     # plt.plot(t_list1, time_consequence, ls='--', label='zero line', c='black')
     # plt.legend()
     # # plt.ylim(-0.1, 0.5)

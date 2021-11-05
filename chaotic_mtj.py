@@ -1054,7 +1054,7 @@ if __name__ == '__main__':
     # fourier_consequence = np.abs(np.fft.fft(temp1))
     # fourier_consequence = fourier_consequence / max(fourier_consequence) * 50
     # fourier_freq = np.fft.fftfreq(len(t_list1))
-    # pds = [pow(i, 2) for i in fourier_consequence]
+    # pds = [pow(ac_value, 2) for ac_value in fourier_consequence]
 
     # FIGURES
     # plt.figure()
@@ -1148,8 +1148,8 @@ if __name__ == '__main__':
     #         #                                                    time_step=3e-13)
     #     # normalization
     #     mz_list_all = mz_list_chao
-    #     # mz_list_all = [i / max(map(abs, mz_list_all)) for i in mz_list_all]
-    #     # t_list_osc = [i + t_list2[-1] for i in t_list_osc]
+    #     # mz_list_all = [ac_value / max(map(abs, mz_list_all)) for ac_value in mz_list_all]
+    #     # t_list_osc = [ac_value + t_list2[-1] for ac_value in t_list_osc]
     #     t_list_whole = t_list2
     #
     #     # for figures
@@ -1201,18 +1201,18 @@ if __name__ == '__main__':
     #                                                  ac_frequency=f_ac, time_consumed=time_consume, time_step=t_step)
     #     try:
     #         max_extreme, min_extreme = [], []
-    #         for i in range(len(mz_list1)):
-    #             if i != 0 and i != len(mz_list1)-1:
-    #                 if mz_list1[i] > mz_list1[i-1] and mz_list1[i] > mz_list1[i+1]:
-    #                     max_extreme.append(mz_list1[i])
-    #                 elif mz_list1[i] < mz_list1[i-1] and mz_list1[i] < mz_list1[i+1]:
-    #                     min_extreme.append(mz_list1[i])
+    #         for ac_value in range(len(mz_list1)):
+    #             if ac_value != 0 and ac_value != len(mz_list1)-1:
+    #                 if mz_list1[ac_value] > mz_list1[ac_value-1] and mz_list1[ac_value] > mz_list1[ac_value+1]:
+    #                     max_extreme.append(mz_list1[ac_value])
+    #                 elif mz_list1[ac_value] < mz_list1[ac_value-1] and mz_list1[ac_value] < mz_list1[ac_value+1]:
+    #                     min_extreme.append(mz_list1[ac_value])
     #
     #         length_extreme = min(len(max_extreme), len(min_extreme))
     #         print('length:{}'.format(length_extreme))
     #         # resistance_dif_list = []
-    #         for i in range(length_extreme):
-    #             resistance_dif_list.append(max_extreme[i])
+    #         for ac_value in range(length_extreme):
+    #             resistance_dif_list.append(max_extreme[ac_value])
     #
     #     except Exception as e:
     #         print('error in finding max_extreme or min_extreme: {}'.format(e))
@@ -1257,7 +1257,7 @@ if __name__ == '__main__':
     # # plt.plot(le_t_list, c='pink', label='m_t')
     # # plt.plot(le_x_list, c='orange', label='m_x')
     # # plt.plot(le_y_list, c='green', label='m_y')
-    # x1 = [0 for i in dc_current_list]
+    # x1 = [0 for ac_value in dc_current_list]
     # plt.plot(x1, ls='--', label='zero line', c='black')
     # plt.legend()
     # plt.show()

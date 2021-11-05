@@ -1,7 +1,12 @@
+import os.path
+import time
+
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from rich.progress import track
+import pandas as pd
+from matplotlib.pyplot import MultipleLocator
 
 """
 this code is designed to calculate the lyapunov exponent function of Lorenz system.
@@ -52,7 +57,7 @@ partial_z = x*y - batter*z
 #     number_interval = int(time_consume/t_step)
 #     x_list, y_list, z_list = [], [], []
 #     x, y, z = x0, y0, z0
-#     for i in range(number_interval):
+#     for ac_value in range(number_interval):
 #         x, y, z = step_evolution(x, y, z, r, t_step)
 #         x_list.append(x)
 #         y_list.append(y)
@@ -103,7 +108,7 @@ partial_z = x*y - batter*z
 #     last_error = np.inf
 #     while True:
 #         le_list_single = []
-#         for i in range(length_le):
+#         for ac_value in range(length_le):
 #             le1_single, perturbation, x, y, z = lyapunov(r, x, y, z, perturbation)
 #             le_list_single.append(le1_single[0, 0])
 #         le1 = sum(le_list_single)/length_le
@@ -120,119 +125,111 @@ partial_z = x*y - batter*z
 #     return le_list_single, x, y, z, perturbation, le1
 
 
-# if __name__ == '__main__':
-#     # verify the code of Lorenz Attractor behavior
-#     mpl.rcParams["legend.fontsize"] = 10
-#     fig = plt.figure()
-#     ax = plt.axes(projection='3d')
-#     ax.set_xlabel('X')
-#     ax.set_ylabel('Y')
-#     ax.set_zlabel('Z')
-#     ax.set_title('Lorenz Attractor r=100')
-#     xs, ys, zs = time_evolution(time_consume=1000, r=100)
-#     ax.plot3D(xs, ys, zs, label="Lorenz's strange attractor")
-#     plt.show()
+if __name__ == '__main__':
+    # ac_list = np.linspace(0, 100, 101)
+    # results = []
+    # for ac_value in ac_list:
+    #     result_1 = ac_value*2+1
+    #     results.append(result_1)
+    # df = {'ac_list': ac_list, 'result': results}
+    # df = pd.DataFrame(df)
+    # print(df)
+    # df.to_excel('result.xlsx')
 
-#     # bifurcation diagram
-#     r_list = np.linspace(20, 100, 801)
-#     r_maxes, z_maxes = [], []
-#     r_min, z_min = [], []
-#     for i1 in track(r_list):
-#         xs, ys, zs = time_evolution(time_consume=100, r=i1)
-#
-#         for i2 in range(1, len(zs)-1):
-#             if zs[i2] > zs[i2-1] and zs[i2] > zs[i2+1]:
-#                 z_maxes.append(zs[i2])
-#                 r_maxes.append(i1)
-#             elif zs[i2] < zs[i2-1] and zs[i2] < zs[i2+1]:
-#                 z_min.append(zs[i2])
-#                 r_min.append(i1)
-#         print(i1)
+    # ###############################################################################################################
+    # a code to draw figures in nature com
+    # df_lyapunov = pd.ExcelFile('E:\\磁\\data\\lyapunov.xlsx')
+    # df_lyapunov_1 = pd.read_excel(df_lyapunov, 'periodic')
+    # print(df_lyapunov_1['frequency'])
+    # x1 = [0]*len(df_lyapunov_1['frequency'][1:])
+    # plt.figure()
+    # plt.plot(df_lyapunov_1['frequency'][1:], df_lyapunov_1['a'][1:])
+    # plt.scatter(df_lyapunov_1['frequency'][1:], df_lyapunov_1['a'][1:], c='red')
+    # plt.plot(df_lyapunov_1['frequency'][1:], x1, c='black')
+    # plt.xlabel('ac amplitude unit: Oe')
+    # plt.ylabel('largest lyapunov exponent')
+    # plt.title('largest lyapunov exponent')
+    # plt.show()
 
-#     plt.figure('bifurcation diagram')
-#     plt.scatter(r_maxes, z_maxes, color="black", s=0.5, alpha=0.2)
-#     plt.scatter(r_min, z_min, color="red", s=0.5, alpha=0.2)
-#     plt.xlabel('r')
-#     plt.ylabel('z')
-#     plt.show()
+    # df_delay = pd.ExcelFile('E:\\磁\\data\\Delay.xlsx')
+    #
+    # df_delay_0 = pd.read_excel(df_delay, 'delay0')
+    # df_delay_1 = pd.read_excel(df_delay, 'delay1')
+    # df_delay_2 = pd.read_excel(df_delay, 'delay2')
+    #
+    # df_parity = pd.ExcelFile('E:\\磁\\data\\Parity.xlsx')
+    # df_parity_0 = pd.read_excel(df_parity, 'parity0')
+    # df_parity_1 = pd.read_excel(df_parity, 'parity1')
+    # df_parity_2 = pd.read_excel(df_parity, 'parity2')
+    #
+    # zero_line = np.linspace(-0.1, 1.1, 20)
+    # x_zero_line = [0]*len(zero_line)
+    #
+    # capacity_delay = np.add(df_delay_0['average'].values, df_delay_1['average'].values)
+    # capacity_delay = np.add(capacity_delay, df_delay_2['average'].values)
+    # capacity_delay = capacity_delay / max(capacity_delay)
+    #
+    # capacity_parity = np.add(df_parity_0['average'].values, df_parity_1['average'].values)
+    # # capacity_parity = np.add(capacity_parity, df_parity_2['average'].values)
+    # capacity_parity = capacity_parity / max(capacity_parity)
+    #
+    # classification_task = np.add(df_delay_0['average'].values[9:100], df_parity_0['average'].values[9:100])/2
+    #
+    # plt.figure()
+    # plt.plot(x_zero_line, zero_line, c='black', label='zero line')
+    # # plt.scatter(df_delay_0['lyapunov'], df_delay_0['average'], label='delay0')
+    # # plt.scatter(df_delay_1['lyapunov'], df_delay_1['average'], label='delay1')
+    # # plt.scatter(df_delay_2['lyapunov'], df_delay_2['average'], label='delay2')
+    # plt.scatter(df_delay_2['lyapunov'], capacity_delay, label='delay')
+    # plt.scatter(df_parity_0['lyapunov'], capacity_parity, label='parity')
+    # plt.scatter(df_parity_0['lyapunov'][9:100], classification_task, label='classification')
+    # # plt.scatter(df_parity_0['lyapunov'], df_parity_0['average'], label='parity0')
+    # # plt.scatter(df_parity_1['lyapunov'], df_parity_1['average'], label='parity1')
+    # # plt.scatter(df_parity_2['lyapunov'], df_parity_2['average'], label='parity2')
+    # plt.xlabel('Lyapunov exponent')
+    # plt.ylabel('Memory Capacity / Accuracy')
+    # # plt.ylim(-0.1, 1.1)
+    # plt.legend()
+    #
+    # x_major_locator = MultipleLocator(10)
+    # ax = plt.gca()
+    # # ax.xaxis.set_major_locator(x_major_locator)
+    # plt.xlim(-11, 11)
+    # plt.show()
 
-#     # find lyapunov
-#     # _, _, _, _, _, le_1 = r_le_curve(r=94, length_le=1000)
-#     # print('le: {}'.format(le_1))
-#     r_list = np.linspace(96.1, 100, 40)
-#     # r_list = np.linspace(90, 100, 101)
-#     le_list_whole = []
-#     for i1 in r_list:
-#         _, _, _, _, _, le_1 = r_le_curve(r=i1, length_le=7000)
-#         le_list_whole.append(le_1)
-#         print('r={}, le={}'.format(i1, le_1))
-#         print('le_list_whole : {}'.format(le_list_whole))
+    # test for loop time
+    # t1 = time.time()
+    # j = 0
+    # for ac_value in range(1000000):
+    #     j += ac_value
+    # print(j)
+    # t2 = time.time()
+    # print('Time : {}s'.format(t2-t1))
 
-#     plt.figure()
-#     plt.plot(r_list, le_list_whole)
-#     plt.xlabel('r')
-#     plt.ylabel(r'lyapunov exponent')
-#     plt.show()
+    # ######################################################################################################33
+    # get data from excel files
+    # ac_amplitude_list = np.linspace(60.1, 80.2, 202)
+    # path = 'D:\\Python_projects\\Physical-Reservoir-Computing-for-MTJs'
+    # le_list = []
+    # for ac_amplitude in ac_amplitude_list:
+    #     path_new = os.path.join(path, f'lyapunov_random_ac{round(ac_amplitude, 1)}_periodic_f_32000000000.0.xlsx')
+    #     df = pd.read_excel(path_new)
+    #     print(df['Le'].values[-1])
+    #     le_list.append(round(df['Le'].values[-1], 2))
+    #
+    # data = {'ac': ac_amplitude_list, 'le': le_list}
+    # df = pd.DataFrame(data)
+    # df.to_excel('result.xlsx')
 
-# import numpy as np
-# import matplotlib.pyplot as plt
-#
-#
-# def lorenz_system(x, y, z, r, b=10, s=8/3):
-#     x_dot = b * (y - x)
-#     y_dot = r * x - y - x * z
-#     z_dot = x * y - s * z
-#     return x_dot, y_dot, z_dot
-#
-#
-# dr = 0.1  # parameter step size
-# r = np.arange(0, 100, dr)  # parameter range
-# dt = 0.0001  # time step
-# t = np.arange(0, 10, dt)  # time range
-#
-# # initialize solution arrays
-# xs = np.empty(len(t) + 1)
-# ys = np.empty(len(t) + 1)
-# zs = np.empty(len(t) + 1)
-#
-# # initial values x0,y0,z0 for the system
-# xs[0], ys[0], zs[0] = (0.1, 1, 1)
-#
-#
-# # Save the plot points coordinates and plot the with a single call to plt.plot
-# # instead of plotting them one at a time, as it's much more efficient
-# r_maxes = []
-# z_maxes = []
-# r_mins = []
-# z_mins = []
-#
-#
-# for R in r:
-#     # Print something to show everything is running
-#     print(f"{R=:.2f}")
-#     for i in range(len(t)):
-#         # approximate numerical solutions to system
-#         x_dot, y_dot, z_dot = lorenz_system(xs[i], ys[i], zs[i], R)
-#         xs[i + 1] = xs[i] + (x_dot * dt)
-#         ys[i + 1] = ys[i] + (y_dot * dt)
-#         zs[i + 1] = zs[i] + (z_dot * dt)
-#     # calculate and save the peak values of the z solution
-#     for i in range(1, len(zs) - 1):
-#         # save the local maxima
-#         if zs[i - 1] < zs[i] and zs[i] > zs[i + 1]:
-#             r_maxes.append(R)
-#             z_maxes.append(zs[i])
-#         # save the local minima
-#         elif zs[i - 1] > zs[i] and zs[i] < zs[i + 1]:
-#             r_mins.append(R)
-#             z_mins.append(zs[i])
-#
-#     # "use final values from one run as initial conditions for the next to stay near the attractor"
-#     xs[0], ys[0], zs[0] = xs[i], ys[i], zs[i]
-#
-# plt.figure('bifurcation diagram')
-# plt.scatter(r_maxes, z_maxes, color="black", s=0.5, alpha=0.2)
-# plt.scatter(r_mins, z_mins, color="red", s=0.5, alpha=0.2)
-# plt.ylabel('z')
-# plt.xlabel('r')
-# plt.show()
+    # test for interpolation functions in Numpy
+    s_in = [1, 0, 1, 0]*10
+    real_input = []
+    for i in s_in:
+        real_input = real_input + [i]*8
+    plt.figure()
+    plt.plot(real_input)
+    plt.title('Input Waveform')
+    plt.ylabel(r'Input')
+    plt.xlabel(r'Time')
+    plt.show()
+
