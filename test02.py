@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from rich.progress import track
 import pandas as pd
 from matplotlib.pyplot import MultipleLocator
+from edge_esn_oscillator import *
 
 """
 this code is designed to calculate the lyapunov exponent function of Lorenz system.
@@ -222,14 +223,52 @@ if __name__ == '__main__':
     # df.to_excel('result.xlsx')
 
     # test for interpolation functions in Numpy
-    s_in = [1, 0, 1, 0]*10
+    # s_in = [1, 0, 1, 0]*10
+    s_in = [150, 180, 200, 180, 150, 120, 100, 120]*4
+    output = [1, 1, 1, 1, 0, 0, 0, 0]*10
     real_input = []
     for i in s_in:
         real_input = real_input + [i]*8
     plt.figure()
-    plt.plot(real_input)
-    plt.title('Input Waveform')
-    plt.ylabel(r'Input')
+    t1 = np.linspace(0, len(output) - 1, len(output))
+    plt.scatter(t1, output, c='green')
+    plt.plot(output, c='green')
+    plt.title('Target Output')
+    plt.ylabel(r'Target')
+    plt.xlabel(r'Time')
+
+    plt.figure()
+    t1 = np.linspace(0, len(output)-1, len(output))
+    plt.plot(output)
+    plt.scatter(t1, output)
+    plt.title('Input triangle signals')
+    plt.ylabel(r'Inputs')
+    plt.xlabel(r'Time')
+    # plt.show()
+
+    mtj_demo = Mtj()
+    mz_whole, mz_list_all = [], []
+    for i in s_in:
+        _, _, mz_list, _ = mtj_demo.time_evolution(dc_amplitude=i, ac_amplitude=0.0, time_consumed=4e-9)
+        mz_whole = np.append(mz_whole, mz_list)
+        mz_list_sampling = mz_list[argrelmax(mz_list)]
+        mz_list_all = np.append(mz_list_all, mz_list_sampling)
+
+    plt.figure()
+    plt.title('reservoirs')
+    t1 = np.linspace(0, 100, len(mz_list_all))
+    plt.plot(t1, mz_list_all)
+    plt.scatter(t1, mz_list_all, c='red')
+    plt.ylabel(r'magnetization')
     plt.xlabel(r'Time')
     plt.show()
+
+    plt.figure()
+    t1 = np.linspace(0, 100, len(mz_whole))
+    plt.plot(t1, mz_whole)
+    plt.title('magnetization')
+    plt.xlabel(r'Time')
+    plt.ylabel(r'magnetization')
+    plt.show()
+
 

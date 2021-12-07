@@ -16,6 +16,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="get_multi">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/get_multi" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="get_weight">
         <serverdata>
           <mappings>

@@ -3,8 +3,6 @@ import os
 import device_module as dm
 import matplotlib.pyplot as plt
 
-# This code applies the virtual nodes method to build the reservoirs
-
 # RC parameters
 positive_voltage_stm = 0.95
 negative_voltage_stm = -0.95
