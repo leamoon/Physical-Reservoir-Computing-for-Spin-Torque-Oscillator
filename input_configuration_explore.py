@@ -1,4 +1,4 @@
-import edge_esn_oscillator
+import mtj_module
 import numpy as np
 import os
 import sys
@@ -21,7 +21,7 @@ def input_configuration_test(dc_current_list, ac_current, consuming_time, freque
         mz_amplitude_list = np.zeros((len(dc_current_list), 2))
         for i in track(range(len(dc_current_list))):
             dc_current = dc_current_list[i]
-            device = edge_esn_oscillator.Mtj(initial_m[0], initial_m[1], initial_m[2]+2)
+            device = mtj_module.Mtj(initial_m[0], initial_m[1], initial_m[2])
             device.time_evolution(dc_amplitude=dc_current, ac_amplitude=ac_current, time_consumed=2e-9, f_ac=frequency)
             mx_list, my_list, mz_list, _, m0 = device.time_evolution(dc_amplitude=dc_current, ac_amplitude=ac_current, 
                                                                      time_consumed=consuming_time, f_ac=frequency)
@@ -66,7 +66,7 @@ def  trajectories_detect(frequency, dc_current, ac_current, consuming_time=1e-9)
     # initial time
     # consuming_time = 1e-9
     initial_state = np.random.random(3)
-    trace = edge_esn_oscillator.Mtj(initial_state[0], initial_state[1], initial_state[2]+2)
+    trace = mtj_module.Mtj(initial_state[0], initial_state[1], initial_state[2])
     trace.time_evolution(dc_amplitude=dc_current, ac_amplitude=ac_current, 
                          time_consumed=2e-9, f_ac=frequency)                
 
@@ -120,6 +120,7 @@ def  trajectories_detect(frequency, dc_current, ac_current, consuming_time=1e-9)
 
 def plot_multi_time(consuming_time_list, save_data_path):
     if not os.path.exists(save_data_path):
+        print('no such path')
         sys.exit()
     
     plt.figure()

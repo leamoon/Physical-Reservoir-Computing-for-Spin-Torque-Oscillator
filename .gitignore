@@ -160,3 +160,7 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# cunstom data saving path
+.history/
+input_configuration_data/
+error_data/
