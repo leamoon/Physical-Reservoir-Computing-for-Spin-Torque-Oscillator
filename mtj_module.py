@@ -73,11 +73,6 @@ def real_time_generator(task='Delay', superposition_number=1, length_signals=100
                 train_signal = np.logical_xor(s_in, np.append(s_in[-int(superposition_number):], s_in[:-int(
                     superposition_number)])).astype(int)
 
-        # print('############################################################')
-        # print('inputs :{}'.format(s_in))
-        # print('target :{}'.format(train_signal))
-        # print('############################################################')
-
         return s_in, train_signal
 
     except Exception as error:
@@ -162,8 +157,8 @@ class Mtj:
         return mx_list, my_list, mz_list, t_list, self.m
 
     def get_reservoirs(self, dc_current=100, ac_current=0.0, consuming_time=1e-8, size=16, f_ac=32e9):
-        mx_list, my_list, mz_list, _ = self.time_evolution(dc_amplitude=dc_current, ac_amplitude=ac_current,
-                                                           time_consumed=consuming_time, f_ac=f_ac)
+        mx_list, my_list, mz_list, _, _ = self.time_evolution(dc_amplitude=dc_current, ac_amplitude=ac_current,
+                                                              time_consumed=consuming_time, f_ac=f_ac)
         try:
             mz_list_all = mz_list[argrelmax(mz_list)]
             xp = np.linspace(1, len(mz_list_all), len(mz_list_all))
@@ -188,7 +183,7 @@ class Mtj:
     def real_time_train(self, number_wave, nodes_stm, file_path='weight_matrix_oscillator_xuezhao',
                         visual_process=False,
                         save_index=True, alert_index=False, superposition=0, time_consume_all=1e-8, ac_amplitude=0.0,
-                        f_ac=32e9, recover_weight=False, task='Delay'):
+                        f_ac=32e9, recover_weight=False, task='Delay', positive_dc_current=200, negative_dc_current=100):
         """
         a function used to train weight matrix of readout layer in classification task
         :param file_path: the path of weight_matrix
@@ -227,28 +222,28 @@ class Mtj:
         y_out_list, x_final_matrix, plus_visual_mz, minus_visual_mz = [], [], [], []
         plus_time, minus_time, time_index = [], [], 0
 
-        # it seems to build a function better
-        positive_dc_current = 200
-        negative_dc_current = 100
+        # # it seems to build a function better
+        # positive_dc_current = 200
+        # negative_dc_current = 100
 
         s_in, train_signal = real_time_generator(task=f'{task}', superposition_number=superposition,
                                                  length_signals=number_wave)
         # pre-training
         self.time_evolution(dc_amplitude=positive_dc_current, ac_amplitude=ac_amplitude,
-                            time_consumed=time_consume_all,
+                            time_consumed=1e-8,
                             f_ac=f_ac)
 
         trace_mz = []
 
-        for i in range(len(s_in)):
+        for i in track(range(len(s_in))):
             if s_in[i] == 1:
                 dc_current1 = positive_dc_current
-                _, _, mz_list_chao, t_list2 = self.time_evolution(dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,
+                _, _, mz_list_chao, t_list2, _ = self.time_evolution(dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,
                                                                   time_consumed=time_consume_all, f_ac=f_ac)
 
             else:
                 dc_current1 = negative_dc_current
-                _, _, mz_list_chao, t_list2 = self.time_evolution(dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,
+                _, _, mz_list_chao, t_list2, _ = self.time_evolution(dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,
                                                                   time_consumed=time_consume_all, f_ac=f_ac)
 
             try:
@@ -380,7 +375,7 @@ class Mtj:
     def real_time_test(self, test_number=80, nodes_stm=80, file_path='weight_matrix_oscillator_xuezhao',
                        visual_index=True,
                        alert_index=False, superposition=0, time_consume_all=1e-8, ac_amplitude=0.0, f_ac=32e9,
-                       task='Delay'):
+                       task='Delay', positive_dc_current=200, negative_dc_current=100):
         """
         a function used to test the ability of classification of chaotic-MTJ echo state network
         :param test_number: the number of test waves form, default:80
@@ -411,9 +406,9 @@ class Mtj:
         y_out_list, x_final_matrix, plus_visual_mz, minus_visual_mz = [], [], [], []
         plus_time, minus_time, time_index = [], [], 0
 
-        # it seems to build a function better
-        positive_dc_current = 200
-        negative_dc_current = 100
+        # # it seems to build a function better
+        # positive_dc_current = 200
+        # negative_dc_current = 100
 
         s_in, train_signal = real_time_generator(task=f'{task}', superposition_number=superposition,
                                                  length_signals=test_number)
@@ -421,18 +416,18 @@ class Mtj:
         trace_mz = []
         # pre-training
         self.time_evolution(dc_amplitude=positive_dc_current, ac_amplitude=ac_amplitude,
-                            f_ac=f_ac, time_consumed=time_consume_all)
+                            f_ac=f_ac, time_consumed=1e-8)
         # time_consume_all = 1e-8
 
         for i_1 in track(range(len(s_in))):
             if s_in[i_1] == 1:
                 dc_current1 = positive_dc_current
-                _, _, mz_list_chao, t_list2 = self.time_evolution(dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,
+                _, _, mz_list_chao, t_list2, _ = self.time_evolution(dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,
                                                                   f_ac=f_ac, time_consumed=time_consume_all)
 
             else:
                 dc_current1 = negative_dc_current
-                _, _, mz_list_chao, t_list2 = self.time_evolution(dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,
+                _, _, mz_list_chao, t_list2, _ = self.time_evolution(dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,
                                                                   f_ac=f_ac,
                                                                   time_consumed=time_consume_all)
 

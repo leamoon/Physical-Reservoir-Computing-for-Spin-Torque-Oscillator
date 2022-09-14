@@ -16,13 +16,25 @@ This code is for detecting the best input configuration of physical reservoir co
 np.random.seed(110)
 initial_m = np.random.random(3)
 
-def input_configuration_test(dc_current_list, ac_current, consuming_time, frequency):
+def input_configuration_test(dc_current_list, ac_current, consuming_time, frequency, random_initial=False):
     try:
+        # initial_m = np.random.random(3)
+        save_data_path = f'{os.getcwd()}/input_configuration_data'
+        if not os.path.exists(save_data_path):
+            os.makedirs(save_data_path)
+        repeat_index = 0
+        while os.path.exists(f'{save_data_path}/input_configuraiton_{consuming_time*1e9}e-9_{repeat_index}.xlsx'):
+            repeat_index += 1
+        save_file_path = f'{save_data_path}/input_configuraiton_{consuming_time*1e9}e-9_{repeat_index}.xlsx'
+
+        if random_initial:
+            initial_m = np.random.random(3)
         mz_amplitude_list = np.zeros((len(dc_current_list), 2))
+        index_valid_list = np.full((len(dc_current_list), 1), True, dtype=bool)
         for i in track(range(len(dc_current_list))):
             dc_current = dc_current_list[i]
             device = mtj_module.Mtj(initial_m[0], initial_m[1], initial_m[2])
-            device.time_evolution(dc_amplitude=dc_current, ac_amplitude=ac_current, time_consumed=2e-9, f_ac=frequency)
+            device.time_evolution(dc_amplitude=dc_current, ac_amplitude=ac_current, time_consumed=1e-8, f_ac=frequency)
             mx_list, my_list, mz_list, _, m0 = device.time_evolution(dc_amplitude=dc_current, ac_amplitude=ac_current, 
                                                                      time_consumed=consuming_time, f_ac=frequency)
             # obtain the amplitude of mz
@@ -30,17 +42,20 @@ def input_configuration_test(dc_current_list, ac_current, consuming_time, freque
                 mz_amplitude_list[i, 0] = np.max(mz_list[argrelmax(mz_list)])
             else:
                 mz_amplitude_list[i, 0] = np.max(mz_list)
+                print(f'time is not enough (max case). dc_current: {dc_current}. consumtion: {consuming_time}')
+                index_valid_list[i, 0] = False
 
             if len(mz_list[argrelmin(mz_list)]) != 0:   
                 mz_amplitude_list[i, 1] = np.min(mz_list[argrelmin(mz_list)])
             else:
                 mz_amplitude_list[i, 1] = np.min(mz_list)
+                print(f'time is not enough (min case). dc_current: {dc_current}. consumtion: {consuming_time}')
+                index_valid_list[i, 0] = False
 
-            df = pd.DataFrame({'dc_current': dc_current_list, 'mz_amplitude_max': mz_amplitude_list[:, 0], 'mz_amplitude_min': mz_amplitude_list[:, 1]})
-            save_data_path = f'{os.getcwd()}/input_configuration_data'
-            if not os.path.exists(save_data_path):
-                os.makedirs(save_data_path)
-            df.to_excel(f'{save_data_path}/input_configuraiton_{consuming_time*1e9}e-9.xlsx')
+            df = pd.DataFrame({'dc_current': dc_current_list, 'mz_amplitude_max': mz_amplitude_list[:, 0], 'mz_amplitude_min': mz_amplitude_list[:, 1], 
+                                'invalid': index_valid_list[:, 0]})
+            
+            df.to_excel(save_file_path)
         print('saving successfully')
 
         # fig
@@ -62,10 +77,13 @@ def input_configuration_test(dc_current_list, ac_current, consuming_time, freque
         df.to_excel(f'{save_data_path}/error_input_configuraiton_dc{dc_current}_{consuming_time*1e9}e-9.xlsx')
 
 
-def  trajectories_detect(frequency, dc_current, ac_current, consuming_time=1e-9):
+def  trajectories_detect(frequency, dc_current, ac_current, consuming_time=1e-9, random_initial=False):
     # initial time
     # consuming_time = 1e-9
-    initial_state = np.random.random(3)
+    if random_initial:
+        initial_state = np.random.random(3)
+    else:
+        initial_state = initial_m
     trace = mtj_module.Mtj(initial_state[0], initial_state[1], initial_state[2])
     trace.time_evolution(dc_amplitude=dc_current, ac_amplitude=ac_current, 
                          time_consumed=2e-9, f_ac=frequency)                
@@ -118,6 +136,7 @@ def  trajectories_detect(frequency, dc_current, ac_current, consuming_time=1e-9)
             plt.pause(0.1)
             plt.ioff()
 
+
 def plot_multi_time(consuming_time_list, save_data_path):
     if not os.path.exists(save_data_path):
         print('no such path')
@@ -129,22 +148,52 @@ def plot_multi_time(consuming_time_list, save_data_path):
 
     for consuming_time in consuming_time_list:
         file_name = f'{save_data_path}/input_configuraiton_{consuming_time*1e9}e-9.xlsx'
-        data = pd.read_excel(file_name)
-        plt.plot(data['dc_current'], data['mz_amplitude_max'], label=f'{consuming_time*1e9}e-9s')
+        if os.path.exists(file_name):
+            raw_data = pd.read_excel(file_name)
+            data = raw_data.drop(raw_data[raw_data['invalid']==False].index)
+            plt.plot(data['dc_current'], data['mz_amplitude_max'], label=f'{consuming_time*1e9}e-9s max')
+            # plt.plot(data['dc_current'], data['mz_amplitude_min'], label=f'{consuming_time*1e9}e-9s min')
 
     plt.legend()
     plt.show()        
 
 
+
 if __name__ == '__main__':
-    dc_current_list = np.linspace(10, 3000, 2991, dtype=int)
-    consuming_time_list = [5e-10, 7e-10, 1e-9, 2e-9]
+    dc_current_list = np.linspace(10, 1000, 991, dtype=int)
+    # dc_current_list = np.linspace(40, 50, 11, dtype=int)
+    consuming_time_list = [5e-10, 7e-10, 9e-10, 1e-9, 2e-9]
+    consuming_time_list = [1e-9]*20
+
     # dc_current_list = [204]
     # input_configuration_test(dc_current_list=dc_current_list, ac_current=0, consuming_time=5e-10, frequency=0)
-    # trajectories_detect(frequency=0, dc_current=204, ac_current=0, consuming_time=5e-10)
+    trajectories_detect(frequency=0, dc_current=100, ac_current=0, consuming_time=1e-8, random_initial=True)
     # with Pool() as pool:
-    #     pool.starmap(input_configuration_test, 
-    #                  zip(itertools.repeat(dc_current_list), itertools.repeat(0), 
-    #                      consuming_time_list, itertools.repeat(0)))
+        # pool.starmap(input_configuration_test, 
+                    #  zip(itertools.repeat(dc_current_list), itertools.repeat(0), 
+                        #  consuming_time_list, itertools.repeat(0), itertools.repeat(True)))
+    # plt.figure()
+    # plot_multi_time(consuming_time_list=consuming_time_list, save_data_path='input_configuration_data/constant_initial')
+    # plot_multi_time(consuming_time_list=consuming_time_list, save_data_path='input_configuration_data/random_seed(1)_random_initial')
+    # plt.legend()
+    # # plt.show()  
 
-    plot_multi_time(consuming_time_list=consuming_time_list, save_data_path='input_configuration_data')
+
+    # for i in consuming_time_list:
+    #     input_configuration_test(dc_current_list=dc_current_list, ac_current=0, consuming_time=i, frequency=0, random_initial=True)
+
+
+    # fig for error bar in random input case
+    plt.figure()
+    consuming_time_list = [1e-9]*20
+    consuming_time_list = [1, 2, 3, 4]
+    plt.xlabel(r'DC current(Oe)', size=16)
+    plt.ylabel(r'$M_{z}$ amplitude (a.u.)', size=16)
+    save_data_path='input_configuration_data/error_bar_random_initial'
+    for i in range(len(consuming_time_list)):
+        file_name = f'{save_data_path}/input_configuraiton_1.0e-9_{i+21}.xlsx'
+        raw_data = pd.read_excel(file_name)
+        data = raw_data.drop(raw_data[raw_data['invalid']==False].index)
+        plt.plot(data['dc_current'], data['mz_amplitude_max'], label=f'curve {i}')
+    plt.legend()
+    plt.show()
