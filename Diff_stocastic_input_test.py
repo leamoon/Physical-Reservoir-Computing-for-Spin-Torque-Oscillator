@@ -35,8 +35,8 @@ def input_current_task_test(node_list, posibility_0, superposition_list):
             
 
 if __name__ == '__main__':
-    # dc current (100, 140), (120, 140), (200, 400), (200, 300), (140, 400), (100, 200)
-    # input_current_task_test(positive_dc_current=100, negative_dc_current=140)
+
+    # test for different pair
     posibility_list = np.round(np.linspace(0.1, 0.9, 9), 1)
     nodes = [16, 20, 30, 40]
     superposition_list = [1, 2, 3, 4]

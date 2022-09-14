@@ -18,6 +18,14 @@ if __name__ == '__main__':
         plt.plot(data['dc_current'], data['mz_amplitude_max'], label=f'curve {i}')
     
     # index line
-    x = [91]*len()
+    x = [90]*20
+    y = np.linspace(-1, 1, 20)
+    plt.plot(x, y, '-', linewidth=5, alpha=0.5)
+
+    x = [300]*20
+    y = np.linspace(-1, 1, 20)
+    plt.plot(x, y, '-', linewidth=5, alpha=0.5)
+
+    plt.ylim(0, 0.55)
     plt.legend()
     plt.show()
