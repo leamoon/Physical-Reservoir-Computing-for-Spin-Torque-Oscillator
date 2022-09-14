@@ -37,7 +37,7 @@ def email_alert(subject='Default', receiver='1060014562@qq.com'):
     return 0
 
 
-def real_time_generator(task='Delay', superposition_number=1, length_signals=100):
+def real_time_generator(task='Delay', superposition_number=1, length_signals=100, posibility_0=0.5):
     """
     a function used to associate training delay task and Parity check task
     :param task: 'Delay' or 'Parity' corresponds to different task
@@ -46,7 +46,8 @@ def real_time_generator(task='Delay', superposition_number=1, length_signals=100
     :return: input signals and train signals
     """
     try:
-        s_in = np.random.randint(0, 2, length_signals)
+        # s_in = np.random.randint(0, 2, length_signals)
+        s_in = np.random.choice([0, 1], size=length_signals, p=[posibility_0, 1-posibility_0])
 
         if superposition_number == 0:
             train_signal = s_in
@@ -183,7 +184,7 @@ class Mtj:
     def real_time_train(self, number_wave, nodes_stm, file_path='weight_matrix_oscillator_xuezhao',
                         visual_process=False,
                         save_index=True, alert_index=False, superposition=0, time_consume_all=1e-8, ac_amplitude=0.0,
-                        f_ac=32e9, recover_weight=False, task='Delay', positive_dc_current=200, negative_dc_current=100):
+                        f_ac=32e9, recover_weight=False, task='Delay', positive_dc_current=200, negative_dc_current=100, posibility_0=0.5):
         """
         a function used to train weight matrix of readout layer in classification task
         :param file_path: the path of weight_matrix
@@ -227,7 +228,7 @@ class Mtj:
         # negative_dc_current = 100
 
         s_in, train_signal = real_time_generator(task=f'{task}', superposition_number=superposition,
-                                                 length_signals=number_wave)
+                                                 length_signals=number_wave, posibility_0=posibility_0)
         # pre-training
         self.time_evolution(dc_amplitude=positive_dc_current, ac_amplitude=ac_amplitude,
                             time_consumed=1e-8,
@@ -375,7 +376,7 @@ class Mtj:
     def real_time_test(self, test_number=80, nodes_stm=80, file_path='weight_matrix_oscillator_xuezhao',
                        visual_index=True,
                        alert_index=False, superposition=0, time_consume_all=1e-8, ac_amplitude=0.0, f_ac=32e9,
-                       task='Delay', positive_dc_current=200, negative_dc_current=100):
+                       task='Delay', positive_dc_current=200, negative_dc_current=100, posibility_0=0.5):
         """
         a function used to test the ability of classification of chaotic-MTJ echo state network
         :param test_number: the number of test waves form, default:80
@@ -411,7 +412,7 @@ class Mtj:
         # negative_dc_current = 100
 
         s_in, train_signal = real_time_generator(task=f'{task}', superposition_number=superposition,
-                                                 length_signals=test_number)
+                                                 length_signals=test_number, posibility_0=posibility_0)
 
         trace_mz = []
         # pre-training
@@ -509,10 +510,10 @@ class Mtj:
         # calculate the error
         # error_learning = np.var(np.array(train_signal) - np.array(y_out_list))
         error_learning = (np.square(np.array(train_signal) - np.array(y_out_list))).mean()
-        print('Test Error:{}'.format(error_learning))
-        print('----------------------------------------------------------------')
-
         capacity = pow(np.corrcoef(y_out_list, train_signal)[0, 1], 2)
+        print('Test Error:{}'.format(error_learning))
+        print(f'$Cor^{2}$: {capacity}')
+        print('----------------------------------------------------------------')
 
         if alert_index:
             email_alert(subject='error of STM : {}'.format(error_learning))

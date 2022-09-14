@@ -164,4 +164,4 @@ cython_debug/
 .history/
 input_configuration_data/
 error_data/
-weight_dc_100_140/
+weight*
