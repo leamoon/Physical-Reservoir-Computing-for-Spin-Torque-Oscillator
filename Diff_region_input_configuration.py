@@ -31,7 +31,7 @@ def collect_results(positive_dc_current_list, negative_dc_current_list):
                           time_consume_all=3e-9, task='Delay', positive_dc_current=positive_dc_current_list[i], negative_dc_current=negative_dc_current_list[i])
         
         cor_list[i, 0] = cor_2
-        file_save_path = f'diff_pair_current_500_positive_node20_superposition2_Delay_3e-9.csv'
+        file_save_path = f'diff_pair_current_50_positive_node20_superposition2_Delay_3e-9.csv'
         df = pd.DataFrame({'positive': positive_dc_current_list, 'negative': negative_dc_current_list, 'cor_2': cor_list[:, 0]})
         df.to_csv(file_save_path)
 
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     
     negative_dc_current_list = np.linspace(120, 1000, 50, dtype=int)
-    positive_dc_current_list = [500]*len(negative_dc_current_list)
+    positive_dc_current_list = [50]*len(negative_dc_current_list)
 
     # print(negative_dc_current_list)
 

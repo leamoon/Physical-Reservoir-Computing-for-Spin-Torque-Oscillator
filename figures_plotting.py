@@ -29,3 +29,42 @@ if __name__ == '__main__':
     plt.ylim(0, 0.55)
     plt.legend()
     plt.show()
+
+    # ####################################################
+    # different ration of inputs
+    # ####################################################
+
+    posibility_list = np.round(np.linspace(0.1, 0.9, 9), 1)
+    nodes = [16, 20, 30, 40]
+    superposition_list = [1, 2, 3, 4]
+    save_data_path = f'data_stochastic_'
+    # plt.figure()
+    # plt.xlabel(r'$T_{delay}$', size=16)
+    # plt.ylabel(r'$Cor^{2}$', size=16)
+    for node in nodes:
+        plt.figure()
+        plt.xlabel(r'$T_{delay}$', size=16)
+        plt.ylabel(r'$Cor^{2}$', size=16)
+        plt.title(r'Short Term Memory Task', size=12)
+        for posibiliy in posibility_list:
+            data_name = f'data_positibility{posibiliy}_node_{node}_3e-9.csv'
+            data = pd.read_csv(f'{save_data_path}/{data_name}')
+            plt.plot(data['superposition'], data['cor_2_delay'], label=f'node:{node} posibility: {posibiliy}')
+            plt.scatter(data['superposition'], data['cor_2_delay'])
+    
+        plt.legend()
+        plt.show()
+
+    for node in nodes:
+        plt.figure()
+        plt.xlabel(r'$T_{delay}$', size=16)
+        plt.ylabel(r'$Cor^{2}$', size=16)
+        plt.title(r'Parity Check Task', size=12)
+        for posibiliy in posibility_list:
+            data_name = f'data_positibility{posibiliy}_node_{node}_3e-9.csv'
+            data = pd.read_csv(f'{save_data_path}/{data_name}')
+            plt.plot(data['superposition'], data['cor_2_pc'], label=f'node:{node} posibility: {posibiliy}')
+            plt.scatter(data['superposition'], data['cor_2_pc'])
+    
+        plt.legend()
+        plt.show()
