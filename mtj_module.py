@@ -12,6 +12,9 @@ from rich.progress import track
 from scipy.interpolate import interp1d
 from scipy.signal import argrelmax
 
+"""
+    This module is built by Xuezhao for simulating the baisc MTJ class.
+"""
 
 def email_alert(subject='Default', receiver='1060014562@qq.com'):
     """
@@ -62,18 +65,6 @@ def real_time_generator(task='Delay', superposition_number=1, length_signals=100
                     train_signal = train_signal + temp_signal
                     train_signal[np.argwhere(train_signal == 2)] = 0
 
-            elif task == 'AND':
-                train_signal = np.logical_and(s_in, np.append(s_in[-int(superposition_number):], s_in[:-int(
-                    superposition_number)])).astype(int)
-
-            elif task == 'OR':
-                train_signal = np.logical_or(s_in, np.append(s_in[-int(superposition_number):], s_in[:-int(
-                    superposition_number)])).astype(int)
-
-            elif task == 'XOR':
-                train_signal = np.logical_xor(s_in, np.append(s_in[-int(superposition_number):], s_in[:-int(
-                    superposition_number)])).astype(int)
-
         return s_in, train_signal
 
     except Exception as error:
@@ -86,7 +77,7 @@ class Mtj:
         # initial states of magnetization
         self.x0 = x0
         self.y0 = y0
-        self.z0 = z0 + 2
+        self.z0 = z0 + 2 # for positive PMA
         self.t_step = t_step
 
         # hyper parameters
@@ -236,7 +227,8 @@ class Mtj:
 
         trace_mz = []
 
-        for i in track(range(len(s_in))):
+        # for i in track(range(len(s_in))):
+        for i in range(len(s_in)):
             if s_in[i] == 1:
                 dc_current1 = positive_dc_current
                 _, _, mz_list_chao, t_list2, _ = self.time_evolution(dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,
@@ -420,7 +412,8 @@ class Mtj:
                             f_ac=f_ac, time_consumed=1e-8)
         # time_consume_all = 1e-8
 
-        for i_1 in track(range(len(s_in))):
+        # for i_1 in track(range(len(s_in))):
+        for i_1 in range(len(s_in)):    
             if s_in[i_1] == 1:
                 dc_current1 = positive_dc_current
                 _, _, mz_list_chao, t_list2, _ = self.time_evolution(dc_amplitude=dc_current1, ac_amplitude=ac_amplitude,

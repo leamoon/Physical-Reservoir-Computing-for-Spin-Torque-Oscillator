@@ -9,6 +9,12 @@ from rich.progress import track
 from multiprocessing import Pool
 import itertools
 
+"""
+    This code has some functions to detect the STM and PC tasks performace under different dc current pairs.
+    Author: Xuezhao WU
+    Date: 2022.Sep.16
+"""
+
 # random seed, help for production
 np.random.seed(110)
 

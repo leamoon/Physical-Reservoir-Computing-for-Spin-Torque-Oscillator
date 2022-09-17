@@ -9,6 +9,12 @@ from rich.progress import track
 from multiprocessing import Pool
 import itertools
 
+"""
+    This code is used to detect the influence of different input patterns. (The ratio of 1 & 0)
+    Author: Xuezhao WU
+    Date: 2022.Sep.16
+"""
+
 # random seed, help for production
 np.random.seed(110)
 
@@ -54,15 +60,16 @@ if __name__ == '__main__':
     superposition_list = [1, 2, 3, 4]
     superposition_list = np.linspace(1, 10, 10, dtype=int)
     time_list = [2e-9, 4e-9, 6e-9, 7e-9, 10e-9, 20e-9]
+    time_list = [7e-9]
     # print(superposition_list)
     # sys.exit()
     # print(posibility_list)
     # for posibility in posibility_list:
     #     input_current_task_test(node_list=nodes, posibility_0=posibility, superposition_list=superposition_list)
-    for evolution_time in time_list:
+    for evolution_time in track(time_list):
         for node in nodes:
             for superposition in superposition_list:
-                with Pool(10) as pool:
+                with Pool() as pool:
                     pool.starmap(input_current_task_train, 
                                 zip(itertools.repeat(node), posibility_list, itertools.repeat(superposition), itertools.repeat(evolution_time)))
 
@@ -70,3 +77,5 @@ if __name__ == '__main__':
     for evolution_time in time_list:
         for i in posibility_list:
             input_current_task_train(posibility_0=i, time_comsuming=evolution_time)
+    
+    mtj_module.email_alert('7e-9 task is finished !')

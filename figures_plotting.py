@@ -2,6 +2,12 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+"""
+    This code is used to plot useful figures in weekly report and final version of paper.
+    Author: Xuezhao WU
+    Date: 2022.Sep.16
+"""
+
 if __name__ == '__main__':
 
     # fig

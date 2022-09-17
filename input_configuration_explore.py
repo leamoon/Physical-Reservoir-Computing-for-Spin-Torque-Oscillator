@@ -10,7 +10,9 @@ from multiprocessing import Pool
 import itertools
 
 """
-This code is for detecting the best input configuration of physical reservoir computing system build by one single spin-torque oscillator
+    This code is for detecting the best input configuration of physical reservoir computing system build by one single spin-torque oscillator
+    Author: Xuezhao WU
+    Date: 2022.Sep.12
 """
 
 np.random.seed(110)
