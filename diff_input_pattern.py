@@ -35,7 +35,7 @@ def input_current_task_test(node_list, posibility_0, superposition_list, time_co
         cor_list = np.zeros((2, len(superposition_list)))
         for i in range(len(superposition_list)):
             superposition = superposition_list[i]
-            capacity_delay = device.real_time_test(test_number=100, nodes_stm=node, file_path=f'weight_evolution_{time_comsuming}/weight_posibility_{posibility_0}', superposition=superposition, visual_index=False, 
+            capacity_delay = device.real_time_test(test_number=100, nodes_stm=node, file_path=f'weight_evolution_{time_comsuming}/weight_posibility_{posibility_0}', superposition=superposition, visual_index=True, 
                                                 time_consume_all=time_comsuming, task='Delay', posibility_0=posibility_0)
             capacity_parity = device.real_time_test(test_number=100, nodes_stm=node, file_path=f'weight_evolution_{time_comsuming}/weight_posibility_{posibility_0}', superposition=superposition, visual_index=False, 
                                                 time_consume_all=time_comsuming, task='Parity', posibility_0=posibility_0)
@@ -52,6 +52,11 @@ def input_current_task_test(node_list, posibility_0, superposition_list, time_co
             
 
 if __name__ == '__main__':
+    # single test for IPC task
+    node_list = [20]
+    superposition_list = [0]
+    input_current_task_test(node_list, posibility_0=0.1, superposition_list=superposition_list, time_comsuming=7e-9)
+    sys.exit()
 
     # test for different pair
     posibility_list = np.round(np.linspace(0.1, 0.9, 9), 1)
