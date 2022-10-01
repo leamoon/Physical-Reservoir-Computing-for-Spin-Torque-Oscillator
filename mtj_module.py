@@ -164,7 +164,7 @@ class Mtj:
             reservoir_states[:, -1] = mz_sampling
             reservoir_states[-1, :] = np.array([mx_list[-1], my_list[-1], mz_list[-1]])
 
-            return reservoir_states
+            return reservoir_states, mz_sampling
 
         except Exception as error:
             print('----------------error---------------------')

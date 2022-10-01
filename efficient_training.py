@@ -13,8 +13,7 @@ from scipy.interpolate import interp1d
 
 np.random.seed(110)
 
-def save_random_reservoir(length=10000, ratio=0.5, consuming_time=3e-9, ac_current=0.0):
-    save_path='radom_input_data'
+def save_random_reservoir(length=10000, ratio=0.5, consuming_time=3e-9, ac_current=0.0, save_path='radom_input_data'):
     if not os.path.exists(save_path):
         os.mkdir(save_path)
     if os.path.exists(f'{save_path}/input_ratio_{ratio}_{consuming_time}_{ac_current}.csv'):
@@ -43,10 +42,10 @@ def save_random_reservoir(length=10000, ratio=0.5, consuming_time=3e-9, ac_curre
     data = pd.DataFrame(dict([(key, pd.Series(value)) for key, value in reservoir_data.items()])) 
     data.to_csv(f'{save_path}/input_ratio_{ratio}_{consuming_time}_{ac_current}.csv')
     print('save data successfully!')
-    mtj_module.email_alert(f'The {consuming_time} {ratio} task is finished.')
+    # mtj_module.email_alert(f'The {consuming_time} {ratio} task is finished.')
 
 
-def efficient_training(save_path='radom_input_data', consuming_time=3e-9, ac_current=0.0):
+def efficient_training(save_path='radom_input_data', consuming_time=3e-9, ac_current=0.0, retrain=False):
     if not os.path.exists(save_path):
         sys.exit('No such directionary')
     nodes = [2, 5, 10, 16, 20, 30, 40, 50, 70, 90, 100]
@@ -56,7 +55,7 @@ def efficient_training(save_path='radom_input_data', consuming_time=3e-9, ac_cur
 
     for ratio in track(posibility_list):
         # loading datas
-        input_data_file = pd.read_csv(f'{save_path}/input_ratio_{ratio}_{consuming_time}.csv')
+        input_data_file = pd.read_csv(f'{save_path}/input_ratio_{ratio}_{consuming_time}_{ac_current}.csv')
         s_in = input_data_file['s_in'].to_numpy()
         file_path = f'weight_evolution_{consuming_time}/weight_posibility_{ratio}'
         if not os.path.exists(file_path):
@@ -65,9 +64,12 @@ def efficient_training(save_path='radom_input_data', consuming_time=3e-9, ac_cur
         for task in task_list:
             for node in nodes:
                 for superposition in superposition_list:
-                    if os.path.exists(f'{file_path}/STM_{task}_{superposition}_node_{node}_ac_0.0.npy'):
+                    if os.path.exists(f'{file_path}/STM_{task}_{superposition}_node_{node}_ac_{ac_current}.npy'):
                         print('The weight aleardy existed')
-                        continue
+                        if not retrain:
+                            continue
+                        else:
+                            print(f'STM_{task}_{superposition}_node_{node}_ac_{ac_current}.npy retrain again !')
                         # return 'The weight aleardy existed'
 
                     if task == 'Delay':
@@ -104,17 +106,100 @@ def efficient_training(save_path='radom_input_data', consuming_time=3e-9, ac_cur
                     
                     np.save(f'{file_path}/STM_{task}_{superposition}_node_{node}_ac_{ac_current}.npy', weight_out)
 
+
+def efficient_test(input_path='test_random_input', consuming_time=3e-9, ac_current=0.0, save_path='test_results'):
+    if not os.path.exists(input_path):
+        sys.exit('No such input-data directionary')
+    if not os.path.exists(f'{save_path}/{consuming_time}'):
+        os.makedirs(f'{save_path}/{consuming_time}')
+    nodes = [2, 5, 10, 16, 20, 30, 40, 50, 70, 90, 100]
+    superposition_list = np.linspace(1, 10, 10, dtype=int)
+    posibility_list = np.round(np.linspace(0.1, 0.9, 9), 1)
+    task_list = ['Delay', 'Parity']
+
+    for ratio in track(posibility_list):
+
+        # checking the weight matrix
+        file_path = f'weight_evolution_{consuming_time}/weight_posibility_{ratio}'
+        if not os.path.exists(file_path):
+            print(f'no such folder -> {file_path}')
+            continue
+
+        # loading datas
+        if not os.path.exists(f'{input_path}/input_ratio_{ratio}_{consuming_time}_{ac_current}.csv'):
+            continue
+        input_data_file = pd.read_csv(f'{input_path}/input_ratio_{ratio}_{consuming_time}_{ac_current}.csv')
+        s_in = input_data_file['s_in'].to_numpy()
+        
+
+        for task in task_list:
+            for node in nodes:
+                for superposition in superposition_list:
+                    if not os.path.exists(f'{file_path}/STM_{task}_{superposition}_node_{node}_ac_{ac_current}.npy'):
+                        print(f'no such weight file')
+                        continue
+                    else:
+                        weight_out = np.load(f'{file_path}/STM_{task}_{superposition}_node_{node}_ac_{ac_current}.npy')
+                    # save_path & file_name
+                    data_save_path = f'{save_path}/{consuming_time}/{task}{superposition}_node{node}_ratio{ratio}_ac{ac_current}.csv'
+                    correlation_list = np.zeros((1, 10))
+
+                    if task == 'Delay':
+                        test_signal = np.append(s_in[-int(superposition):], s_in[:-int(superposition)])
+
+                    elif task == 'Parity':
+                        test_signal = s_in
+                        for super_value in range(1, superposition + 1):
+                            temp_signal = np.append(s_in[-int(super_value):], s_in[:-int(super_value)])
+                            test_signal = test_signal + temp_signal
+                            test_signal[np.argwhere(test_signal == 2)] = 0
+
+                    x_final_matrix = []
+                    for index in range(len(s_in)):
+                        # update weight
+                        mz_amplitude = input_data_file[f'mz_list_amplitude_{index}']
+                        mz_amplitude = mz_amplitude[~np.isnan(mz_amplitude)]
+                        xp = np.linspace(1, len(mz_amplitude), len(mz_amplitude))
+                        fp = mz_amplitude
+                        sampling_x_values = np.linspace(1, len(mz_amplitude), node)
+                        f = interp1d(xp, fp, kind='quadratic')
+                        x_matrix = f(sampling_x_values)
+                        x_matrix = np.append(x_matrix.T, 1).reshape(-1, 1)
+                        x_final_matrix.append(x_matrix.T.tolist()[0])
+                            
+                    x_final_matrix = np.asmatrix(x_final_matrix).T
+                    x_matrix_split_list = np.split(x_final_matrix, 10, axis=1)
+                    y_test_list = [np.dot(weight_out, i) for i in x_matrix_split_list]
+                    test_singal_split = np.split(test_signal, 10)
+                    for i in range(10):
+                        correlation_list[0, i] = pow(np.corrcoef(y_test_list[i].A, test_singal_split[i])[0, 1], 2)
+                    print(f'test performance: {correlation_list[0, 0]}, ratio: {ratio}, task: {task}, superposition: {superposition}')
+                    save_data = pd.DataFrame({'correlation^2_list': correlation_list[0, :]})
+                    save_data.to_csv(f'{data_save_path}', index_label='number')
+
 if __name__ == '__main__':
     time_list = [2e-9, 3e-9, 4e-9, 6e-9, 7e-9, 10e-9, 20e-9]
-    time_list = [2e-9, 3e-9, 4e-9, 6e-9, 7e-9, 20e-9]
+    time_list = [4e-9]
     ac_list = np.linspace(1, 100, 100, dtype=int)
     posibility_list = np.round(np.linspace(0.1, 0.9, 9), 1) 
     for time in time_list:
         for posibility in posibility_list:
             with Pool() as pool:
                 pool.starmap(save_random_reservoir, 
-                            zip(itertools.repeat(10000), itertools.repeat(posibility), itertools.repeat(time), ac_list))
+                            zip(itertools.repeat(1000), itertools.repeat(posibility), itertools.repeat(time), ac_list, itertools.repeat('test_random_input')))
 
+    # mtj_module.email_alert('Test input data is ready!')
     # time_list = [2e-9, 3e-9, 4e-9, 6e-9, 7e-9, 10e-9, 20e-9]
     # with Pool() as pool:
-    #     pool.starmap(efficient_training, zip(itertools.repeat('radom_input_data'), time_list))
+    #     pool.starmap(efficient_training, zip(itertools.repeat('radom_input_data'), itertools.repeat(4e-9), ac_list, itertools.repeat(True)))
+
+    # test for code
+    # efficient_test(consuming_time=4e-9, ac_current=10)
+
+    # multi-test
+    with Pool() as pool:
+        pool.starmap(
+            efficient_test,
+            zip(itertools.repeat('test_random_input'), itertools.repeat(4e-9), ac_list, itertools.repeat('test_results')))
+
+    mtj_module.email_alert('Test results are ready !')
