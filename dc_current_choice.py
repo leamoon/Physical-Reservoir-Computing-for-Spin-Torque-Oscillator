@@ -16,7 +16,7 @@ import itertools
 """
 
 # random seed, help for production
-np.random.seed(110)
+# np.random.seed(110)
 
 def input_current_task_test(positive_dc_current, negative_dc_current):
     initial_m = np.random.random(3)
