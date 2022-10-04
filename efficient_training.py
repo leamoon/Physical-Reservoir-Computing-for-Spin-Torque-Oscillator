@@ -179,14 +179,14 @@ def efficient_test(input_path='test_random_input', consuming_time=3e-9, ac_curre
 
 if __name__ == '__main__':
     time_list = [2e-9, 3e-9, 4e-9, 6e-9, 7e-9, 10e-9, 20e-9]
-    time_list = [4e-9]
+    # time_list = [4e-9]
     ac_list = np.linspace(1, 100, 100, dtype=int)
     posibility_list = np.round(np.linspace(0.1, 0.9, 9), 1) 
     for time in time_list:
         for posibility in posibility_list:
             with Pool() as pool:
                 pool.starmap(save_random_reservoir, 
-                            zip(itertools.repeat(1000), itertools.repeat(posibility), itertools.repeat(time), ac_list, itertools.repeat('test_random_input')))
+                            zip(itertools.repeat(10000), itertools.repeat(posibility), itertools.repeat(time), ac_list, itertools.repeat('radom_input_data')))
 
     # mtj_module.email_alert('Test input data is ready!')
     # time_list = [2e-9, 3e-9, 4e-9, 6e-9, 7e-9, 10e-9, 20e-9]
@@ -197,9 +197,9 @@ if __name__ == '__main__':
     # efficient_test(consuming_time=4e-9, ac_current=10)
 
     # multi-test
-    with Pool() as pool:
-        pool.starmap(
-            efficient_test,
-            zip(itertools.repeat('test_random_input'), itertools.repeat(4e-9), ac_list, itertools.repeat('test_results')))
+    # with Pool() as pool:
+    #     pool.starmap(
+    #         efficient_test,
+    #         zip(itertools.repeat('test_random_input'), itertools.repeat(4e-9), ac_list, itertools.repeat('test_results')))
 
-    mtj_module.email_alert('Test results are ready !')
+    # mtj_module.email_alert('Test results are ready !')

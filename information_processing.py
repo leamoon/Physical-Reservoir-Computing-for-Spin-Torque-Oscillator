@@ -8,12 +8,8 @@ from rich.progress import track
 from multiprocessing import Pool
 import itertools
 import scipy
-# from sklearn.preprocessing import normalize
-
-# SVD decomposition of reservoir states
-# define the polynominal according to the specific input distribution
-# Calculation of i th IPC
-# remark: the total IPC should equal to the rank of SVD reservoir states matrix
+import gc
+from sympy.utilities.iterables import multiset_permutations
 
 def first_example_ipc(length=10000):
     # length = 10000
@@ -71,7 +67,48 @@ def first_example_ipc(length=10000):
     plt.xlabel(r'$Degree: n_i$', size=16)
     plt.show()
 
-def polynominal_calculation_example(reservoir_states, s_in, degree=1, max_delay=3):
+def first_example_ipc_re(length=10000, degree=1, max_delay=3, save_index=False):
+    # length = 10000
+    s_in = np.random.uniform(-1, 1, length)
+    
+    s_in_delay_1 = np.append(s_in[-1:], s_in[:-1])
+    s_in_delay_2 = np.append(s_in[-2:], s_in[:-2])
+
+    x_state = s_in_delay_1 + s_in_delay_2**2
+    data_frame = polynominal_calculation(reservoir_states=x_state, s_in=s_in, degree=degree, max_delay=max_delay, save_index=save_index)
+    total_ipc_frame = {}
+    degree_list = data_frame['n_list']
+    c_list = data_frame['c_list']
+    scale_factor = 1.2
+
+    for i in range(200):
+        np.random.seed(i)
+        s_in = np.random.permutation(s_in)
+        data_frame = polynominal_calculation(reservoir_states=x_state, s_in=s_in, degree=degree, max_delay=max_delay, save_index=save_index)
+        total_ipc_frame[f'c_list_{i}'] = data_frame['c_list']
+
+    # save all data
+    total_ipc_frame = pd.DataFrame(total_ipc_frame)
+    maximum_surrogate_values = total_ipc_frame.max(axis=1)*scale_factor
+    c_thresold_list = []
+    for i in range(len(maximum_surrogate_values)):
+        if maximum_surrogate_values[i] > c_list[i]:
+            c_thresold_list.append(0)
+        else:
+            c_thresold_list.append(c_list[i])
+
+    total_ipc_frame.insert(total_ipc_frame.shape[1], 'c_list', c_list)
+    total_ipc_frame.insert(total_ipc_frame.shape[1], 'c_thresold_list', c_thresold_list)
+    total_ipc_frame.insert(0, 'n_list', degree_list)    
+    total_ipc_frame.to_csv('test.csv')
+
+    data_frame = pd.DataFrame({'c_thresold_list': c_thresold_list})
+    print(data_frame)
+    print(f'degree = {degree}, c_total = {np.sum(c_thresold_list)}, Rank: {np.linalg.matrix_rank(x_state)}')
+
+    return c_thresold_list, np.sum(c_thresold_list)
+
+def polynominal_calculation(reservoir_states, s_in, degree=1, max_delay=3, save_index=True):
     # for reproduce the figures in paper.
 
     # generate the family of sets of degrees and delays
@@ -84,12 +121,14 @@ def polynominal_calculation_example(reservoir_states, s_in, degree=1, max_delay=
     family_matrix = pd.concat(
         [pd.DataFrame({'{}'.format(index):labels}) for index,labels in enumerate(n_list)],axis=1
     ).fillna(0).values.T.astype(int)
+    gc.collect() # release memory
     family_matrix = np.delete(family_matrix, -1, 0)
     total_family_matrix = family_matrix.copy()
+    # prepare the degree, delay sets
     for index in range(family_matrix.shape[0]):
-        all_iter_list = list(itertools.permutations(family_matrix[index], max_delay))
+        all_iter_list = list(multiset_permutations(family_matrix[index], max_delay))
         total_family_matrix = np.insert(total_family_matrix, index+index*len(all_iter_list), np.matrix(all_iter_list), axis=0)
- 
+
     total_family_matrix, idx = np.unique(total_family_matrix, axis=0, return_index=True)
     total_family_matrix = total_family_matrix[np.argsort(idx)]
 
@@ -105,7 +144,7 @@ def polynominal_calculation_example(reservoir_states, s_in, degree=1, max_delay=
     for index_ipc in range(total_family_matrix.shape[0]):
         # legendre chaos
         polynomial = scipy.special.eval_legendre(total_family_matrix[index_ipc].T, s_in_matrix.T)
-        polynominal_matrix[index_ipc, :] = np.prod(polynomial, axis=1)
+        polynominal_matrix[index_ipc, :] = np.prod(polynomial, axis=1) / np.linalg.norm(np.prod(polynomial, axis=1))
 
     # calculate the ipc
     reservoir_states = reservoir_states - np.mean(reservoir_states)
@@ -113,8 +152,8 @@ def polynominal_calculation_example(reservoir_states, s_in, degree=1, max_delay=
     normalized_x, _, _ = np.linalg.svd(reservoir_states, full_matrices=False)
 
     c_list = np.dot(normalized_x.T, polynominal_matrix.T)**2
-    print(f'c_list : {c_list}')
-    print(f'total ipc: {np.sum(c_list)}, ideal value: {normalized_x.shape[1]}')
+    # print(f'c_list : {c_list}')
+    # print(f'total ipc: {np.sum(c_list)}, ideal value: {normalized_x.shape[1]}')
 
     # save ipc data
     repeat_index = 0
@@ -127,22 +166,58 @@ def polynominal_calculation_example(reservoir_states, s_in, degree=1, max_delay=
         family_matrix_index.append(total_family_matrix[i, :])
 
     data_frame = pd.DataFrame({'n_list': family_matrix_index, 'c_list': c_list[0]})
-    data_frame.to_csv(save_name)
+    if save_index:
+        data_frame.to_csv(save_name)
 
     return data_frame
 
-def second_example_one_layer_rc(length=1000, sigma=1, degree=1, max_delay=3):
+
+def second_example_one_layer_rc(length=10000, sigma=0.2, degree=1, max_delay=10, save_index=True):
     # for legendre chaos
     s_in = np.random.uniform(-1, 1, length)
-    reservoir_state = sigma * np.random.randn(length)
+    reservoir_state = 0
+    reservoir_states = np.zeros((length, 1))
     rho = 0.95
+    # for i in range(length):
+    #     reservoir_state = np.tanh(rho*reservoir_state + sigma*s_in[i])
+    for i in range(length):
+        reservoir_state = np.tanh(rho*reservoir_state + sigma*s_in[i])
+        reservoir_states[i, 0] = reservoir_state
     
-    # update
-    for i in track(range(200)):
-        np.random.shuffle(s_in)
-        reservoir_state = np.tanh(rho*reservoir_state + s_in)
-        polynominal_calculation_example(reservoir_states=reservoir_state, s_in=s_in, degree=degree, max_delay=max_delay)
+    data_frame = polynominal_calculation(reservoir_states=reservoir_states, s_in=s_in, degree=degree, max_delay=max_delay, save_index=save_index)
+    total_ipc_frame = {}
+    degree_list = data_frame['n_list']
+    c_list = data_frame['c_list']
+    scale_factor = 1.2
 
+    # update
+    for i in track(range(100)):
+        np.random.seed(i)
+        random_input = np.random.permutation(s_in)
+        data_frame = polynominal_calculation(reservoir_states=reservoir_states, s_in=random_input, degree=degree, max_delay=max_delay, save_index=save_index)
+        total_ipc_frame[f'c_list_{i}'] = data_frame['c_list']
+    
+    # save all data
+    total_ipc_frame = pd.DataFrame(total_ipc_frame)
+    maximum_surrogate_values = total_ipc_frame.max(axis=1)*scale_factor
+    c_thresold_list = []
+    for i in range(len(maximum_surrogate_values)):
+        if maximum_surrogate_values[i] > c_list[i]:
+            c_thresold_list.append(0)
+        else:
+            c_thresold_list.append(c_list[i])
+
+    total_ipc_frame.insert(total_ipc_frame.shape[1], 'c_list', c_list)
+    total_ipc_frame.insert(total_ipc_frame.shape[1], 'c_thresold_list', c_thresold_list)
+    total_ipc_frame.insert(0, 'n_list', degree_list)    
+    total_ipc_frame.to_csv(f'sigma_{sigma}_degree_{degree}_delay_{max_delay}.csv')
+
+    data_frame = pd.DataFrame({'c_thresold_list': c_thresold_list})
+    print(data_frame)
+    print(f'degree = {degree}, c_total = {np.sum(c_thresold_list)}, Rank: {np.linalg.matrix_rank(reservoir_states)}')
+
+    return c_thresold_list, np.sum(c_thresold_list)
+        
 
 
 # need to be initialize before use the integrate_spliiting function
@@ -161,43 +236,31 @@ def integrate_splitting(n, startnum=1, out=''):
 
     integrate_splitting(n,n,out)
 
+
+
 if __name__ == '__main__':
-    # s_in, z_matrix = polynominal_calculation(degree=2, max_delay=3, length=1000)
-    
-    # test_result = np.dot(z_matrix[:, 0].T, z_matrix[:, 5])
-    # print(f'S_in: {s_in}')
-    # print(f'z_matrix: \n{z_matrix}')
-    # print(test_result)
+    # # test for first example in ipc calculation
+    # degree_list = [1, 2, 3]
+    # ipc_sum = 0
+    # for i in degree_list:
+    #     _, ipc = first_example_ipc_re(degree=i, max_delay=4)
+    #     ipc_sum += ipc
+    # print(f'c_all: {ipc_sum}')
 
-    # ipc_calculation(degree=6, max_delay=10, length=2000)
-    # example_one_layer_rc(10000)
-    second_example_one_layer_rc(length=10, sigma=1, degree=2, max_delay=10)
-    
+    degree_list = np.linspace(1, 4, 4, dtype=int)
+    sigma_list = np.round(np.linspace(0.2, 2, 10), 1)
+    for sigma in sigma_list:
+        ipc_sum = 0
+        for i in degree_list:
+            _, ipc = second_example_one_layer_rc(length=10000, degree=i, max_delay=50, save_index=False, sigma=sigma)
+            ipc_sum += ipc
+            print(f'sigma: {sigma}, c_all: {ipc_sum}')
 
-    # s_in = np.random.choice([0, 1], size=10, p=[0.5, 0.5])
-    # s_in_delay_1 = np.append(s_in[-1:], s_in[:-1])
-    # s_in_matrix = np.zeros((10, 2))
-    # s_in_matrix[:, 0] = s_in.reshape(10,)
-    # s_in_matrix[:, 1] = s_in_delay_1
-    # order_list = np.array([0, 1]).reshape(1, 2)
-    # # polynominal_calculation_example(s_in=s_in, degree=3, max_delay=5)
-    # result = scipy.special.eval_legendre(order_list, s_in_matrix)
-    # print(f'result = \n{result}')
-    # # print(f'raw s_in: \n{s_in_matrix}')
-    # print(f'final result: \n{np.prod(result, axis=1)}')
-
-
-    # a little test for matrix operations
-    # a = np.mat([[1, 2, 3], [2, 3, 4]])
-    # b = np.linalg.norm(a, axis=1)
-    # c = np.repeat(b, a.shape[1], axis=0).reshape(2, 3)
-    # d = np.divide(a, c)
+    # # test
+    # a = np.linspace(0, 12, 12, dtype=int)
+    # b = itertools.permutations(a, 12)
+    # b_list = []
+    # for i in b:
+    #     b_list.append(i)
     # print(b)
-    # print(c)
-    # print(d)
-    # s_in = np.random.choice([0, 1], size=10, p=[0.5, 0.5])
-    # print(s_in)
-    # np.random.shuffle(s_in)
-    # print(s_in)
-
 
