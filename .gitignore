@@ -159,4 +159,8 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+*.csv
+NMSE*
+weight*
+Figures
 
