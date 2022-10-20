@@ -2,8 +2,13 @@ import ipc_module
 import mtj_module
 import numpy as np
 import pandas as pd
+import os
+import sys
+from scipy.interpolate import interp1d
+from multiprocessing import Pool
+import itertools
 
-def ipc_target(length_input, task, ratio, delay, washtime, degree_ipc, max_delay_ipc):
+def ipc_target(length_input, task, ratio, delay, washtime, degree_ipc, max_delay_ipc, scale_factor=3):
     s_in, train_signal = mtj_module.real_time_generator(
         task=task, superposition_number=delay, length_signals=length_input+washtime, posibility_0=ratio
         )
@@ -12,13 +17,70 @@ def ipc_target(length_input, task, ratio, delay, washtime, degree_ipc, max_delay
     # print(reservoir_states.shape)
     ipc_analyze = ipc_module.ipc(
         washtime=washtime, s_in=s_in, reservoir_states=reservoir_states, N_binomial=1, p_binomial=0.5,
-        distribution_in='bernoulli', degree=degree_ipc, max_delay=max_delay_ipc, scale_factor=1.2
+        distribution_in='bernoulli', degree=degree_ipc, max_delay=max_delay_ipc, scale_factor=scale_factor
         )
     ipc_list = ipc_analyze.thresold()
     ipc_analyze.save_ipc()
-    print(ipc_list)
+
+    # info about the max and min
+    ipc_temp = []
+    for i in ipc_list:
+        if i != 0:
+            ipc_temp.append(i)    
+    print('max', np.max(ipc_list))
+    if len(ipc_temp) != 0:
+        print('min', np.min(ipc_temp))
+    else:
+        print('no min value')
     print('degree', degree_ipc, 'delay', max_delay_ipc, 'ipc', np.sum(ipc_list))
 
+def ipc_mtj(degree_delay_sets, ratio=0.5, evolution_time=4e-9, ac_current=0, node=20):
+
+    # # avoid repeat calcualtion
+    # for degree_ipc, max_delay_ipc in degree_delay_sets: 
+    #     if os.path.exists(f'ipc_data_mtj/{evolution_time}/{ratio}/test_degree_{degree_ipc}_delay_{max_delay_ipc}_bernoulli_ac_{ac_current}_node{node}.csv'):
+    #         print('data exits, pass')
+    #         return True
+
+    file_name = f'radom_input_data/input_ratio_{ratio}_{evolution_time}_{ac_current}.csv'
+    if not os.path.exists(file_name):
+        return f'no such file: {file_name}'
+    input_data_file = pd.read_csv(file_name)
+    s_in = input_data_file['s_in']
+    washtime = int(len(s_in)/2)
+    reservoir_states = np.zeros(((len(s_in) - washtime), node))
+
+    # construct reservoir states
+    for row_index in range(len(s_in) - washtime):
+        mz_amplitude = input_data_file[f'mz_list_amplitude_{row_index+washtime}']
+        mz_amplitude = mz_amplitude[~np.isnan(mz_amplitude)]
+        xp = np.linspace(1, len(mz_amplitude), len(mz_amplitude))
+        fp = mz_amplitude
+        sampling_x_values = np.linspace(1, len(mz_amplitude), node)
+        f = interp1d(xp, fp, kind='quadratic')
+        reservoir_states[row_index, :] = f(sampling_x_values)
+    
+    # calculate ipc
+    for degree_ipc, max_delay_ipc in degree_delay_sets:
+        ipc_analyze = ipc_module.ipc(
+            washtime=washtime, s_in=s_in, reservoir_states=reservoir_states, N_binomial=1, p_binomial=ratio,
+            distribution_in='bernoulli', degree=degree_ipc, max_delay=max_delay_ipc, scale_factor=1.2
+            )
+        ipc_list = ipc_analyze.thresold()
+        ipc_analyze.save_ipc(path=f'ipc_data_mtj/{evolution_time}/{ratio}', remark=f'ac_{ac_current}_node{node}')
+        # info about the max and min
+        ipc_temp = []
+        for i in ipc_list:
+            if i != 0:
+                ipc_temp.append(i)    
+        print('max', np.max(ipc_list))
+        if len(ipc_temp) != 0:
+            print('min', np.min(ipc_temp))
+        else:
+            print('no min value')
+        # print('max', np.max(ipc_list), 'min', np.min(ipc_list))
+        print('ac', ac_current, 'degree', degree_ipc, 'delay', max_delay_ipc, 'ipc', np.sum(ipc_list))
+    return 0
 
 if __name__ == '__main__':
     # #####################################################################################
@@ -56,6 +118,20 @@ if __name__ == '__main__':
     # # print(np.max(c_list))
 
     # #####################################################################################
-    # simple test for the restructure of ipc module
+    # calculation of ipc in STO-RC
     # #####################################################################################
-    ipc_target(length_input=10000, task='Delay', delay=1 ,ratio=0.5, washtime=5000, degree_ipc=1, max_delay_ipc=10)
+    delay_degree_list = [[1, 200], [2, 100], [3, 20], [4, 20], [5, 10], [6, 10], [7, 10], [8, 10]]
+    ac_list = np.linspace(1, 100, 100, dtype=int)
+    posibility_list = np.round(np.linspace(0.1, 0.9, 9), 1)
+    nodes = [2, 5, 10, 16, 20, 30]
+    # ipc_mtj(degree_delay_sets=delay_degree_list, ac_current=20, node=20, ratio=0.5, evolution_time=4e-9)
+    # degree_delay_sets, ratio=0.5, evolution_time=4e-9, ac_current=0, node=20
+    for node in nodes:
+        for posibility in posibility_list:
+            with Pool(5) as pool:
+                pool.starmap(ipc_mtj, 
+                            zip(itertools.repeat(delay_degree_list), itertools.repeat(posibility), itertools.repeat(4e-9), ac_list, itertools.repeat(node)))
+
+    # delay_degree_list = [[1, 100]]
+    # for degree, max_delay in delay_degree_list:
+    #     ipc_target(length_input=500, task='Parity', delay=3 ,ratio=0.5, washtime=500, degree_ipc=degree, max_delay_ipc=max_delay, scale_factor=1.2)

@@ -12,7 +12,7 @@ class ipc:
         scale_factor, N_binomial=10, p_binomial=0.5
         ) -> None:
         self.washtime = washtime
-        self.reservoir_states = reservoir_states
+        self.reservoir_states = reservoir_states.astype(np.float64) # ensure the type of reservoir states
         self.s_in = s_in # the washtime should be smaller than length of s_in
         self.save_s_in = self.s_in
         self.polynomial = distribution_in
@@ -83,8 +83,8 @@ class ipc:
         elif self.polynomial == 'bernoulli': # special calculation for this pattern
             # print(f'input: bernouli p = {self.p}')
             mean_s_in = np.mean(self.s_in)
-            self.polynomial_matrix = np.zeros((2, len(self.s_in)))
-            self.polynomial_matrix[1] = self.s_in - mean_s_in
+            for n in range(1, self.degree+1):
+                self.polynomial_matrix[n] = self.s_in - mean_s_in
 
         else:
             print('no such distrubition configuration')
@@ -108,7 +108,14 @@ class ipc:
         self.number_list = [] # should be clear before use this parameter
         self.integrate_splitting(self.degree)
         n_list = [i.split(',') for i in self.number_list]
-        # print(n_list)
+        if self.polynomial == 'bernoulli':
+            # print(n_list)
+            update_n_list = []
+            for index_element in range(len(n_list)):
+                if np.max(list(map(int, n_list[index_element]))) <= 1:
+                    update_n_list.append(n_list[index_element])
+            n_list = update_n_list
+            # print(n_list)
         # sys.exit()
     
         n_list.append([0]*self.max_delay)
@@ -190,9 +197,11 @@ class ipc:
         # print(self.total_ipc_frame.max(axis=1))
         return self.c_thresold_list
 
-    def save_ipc(self, path=None):
+    def save_ipc(self, path=None, remark=''):
         if not path is None:
             save_path = path
+            if not os.path.exists(save_path):
+                os.makedirs(save_path)
         else:
             save_path = os.getcwd()
  
@@ -204,6 +213,6 @@ class ipc:
             'c_thresold_list': self.c_thresold_list, 'degree_delay_sets': self.degree_delay_sets})
 
         # save
-        self.total_ipc_frame.to_csv(f'{save_path}/test_degree_{self.degree}_delay_{self.max_delay}_{self.polynomial}.csv', index=False)
-        summary_ipc_frame.to_csv(f'{save_path}/summary_test_degree_{self.degree}_delay_{self.max_delay}_{self.polynomial}.csv', index=False)
+        self.total_ipc_frame.to_csv(f'{save_path}/test_degree_{self.degree}_delay_{self.max_delay}_{self.polynomial}_{remark}.csv', index=False)
+        summary_ipc_frame.to_csv(f'{save_path}/summary_test_degree_{self.degree}_delay_{self.max_delay}_{self.polynomial}_{remark}.csv', index=False)
         print('data save successfully!')
