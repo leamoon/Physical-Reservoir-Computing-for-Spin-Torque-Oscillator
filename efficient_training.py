@@ -184,7 +184,7 @@ if __name__ == '__main__':
     posibility_list = np.round(np.linspace(0.1, 0.9, 9), 1) 
     for time in time_list:
         for posibility in posibility_list:
-            with Pool() as pool:
+            with Pool(10) as pool:
                 pool.starmap(save_random_reservoir, 
                             zip(itertools.repeat(10000), itertools.repeat(posibility), itertools.repeat(time), ac_list, itertools.repeat('radom_input_data')))
 

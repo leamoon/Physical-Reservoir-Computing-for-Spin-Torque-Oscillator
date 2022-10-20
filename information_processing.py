@@ -107,7 +107,7 @@ def first_example_ipc_re(length=10000, degree=1, max_delay=3, save_index=False):
 
     return c_thresold_list, np.sum(c_thresold_list)
 
-def polynominal_calculation(reservoir_states, s_in, degree=1, max_delay=3, save_index=True, polynominal='legendre', sorrogate=False):
+def polynominal_calculation_origin(reservoir_states, s_in, degree=1, max_delay=3, save_index=True, polynominal='legendre', sorrogate=False):
     # for reproduce the figures in paper.
 
     # generate the family of sets of degrees and delays
@@ -143,8 +143,6 @@ def polynominal_calculation(reservoir_states, s_in, degree=1, max_delay=3, save_
         else:
             s_in_matrix[delay_value, :] = np.append(s_in[-(delay_value+1):], s_in[:-(delay_value+1)])
 
-    # print(f's_in_matrix: \n{s_in_matrix}')
-    # print('*****************************')
     polynominal_matrix = np.ones((total_family_matrix.shape[0], len(s_in)))
 
     # generate corresponding polynomial chaos
@@ -165,12 +163,8 @@ def polynominal_calculation(reservoir_states, s_in, degree=1, max_delay=3, save_
             polynomial = scipy.special.eval_laguerre(total_family_matrix[index_ipc].T, s_in_matrix.T)
 
         polynomial_term = np.prod(polynomial, axis=1)
-        # polynomial_term = polynomial_term / np.sqrt(np.dot(polynomial_term, polynomial_term))
         polynominal_matrix[index_ipc, :] = polynomial_term/np.linalg.norm(polynomial_term)
-        # print('polynomial_term', polynomial_term, polynominal_matrix.shape)
-
-        # data_dic[f'polynominal_{index_ipc}'] = polynominal_matrix[index_ipc, :]
-
+  
     # calculate the ipc
     if reservoir_states.shape[0] == polynominal_matrix.shape[1]:
         index_reservoir_mean = reservoir_states.shape[1]
@@ -193,7 +187,8 @@ def polynominal_calculation(reservoir_states, s_in, degree=1, max_delay=3, save_
     c_list = (np.dot(normalized_x.T, polynominal_matrix.T))**2
     # print(f'c_list : {c_list}')
     # print(c_list.shape)
-    # print(f'total ipc: {np.sum(c_list)}, ideal value: {normalized_x.shape[1]}')
+    print(f'total ipc: {np.sum(c_list)}, ideal value: {normalized_x.shape[1]}')
+    # sys.exit()
 
     # save ipc data
     repeat_index = 0
@@ -214,26 +209,168 @@ def polynominal_calculation(reservoir_states, s_in, degree=1, max_delay=3, save_
 
     return data_frame
 
-def second_example_one_layer_rc(length=10000, sigma=0.2, degree=1, max_delay=10, save_index=False, polynomial='uniform'):
+def polynominal_calculation(reservoir_states, s_in, washout=10000, degree=1, max_delay=3, polynominal='uniform'):
+    # for reproduce the figures in paper.
+
+    # generate the family of sets of degrees and delays
+    global number_list
+    data_dic = {} # save all data
+
+    integrate_splitting(degree)
+    n_list = [i.split(',') for i in number_list]
+    number_list = []
+    n_list.append([0]*max_delay)
+    family_matrix = pd.concat(
+        [pd.DataFrame({'{}'.format(index):labels}) for index,labels in enumerate(n_list)],axis=1
+    ).fillna(0).values.T.astype(int)
+
+    family_matrix = np.delete(family_matrix, -1, 0)
+    total_family_matrix = family_matrix.copy()
+    # prepare the degree, delay sets
+    for index in range(family_matrix.shape[0]):
+        all_iter_list = list(multiset_permutations(family_matrix[index], max_delay))
+        all_iter_list.reverse()
+        total_family_matrix = np.insert(total_family_matrix, index, np.matrix(all_iter_list), axis=0)
+
+    total_family_matrix, idx = np.unique(total_family_matrix, axis=0, return_index=True)
+    total_family_matrix = total_family_matrix[np.argsort(idx)]
+
+     # generate the SVD value of reservoir states
+    if reservoir_states.shape[0] == len(s_in[washout:]):
+        index_reservoir_mean = reservoir_states.shape[1]
+    else:
+        index_reservoir_mean = reservoir_states.shape[0]
+    # print('index_mean', index_reservoir_mean)
+    for index_mean_reservoir in range(index_reservoir_mean):
+        # print(np.mean(reservoir_states[:, index_mean_reservoir]))
+        reservoir_states[:, index_mean_reservoir] = reservoir_states[:, index_mean_reservoir] - np.mean(reservoir_states[:, index_mean_reservoir])
+    normalized_x, _, _ = np.linalg.svd(reservoir_states, full_matrices=False)
+
+    # generate the polynomial_matrix shape=(degree+1, len(s_in))
+    degree_list = np.linspace(0, degree, degree+1, dtype=int).reshape(degree+1, 1)
+    if polynominal == 'uniform':
+        # legendre chaos
+        polynomial_matrix = scipy.special.eval_legendre(degree_list, s_in.reshape(1, len(s_in)))
+        # a,b = 0, 0
+        # P = np.ones((degree+1, len(s_in)))
+        # P[1] = ((a+b+2)*s_in+a-b)/2
+        # for n in range(1,degree):
+        #     A = (2*n+a+b+1)*((2*n+a+b)*(2*n+a+b+2)*s_in+(a**2)-(b**2))/(2*(n+1)*(n+a+b+1)*(2*n+a+b))
+        #     B = -(n+a)*(n+b)*(2*n+a+b+2)/((n+1)*(n+a+b+1)*(2*n+a+b))
+        #     P[n+1] = A*P[n]+B*P[n-1]
+        # print(f'P: {P[-1, :]/np.linalg.norm(P[-1, :])}')
+        # print(f'poly: {polynomial_matrix[-1, :]/np.linalg.norm(polynomial_matrix[-1, :])}')
+        # print(P.shape, polynomial_matrix.shape)
+        # sys.exit()
+
+    elif polynominal == 'guassian':
+        # hermite chaos
+        # polynomial_matrix = scipy.special.eval_hermite(degree_list, s_in.reshape(1, len(s_in)))
+        P = np.ones((degree+1, len(s_in)))
+        P[1] = s_in
+        for n in range(1, degree):
+            P[n+1] = s_in*P[n] - n*P[n-1]
+        # print(f'P: {P[-1, :]}')
+        # print(f'poly: {polynomial_matrix[-1, :]}')
+        # print(P.shape, polynomial_matrix.shape)
+        # sys.exit()
+        polynomial_matrix = P
+
+    elif polynominal == 'beta':
+        alpha, beta = -0.25, -0.25
+        polynomial_matrix = scipy.special.eval_jacobi(
+            degree_list, alpha, beta, s_in.reshape(1, len(s_in)))
+        # a,b = alpha, beta
+        # P = np.ones((degree+1, len(s_in)))
+        # P[1] = ((a+b+2)*s_in+a-b)/2
+        # for n in range(1,degree):
+        #     A = (2*n+a+b+1)*((2*n+a+b)*(2*n+a+b+2)*s_in+(a**2)-(b**2))/(2*(n+1)*(n+a+b+1)*(2*n+a+b))
+        #     B = -(n+a)*(n+b)*(2*n+a+b+2)/((n+1)*(n+a+b+1)*(2*n+a+b))
+        #     P[n+1] = A*P[n]+B*P[n-1]
+        # print(f'P: {P[-1, :]/np.linalg.norm(P[-1, :])}')
+        # print(f'poly: {polynomial_matrix[-1, :]/np.linalg.norm(polynomial_matrix[-1, :])}')
+        # print(P.shape, polynomial_matrix.shape)
+        # sys.exit()
+
+    elif polynominal == 'gamma':
+        # polynomial_matrix = scipy.special.eval_laguerre(
+        #     degree_list, s_in.reshape(1, len(s_in)))
+        a = 1
+        L = np.ones((degree+1, len(s_in)))
+        L[1] = 1+a-s_in
+        for n in range(1, degree):
+            L[n+1] = ((2*n+1+a-s_in)*L[n]-(n+a)*L[n-1])/(n+1)
+        polynomial_matrix = L
+    
+    elif polynominal == 'binomial':
+        N, p = 10, 0.5
+        K = np.ones((degree+1, len(s_in)))
+        K[1] = (1-s_in/(p*N))
+        for n in range(1, degree):
+            K[n+1] = ((p*(N-n)+n*(1-p)-s_in)*K[n] - n*(1-p)*K[n-1] )/(p*(N-n))
+        polynomial_matrix = K
+   
+    # generate corresponding polynomial chaos
+    for i in range(polynomial_matrix.shape[0]):
+        polynomial_matrix[i, :] = polynomial_matrix[i, :] / np.linalg.norm(polynomial_matrix[i, :])
+    # print('input', s_in)
+    # print('poly', polynomial_matrix)
+    c_list = np.zeros((1, total_family_matrix.shape[0]))
+    for index_ipc in range(total_family_matrix.shape[0]):
+        # print('index_famliy', total_family_matrix[index_ipc, :])
+        single_row_polynomial = np.ones((1, len(s_in[washout:])))
+        for index_ipc_column in range(total_family_matrix.shape[1]):
+            degree_value = total_family_matrix[index_ipc, index_ipc_column]
+            if degree_value == 0:
+                continue
+            delay_value = index_ipc_column+1
+            polynomial_term = polynomial_matrix[degree_value, :]
+            # print(f'polu_term: {polynomial_term}, degree{degree_value}, delay_value: {delay_value}')
+            cor_temp = polynomial_term[washout-delay_value: -delay_value].reshape(1, len(s_in[washout:]))
+            # print('cor_temp', cor_temp)
+            single_row_polynomial = np.multiply(single_row_polynomial, cor_temp)
+            # print(single_row_polynomial)
+        single_row_polynomial = single_row_polynomial / np.linalg.norm(single_row_polynomial)
+        # print(single_row_polynomial, 'norm')
+        # print(single_row_polynomial.shape, normalized_x.shape)
+        c_list[0, index_ipc] = np.sum((np.dot(normalized_x.T, single_row_polynomial.T))**2, axis=0)
+        # print(c_list[0, index_ipc])
+        # sys.exit()
+    # print(c_list)
+    # print(c_list.shape, np.sum(c_list))
+    # sys.exit()
+    # save ipc data
+    family_matrix_index = []
+    for i in range(total_family_matrix.shape[0]):
+        family_matrix_index.append(total_family_matrix[i, :])
+
+    data_dic['n_list'] = family_matrix_index
+    data_dic['c_list'] = c_list[0, :]
+    data_frame = pd.DataFrame(data_dic)
+    return data_frame
+
+def second_example_one_layer_rc(length=10000, sigma=0.2, degree=1, max_delay=10, polynomial_index='uniform'):
     washout_time = 10000
     np.random.seed(0)
-    if polynomial == 'uniform':
+    if polynomial_index == 'uniform':
         # for legendre chaos
         s_in = np.random.uniform(-1, 1, length+washout_time)
-    elif polynomial == 'guassian':
+
+    elif polynomial_index == 'guassian':
         # for Guassian chaos
-        s_in = np.random.normal(loc=0, scale=1, size=length+washout_time)
+        # s_in = np.random.normal(loc=0, scale=1, size=length+washout_time)
+        s_in = np.random.randn(length+washout_time)
         
-    elif polynomial == 'beta':
+    elif polynomial_index == 'beta':
         s_in = np.random.beta(0.25, 0.25, size=length+washout_time)*2-1
 
-    elif polynomial == 'binomial':
+    elif polynomial_index == 'binomial':
         s_in = np.random.binomial(n=10, p=0.5, size=length+washout_time)
 
-    elif polynomial == 'gamma':
-        s_in = np.random.gamma(shape=1, scale=1, size=length+washout_time)
+    elif polynomial_index == 'gamma':
+        s_in = np.random.gamma(shape=2, scale=1, size=length+washout_time)
     
-    print(f'input: {polynomial}')
+    print(f'input: {polynomial_index}')
     reservoir_state = 0
     reservoir_states = np.zeros((length+washout_time, 1))
     rho = 0.95
@@ -242,9 +379,11 @@ def second_example_one_layer_rc(length=10000, sigma=0.2, degree=1, max_delay=10,
         reservoir_states[i, 0] = reservoir_state
     
     reservoir_states = reservoir_states[washout_time:]
-    s_in = s_in[washout_time:]
+    # s_in = s_in[washout_time:]
     # print('reservoir', reservoir_states)
-    data_frame = polynominal_calculation(reservoir_states=reservoir_states, s_in=s_in, degree=degree, max_delay=max_delay, save_index=save_index, polynominal=polynomial)
+    data_frame = polynominal_calculation(
+        reservoir_states=reservoir_states, s_in=s_in, washout=washout_time, degree=degree, 
+        max_delay=max_delay, polynominal=polynomial_index)
     total_ipc_frame = {}
     degree_list = data_frame['n_list']
     c_list = data_frame['c_list']
@@ -255,9 +394,9 @@ def second_example_one_layer_rc(length=10000, sigma=0.2, degree=1, max_delay=10,
         np.random.seed(i)
         random_input = np.random.permutation(s_in)
         data_frame = polynominal_calculation(
-            reservoir_states=reservoir_states, s_in=random_input, 
-            degree=degree, max_delay=max_delay, save_index=save_index, 
-            polynominal=polynomial, sorrogate=False)
+            reservoir_states=reservoir_states, s_in=random_input, washout=washout_time,
+            degree=degree, max_delay=max_delay,
+            polynominal=polynomial_index)
         total_ipc_frame[f'c_list_{i}'] = data_frame['c_list']
     
     # save all data
@@ -272,12 +411,15 @@ def second_example_one_layer_rc(length=10000, sigma=0.2, degree=1, max_delay=10,
 
     total_ipc_frame.insert(total_ipc_frame.shape[1], 'c_list', c_list)
     total_ipc_frame.insert(total_ipc_frame.shape[1], 'c_thresold_list', c_thresold_list)
-    total_ipc_frame.insert(0, 'n_list', degree_list)    
-    total_ipc_frame.to_csv(f'sigma_{sigma}_degree_{degree}_delay_{max_delay}_{polynomial}.csv')
+    total_ipc_frame.insert(0, 'n_list', degree_list)
+    if not os.path.exists('ipc_data'):
+        os.mkdir('ipc_data')    
+    total_ipc_frame.to_csv(f'ipc_data/sigma_{sigma}_degree_{degree}_delay_{max_delay}_{polynomial_index}.csv')
 
-    data_frame = pd.DataFrame({'c_thresold_list': c_thresold_list, 'c_list': c_list})
-    print(data_frame)
-    print(f'degree = {degree}, c_total = {np.sum(c_thresold_list)}, Rank: {np.linalg.matrix_rank(reservoir_states)}')
+    # data_frame = pd.DataFrame({'c_thresold_list': c_thresold_list, 'c_list': c_list})
+    # print(data_frame)
+    # print(
+    #     f'degree = {degree}, c_total = {np.sum(c_thresold_list)}, Rank: {np.linalg.matrix_rank(reservoir_states)}, sigma = {sigma}')
 
     return c_thresold_list, np.sum(c_thresold_list)
         
@@ -297,7 +439,7 @@ def integrate_splitting(n, startnum=1, out=''):
 
     integrate_splitting(n,n,out)
 
-def example_from_author_code(polynomial='legendre', degree=1, max_delay=1):
+def example_from_author_code(polynomial='uniform', degree=1, max_delay=1):
     ##### Parameters for esn #####
     N = 50      # Number of nodes
     Two = 10000 # Washout time
@@ -369,21 +511,12 @@ def example_from_author_code(polynomial='legendre', degree=1, max_delay=1):
 if __name__ == '__main__':
     # # test for first example in ipc calculation
     # s = np.random.normal(loc=0, scale=1, size=1000000)
+    # s_in = np.random.binomial(p=0.5, n=10, size=1000000)
+    # # s_in = np.random.binomial(n=10, p=0.4, size=1000000)
     # plt.figure()
-    # count, bins, ignored = plt.hist(s, 100, density=True)
-    # plt.plot(bins, 1/(1 * np.sqrt(2 * np.pi)) *
-    #            np.exp( - (bins - 0)**2 / (2 * 1**2) ),
-    #      linewidth=2, color='r')
+    # plt.hist(s_in, density=True)
     # plt.show()
-
-    # degree_delay_family = [[1, 500], [2, 100], [3, 50], [4, 10]]
-    # # degree_delay_family = [[1, 100], [2, 100], [3, 50], [4, 10]]
-    # # degree_delay_family = [[1, 100], [1, 200], [3, 20], [3, 50]]
-    # sigma_list = np.round(np.linspace(0.2, 2, 10), 1)
-    # # sigma_list = [1]
-    # sigma_list = [0.2] 
-    # # print(sigma_list)
-    # # sys.exit()
+    # sys.exit()
 
     # for degree, max_delay in degree_delay_family:
     #     for sigma in sigma_list:
@@ -394,17 +527,23 @@ if __name__ == '__main__':
     # plt.figure()
     # count, bins, ignored = plt.hist(s_in, 100, density=True)
     # plt.show()
+    # example_from_author_code(degree=1, max_delay=20)
+    # sys.exit()
 
-    delay_degree_list = [[1, 100], [2, 100], [3, 50], [4, 30], [5, 20], [6, 10], [7, 10], [8, 10]]
-    sigma_list = np.round(np.linspace(0.2, 2, 10), 1)
+    delay_degree_list = [[1, 100], [2, 80], [3, 50], [4, 30], [5, 10], [6, 10], [7, 10], [8, 10]]
+    delay_degree_list = [[1, 100], [2, 10], [3, 10], [4, 10], [5, 10], [6, 10], [7, 10], [8, 10]]
+    # delay_degree_list = [[7, 10]]
+    sigma_list = np.round(np.linspace(0.05, 0.5, 10), 2)
+    sigma_list = [0.05]
+    # sigma_list = np.round(np.linspace(0.2, 2, 10), 1)
     print(sigma_list)
+    ipc_list = np.zeros((len(sigma_list), len(delay_degree_list)))
     for degree, max_delay in delay_degree_list:
-        for sigma in sigma_list:
-            second_example_one_layer_rc(degree=degree, max_delay=max_delay, length=10000, polynomial='beta', sigma=sigma)
-
-    sigma_list = np.round(np.linspace(0.1, 1, 10), 1)
-    for degree, max_delay in delay_degree_list:
-        for sigma in sigma_list:
-            second_example_one_layer_rc(degree=degree, max_delay=max_delay, length=10000, polynomial='gamma', sigma=sigma)
-
-    mtj_module.email_alert('reproduction beta!')
+        for sigma_index in range(len(sigma_list)):
+            sigma = sigma_list[sigma_index]
+            _, ipc = second_example_one_layer_rc(
+                degree=degree, max_delay=max_delay, length=10000, polynomial_index='binomial', sigma=sigma)
+            ipc_list[sigma_index, degree-1] = ipc
+            df = pd.DataFrame({'sigma': sigma_list, 'ipc':np.sum(ipc_list, axis=1)})
+            print(df)
+            print('degree', degree, 'sigma update', sigma, 'ipc', ipc)

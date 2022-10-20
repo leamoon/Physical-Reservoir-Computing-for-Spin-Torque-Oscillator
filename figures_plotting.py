@@ -202,121 +202,121 @@ if __name__ == '__main__':
     # ####################################################
     # different ratio of inputs (test_results)
     # #################################################### 
+    posibility_list = np.round(np.linspace(0.1, 0.9, 9), 1)
+    # nodes = [2, 5, 10, 16, 20, 30]
+    superposition_list = np.linspace(1, 10, 10, dtype=int)
+    ac_list = np.linspace(1, 100, 100, dtype=int)
+    task_list = ['Delay', 'Parity']
+    save_data_path = f'test_results/4e-09'
+    # for task in task_list:
+    #     for ratio in posibility_list:
+    #         cor_2_list = []
+    #         for ac in ac_list:
+    #             cor_2_sub = 0
+    #             for superposition in superposition_list:
+    #                 file_name = f'{save_data_path}/{task}{superposition}_node16_ratio{ratio}_ac{ac}.csv'
+    #                 if not os.path.exists(file_name):
+    #                     print(f'no such file: {file_name}')
+    #                 data = pd.read_csv(file_name)
+    #                 cor_2 = np.mean(data['correlation^2_list'])
+    #                 error_2 = np.std(data['correlation^2_list'])
+    #                 cor_2_sub += cor_2
+    #                 # print(f'delay: {superposition}, cor_2 = {cor_2}, node={node}, ratio={ratio}')
+    #             cor_2_list.append(cor_2_sub)
+    #         data_frame = pd.DataFrame({'ac_current': ac_list, 'cor_2_list': cor_2_list})
+    #         data_frame.to_csv(f'test_results/ratio{ratio}_4e-09_{task}_ac_node16.csv')
+
     # posibility_list = np.round(np.linspace(0.1, 0.9, 9), 1)
-    # # nodes = [2, 5, 10, 16, 20, 30]
+    # nodes = [2, 5, 10, 16, 20, 30, 40, 50, 70, 90, 100]
     # superposition_list = np.linspace(1, 10, 10, dtype=int)
     # ac_list = np.linspace(1, 100, 100, dtype=int)
     # task_list = ['Delay', 'Parity']
-    # save_data_path = f'test_results/4e-09'
-    # # for task in task_list:
-    # #     for ratio in posibility_list:
-    # #         cor_2_list = []
-    # #         for ac in ac_list:
-    # #             cor_2_sub = 0
-    # #             for superposition in superposition_list:
-    # #                 file_name = f'{save_data_path}/{task}{superposition}_node16_ratio{ratio}_ac{ac}.csv'
-    # #                 if not os.path.exists(file_name):
-    # #                     print(f'no such file: {file_name}')
-    # #                 data = pd.read_csv(file_name)
-    # #                 cor_2 = np.mean(data['correlation^2_list'])
-    # #                 error_2 = np.std(data['correlation^2_list'])
-    # #                 cor_2_sub += cor_2
-    # #                 # print(f'delay: {superposition}, cor_2 = {cor_2}, node={node}, ratio={ratio}')
-    # #             cor_2_list.append(cor_2_sub)
-    # #         data_frame = pd.DataFrame({'ac_current': ac_list, 'cor_2_list': cor_2_list})
-    # #         data_frame.to_csv(f'test_results/ratio{ratio}_4e-09_{task}_ac_node16.csv')
+    # save_data_path = 'test_results'
 
-    # # posibility_list = np.round(np.linspace(0.1, 0.9, 9), 1)
-    # # nodes = [2, 5, 10, 16, 20, 30, 40, 50, 70, 90, 100]
-    # # superposition_list = np.linspace(1, 10, 10, dtype=int)
-    # # ac_list = np.linspace(1, 100, 100, dtype=int)
-    # # task_list = ['Delay', 'Parity']
-    # # save_data_path = 'test_results'
+    X, Y = np.meshgrid(ac_list, posibility_list)
 
-    # X, Y = np.meshgrid(ac_list, posibility_list)
+    cor_list_delay = np.zeros((len(ac_list), len(posibility_list)))
+    cor_list_parity = np.zeros((len(ac_list), len(posibility_list)))
+    for i in range(len(posibility_list)):
+        ratio = posibility_list[i]
+        data_f = pd.read_csv(f'test_results/ratio{ratio}_4e-09_Delay_ac_node16.csv')
+        cor_list_delay[:, i] = data_f['cor_2_list']
+        data_f = pd.read_csv(f'test_results/ratio{ratio}_4e-09_Parity_ac_node16.csv')
+        cor_list_parity[:, i] = data_f['cor_2_list']
 
-    # cor_list_delay = np.zeros((len(ac_list), len(posibility_list)))
-    # cor_list_parity = np.zeros((len(ac_list), len(posibility_list)))
-    # for i in range(len(posibility_list)):
-    #     ratio = posibility_list[i]
-    #     data_f = pd.read_csv(f'test_results/ratio{ratio}_4e-09_Delay_ac_node16.csv')
-    #     cor_list_delay[:, i] = data_f['cor_2_list']
-    #     data_f = pd.read_csv(f'test_results/ratio{ratio}_4e-09_Parity_ac_node16.csv')
-    #     cor_list_parity[:, i] = data_f['cor_2_list']
+    bins_delay = np.linspace(cor_list_delay.min(), cor_list_delay.max(), 101)
+    nbin_delay = len(bins_delay) - 1
+    norm_delay = mcolors.BoundaryNorm(bins_delay, nbin_delay)
+    cmap_delay = cm.get_cmap('PuRd', nbin_delay)
+    # cmap_delay.set_under('white')
+    # cmap_delay.set_over('purple')
 
-    # bins_delay = np.linspace(cor_list_delay.min(), cor_list_delay.max(), 101)
-    # nbin_delay = len(bins_delay) - 1
-    # norm_delay = mcolors.BoundaryNorm(bins_delay, nbin_delay)
-    # cmap_delay = cm.get_cmap('plasma', nbin_delay)
-    # # cmap_delay.set_under('white')
-    # # cmap_delay.set_over('purple')
+    bins_parity = np.linspace(cor_list_parity.min(), cor_list_parity.max(), 101)
+    nbin_parity = len(bins_parity) - 1
+    norm_parity = mcolors.BoundaryNorm(bins_parity, nbin_parity)
+    cmap_parity = cm.get_cmap('Reds', nbin_parity)
+    # cmap_parity.set_under('white')
+    # cmap_parity.set_over('purple')
 
-    # bins_parity = np.linspace(cor_list_parity.min(), cor_list_parity.max(), 101)
-    # nbin_parity = len(bins_parity) - 1
-    # norm_parity = mcolors.BoundaryNorm(bins_parity, nbin_parity)
-    # cmap_parity = cm.get_cmap('bwr', nbin_parity)
-    # # cmap_parity.set_under('white')
-    # # cmap_parity.set_over('purple')
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
-    # fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    x_ticks = np.round(np.linspace(cor_list_delay.min(), cor_list_delay.max(), 10), 2)
+    im = axes[0].contourf(
+        X, Y, cor_list_delay.T, levels=bins_delay, cmap=cmap_delay, norm=norm_delay, extend='both'
+    )
+    cbar = fig.colorbar(im, ax=axes[0], ticks=x_ticks)
+    axes[0].set_ylabel(r'Ratio', size=16)
+    axes[0].set_xlabel(r'ac current $a_j$', size=16)
+    axes[0].set_title(r'Delay task', size=16)
 
-    # x_ticks = np.round(np.linspace(cor_list_delay.min(), cor_list_delay.max(), 10), 2)
-    # im = axes[0].contourf(
-    #     X, Y, cor_list_delay.T, levels=bins_delay, cmap=cmap_delay, norm=norm_delay, extend='both'
-    # )
-    # cbar = fig.colorbar(im, ax=axes[0], ticks=x_ticks)
-    # axes[0].set_ylabel(r'Ratio', size=16)
-    # axes[0].set_xlabel(r'ac current $a_j$', size=16)
-    # axes[0].set_title(r'Delay task', size=16)
+    im = axes[1].contourf(
+        X, Y, cor_list_parity.T, levels=bins_parity, cmap=cmap_parity, norm=norm_parity, extend='both'
+    )
+    x_ticks = np.round(np.linspace(cor_list_parity.min(), cor_list_parity.max(), 10), 2)
+    cbar = fig.colorbar(im, ax=axes[1], ticks=x_ticks)
+    axes[1].set_title(r'Parity task', size=16)
+    axes[1].set_ylabel(r'Ratio', size=16)
+    axes[1].set_xlabel(r'ac current $a_j$', size=16)
+    plt.show()
 
-    # im = axes[1].contourf(
-    #     X, Y, cor_list_parity.T, levels=bins_parity, cmap=cmap_parity, norm=norm_parity, extend='both'
-    # )
-    # x_ticks = np.round(np.linspace(cor_list_parity.min(), cor_list_parity.max(), 10), 2)
-    # cbar = fig.colorbar(im, ax=axes[1], ticks=x_ticks)
-    # axes[1].set_title(r'Parity task', size=16)
-    # axes[1].set_ylabel(r'Ratio', size=16)
-    # axes[1].set_xlabel(r'ac current $a_j$', size=16)
-    # plt.show()
+    # obtain the lyapounov exponent 
+    file = f'Data_LLE_trajectory_AC'
+    le_list = np.zeros((len(ac_list), 1))
+    for i in range(len(ac_list)):
+        ac_value = ac_list[i]
+        file_name = f'{file}/lyapunov_periodic_ac{ac_value}_nodes16_random.csv'
+        data_frame = pd.read_csv(file_name)
+        le_list[i, 0] = data_frame['Le'].tolist()[-1]
 
-    # # obtain the lyapounov exponent 
-    # file = f'Data_LLE_trajectory_AC'
-    # le_list = np.zeros((len(ac_list), 1))
-    # for i in range(len(ac_list)):
-    #     ac_value = ac_list[i]
-    #     file_name = f'{file}/lyapunov_periodic_ac{ac_value}_nodes16_random.csv'
-    #     data_frame = pd.read_csv(file_name)
-    #     le_list[i, 0] = data_frame['Le'].tolist()[-1]
+    plt.subplot(1, 2, 2)
+    for i in range(len(posibility_list)):
+        plt.scatter(le_list[:, 0], cor_list_parity[:, i]+i, label=f'{posibility_list[i]}')
+        # plt.plot(le_list[:, 0], cor_list_parity[:, i])
+        plt.legend()
+        plt.xlabel(r'lyapunov exponent', size=16)
+        plt.ylabel(r'$Cor^2$', size=16)
+        plt.xlim([-1, 1])
+        plt.title(r'Parity Check task')
+    plt.axvline(x=0, alpha=0.5, c='black', linestyle='--')
 
-    # plt.subplot(1, 2, 2)
-    # for i in range(len(posibility_list)):
-    #     plt.scatter(le_list[:, 0], cor_list_parity[:, i]+i, label=f'{posibility_list[i]}')
-    #     # plt.plot(le_list[:, 0], cor_list_parity[:, i])
-    #     plt.legend()
-    #     plt.xlabel(r'lyapunov exponent', size=16)
-    #     plt.ylabel(r'$Cor^2$', size=16)
-    #     plt.xlim([-1, 1])
-    #     plt.title(r'Parity Check task')
-    # plt.axvline(x=0, alpha=0.5, c='black', linestyle='--')
+    plt.subplot(1, 2, 1)
+    for i in range(len(posibility_list)):
+        plt.scatter(le_list[:, 0], cor_list_delay[:, i]+i, label=f'{posibility_list[i]}')
+        # plt.plot(le_list[:, 0], cor_list_delay[:, i])
+        plt.legend()
+        plt.xlabel(r'lyapunov exponent', size=16)
+        plt.ylabel(r'$Cor^2$', size=16)
+        plt.title(r'Delay task')
+        plt.xlim([-1, 1])
+    plt.axvline(x=0, alpha=0.5, c='black', linestyle='--')
+    plt.show()
 
-    # plt.subplot(1, 2, 1)
-    # for i in range(len(posibility_list)):
-    #     plt.scatter(le_list[:, 0], cor_list_delay[:, i]+i, label=f'{posibility_list[i]}')
-    #     # plt.plot(le_list[:, 0], cor_list_delay[:, i])
-    #     plt.legend()
-    #     plt.xlabel(r'lyapunov exponent', size=16)
-    #     plt.ylabel(r'$Cor^2$', size=16)
-    #     plt.title(r'Delay task')
-    #     plt.xlim([-1, 1])
-    # plt.axvline(x=0, alpha=0.5, c='black', linestyle='--')
-    # plt.show()
-
-    # plt.figure('lyapunov-ac')
-    # plt.plot(ac_list, le_list[:, 0])
-    # plt.scatter(ac_list, le_list[:, 0])
-    # plt.xlabel(r'ac current $a_j$(Oe)', size=16)
-    # plt.ylabel(r'lyapunov exponent $\lambda_i$', size=16)
-    # plt.show()
+    plt.figure('lyapunov-ac')
+    plt.plot(ac_list, le_list[:, 0])
+    plt.scatter(ac_list, le_list[:, 0])
+    plt.xlabel(r'ac current $a_j$(Oe)', size=16)
+    plt.ylabel(r'lyapunov exponent $\lambda_i$', size=16)
+    plt.show()
 
     # ####################################################
     # ipc analyze for second example in paper
