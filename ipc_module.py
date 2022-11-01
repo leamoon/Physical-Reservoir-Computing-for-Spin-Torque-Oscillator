@@ -12,7 +12,10 @@ class ipc:
         scale_factor, N_binomial=10, p_binomial=0.5
         ) -> None:
         self.washtime = washtime
+        self.reservoir_states_shape = reservoir_states.shape
         self.reservoir_states = reservoir_states.astype(np.float64) # ensure the type of reservoir states
+        self.reservoir_states = self.reservoir_states.reshape(reservoir_states.shape)
+
         self.s_in = s_in # the washtime should be smaller than length of s_in
         self.save_s_in = self.s_in
         self.polynomial = distribution_in
@@ -30,7 +33,9 @@ class ipc:
         self.delay_degree_generator() # generate the degree_delay sets
 
         # reduce the time-bias term from reservoir states
-        # print(reservoir_states.shape)
+        
+        print(reservoir_states.shape)
+
         if self.reservoir_states.shape[0] == len(self.s_in) - self.washtime:
             index_reservoir_mean = self.reservoir_states.shape[1]
         else:

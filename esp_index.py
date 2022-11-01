@@ -95,27 +95,27 @@ def esp_analyze(random_initial_states=50, transition_time=500, ratio=0.5, consum
 
 if __name__ == '__main__':
     # multi-test
-    # ac_list = np.linspace(1, 100, 100, dtype=int)
-    # ratio_list = [0.5, 0.7, 0.8, 0.9]
-    # for ratio in ratio_list:
-    #     with Pool(10) as pool:
-    #         pool.starmap(
-    #             esp_index_calculation,
-    #             zip(itertools.repeat(50), itertools.repeat(1000), itertools.repeat(ratio), itertools.repeat(4e-9), ac_list))
+    ac_list = np.linspace(1, 100, 100, dtype=int)
+    ratio_list = [0.5, 0.7, 0.8, 0.9, 0.6, 0.4, 0.3, 0.2, 0.1]
+    for ratio in ratio_list:
+        with Pool(15) as pool:
+            pool.starmap(
+                esp_index_calculation,
+                zip(itertools.repeat(50), itertools.repeat(1000), itertools.repeat(ratio), itertools.repeat(4e-9), ac_list))
 
-    # mtj_module.email_alert('Test results are ready !')
+    mtj_module.email_alert('Test results are ready !')
 
 
     # test for eps_index_analyze
-    ac_list = np.linspace(1, 100, 100, dtype=int)
-    # ac_list = [1, 2, 3]
-    nodes = [16, 20, 30, 2, 5, 10]
-    for node in nodes:
-        esp_value_matrix = np.zeros((len(ac_list), 1))
-        for ac_value_index in track(range(len(ac_list))):
-            esp_index_value = esp_analyze(ac_current=ac_list[ac_value_index], node=node, transition_time=500)
-            esp_value_matrix[ac_value_index, 0] = esp_index_value
+    # ac_list = np.linspace(1, 100, 100, dtype=int)
+    # # ac_list = [1, 2, 3]
+    # nodes = [16, 20, 30, 2, 5, 10]
+    # for node in nodes:
+    #     esp_value_matrix = np.zeros((len(ac_list), 1))
+    #     for ac_value_index in track(range(len(ac_list))):
+    #         esp_index_value = esp_analyze(ac_current=ac_list[ac_value_index], node=node, transition_time=500)
+    #         esp_value_matrix[ac_value_index, 0] = esp_index_value
         
-        data_frame = pd.DataFrame({'ac_current': ac_list, 'esp_list': esp_value_matrix[:, 0]})
-        data_frame.to_csv(f'esp_node{node}_4e-9.csv', index=False)
-        print(f'esp_node{node}_4e-9.csv save !')
+    #     data_frame = pd.DataFrame({'ac_current': ac_list, 'esp_list': esp_value_matrix[:, 0]})
+    #     data_frame.to_csv(f'esp_node{node}_4e-9.csv', index=False)
+    #     print(f'esp_node{node}_4e-9.csv save !')

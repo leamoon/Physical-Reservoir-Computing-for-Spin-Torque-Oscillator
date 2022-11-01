@@ -316,41 +316,102 @@ if __name__ == '__main__':
     plt.scatter(ac_list, le_list[:, 0])
     plt.xlabel(r'ac current $a_j$(Oe)', size=16)
     plt.ylabel(r'lyapunov exponent $\lambda_i$', size=16)
-    plt.show()
+    # plt.show()
 
     # ####################################################
     # ipc analyze for second example in paper
     # #################################################### 
-    file_path = 'ipc_data'
-    sigma_list = np.round(np.linspace(0.2, 2, 10), 1)
-    # sigma_list = sigma_list[1:]
-    degree_delay_family = [[1, 500], [2, 100], [3, 50], [4, 10]]
-    degree_delay_family = [[1, 500]]
+    # file_path = 'ipc_data'
+    # sigma_list = np.round(np.linspace(0.2, 2, 10), 1)
+    # # sigma_list = sigma_list[1:]
+    # degree_delay_family = [[1, 500], [2, 100], [3, 50], [4, 10]]
+    # degree_delay_family = [[1, 500]]
     
-    ipc_list = []
-    for sigma in sigma_list:
-        file_name = f'{file_path}/sigma_{sigma}_degree_1_delay_500.csv'
-        data_frame = pd.read_csv(file_name)
-        ipc_list.append(np.sum(data_frame['c_thresold_list']))
-
-    plt.figure('one-layer reservoir ipc')
-    plt.bar(sigma_list, ipc_list, fc='blue', edgecolor='black', width=0.2, tick_label=sigma_list)
-    plt.xlabel(r'$\sigma$', size=16)
-    plt.ylabel(r'$C_{tot}$', size=16)
-    plt.title(r'Legendre', size=16)
-
-    # ipc_list_3 = np.zeros((len(sigma_list), 1))
-    # # sigma_list = [1.8, 2]
-    # for i in range(len(sigma_list)):
-    #     sigma = sigma_list[i]
-    #     file_name = f'{file_path}/sigma_{sigma}_degree_3_delay_50.csv'
-    #     print(file_name)
-    #     if not os.path.exists(file_name):
-    #         continue
+    # ipc_list = []
+    # for sigma in sigma_list:
+    #     file_name = f'{file_path}/sigma_{sigma}_degree_1_delay_500.csv'
     #     data_frame = pd.read_csv(file_name)
-    #     ipc_list_3[i, 0] = (np.sum(data_frame['c_thresold_list']))
+    #     ipc_list.append(np.sum(data_frame['c_thresold_list']))
+
+    # plt.figure('one-layer reservoir ipc')
+    # plt.bar(sigma_list, ipc_list, fc='blue', edgecolor='black', width=0.2, tick_label=sigma_list)
+    # plt.xlabel(r'$\sigma$', size=16)
+    # plt.ylabel(r'$C_{tot}$', size=16)
+    # plt.title(r'Legendre', size=16)
+
+    # # ipc_list_3 = np.zeros((len(sigma_list), 1))
+    # # # sigma_list = [1.8, 2]
+    # # for i in range(len(sigma_list)):
+    # #     sigma = sigma_list[i]
+    # #     file_name = f'{file_path}/sigma_{sigma}_degree_3_delay_50.csv'
+    # #     print(file_name)
+    # #     if not os.path.exists(file_name):
+    # #         continue
+    # #     data_frame = pd.read_csv(file_name)
+    # #     ipc_list_3[i, 0] = (np.sum(data_frame['c_thresold_list']))
     
-    # plt.bar(sigma_list, ipc_list_3[:, 0], fc='green', edgecolor='black', width=0.2, tick_label=sigma_list, bottom=ipc_list)
+    # # plt.bar(sigma_list, ipc_list_3[:, 0], fc='green', edgecolor='black', width=0.2, tick_label=sigma_list, bottom=ipc_list)
+    # plt.show()
+
+    # ####################################################
+    # ESP in STO-system
+    # #################################################### 
+    nodes = [2, 5, 10, 16, 20, 30]
+    plt.figure()
+    for node in nodes:
+        data_frame = pd.read_csv(f'esp_node{node}_4e-9.csv')
+        plt.plot(data_frame['ac_current'], data_frame['esp_list'], label=f'{node}')
+        plt.scatter(data_frame['ac_current'], data_frame['esp_list'])
+    plt.legend()
+    plt.xlabel(r'ac current $a_j$(Oe)', size=16)
+    plt.ylabel(r'Echo state properties', size=16)
     plt.show()
 
+    # #####################################################################################
+    # analyze the calculation of ipc in STO-RC
+    # #####################################################################################
+    delay_degree_list = [[1, 200], [2, 100], [3, 20], [4, 20], [5, 10], [6, 10], [7, 10], [8, 10]]
+    ac_list = np.linspace(1, 100, 100, dtype=int)
+    # posibility_list = np.round(np.linspace(0.1, 0.9, 9), 1)
+    # nodes = [16, 20, 30, 10, 5]
+    # node = 16
+    # c_list_degree_rc = np.zeros((len(ac_list), len(delay_degree_list)))
+    # for degree, delay in delay_degree_list:
+    #     for ac_value_index in track(range(len(ac_list))):
+    #         ac_value = ac_list[ac_value_index]
+    #         file_name = f'ipc_data_mtj/4e-09/0.5/summary_test_degree_{degree}_delay_{delay}_bernoulli_ac_{ac_value}_node{node}.csv'
+    #         df = pd.read_csv(file_name)
+    #         c_list_degree_rc[ac_value_index, degree-1] = np.sum(df['c_thresold_list'])
 
+    # print(c_list_degree_rc)
+    # data = pd.DataFrame({
+    #     'degree_1': c_list_degree_rc[:, 1],
+    #     'degree_2': c_list_degree_rc[:, 2],
+    #     'degree_3': c_list_degree_rc[:, 3],
+    #     'degree_4': c_list_degree_rc[:, 4],
+    #     })
+    # data.to_csv('data_ipc_temp.csv', index=False)
+
+    data = pd.read_csv('data_ipc_temp.csv')
+    plt.figure(f'degree_1')
+    for i in range(1, 5):
+        
+        plt.plot(ac_list, data[f'degree_{i}'], label=f'degree {i}')
+        plt.scatter(ac_list, data[f'degree_{i}'])
+        label_size = 16
+        plt.xlabel(r'ac current', size=label_size)
+        plt.ylabel(r'IPC', size=label_size)
+    plt.legend()
+    plt.show()
+
+    superposition_list = np.linspace(1, 10, 10, dtype=int)
+    ac_list = np.linspace(1, 100, 100, dtype=int)
+    task_list = ['Delay', 'Parity']
+    save_data_path = f'test_results/4e-09'
+    data_f = pd.read_csv(f'test_results/ratio0.5_4e-09_Delay_ac_node16.csv')
+    plt.figure()
+    plt.plot(ac_list, data_f['cor_2_list'])
+    plt.scatter(ac_list, data_f['cor_2_list'])
+    plt.xlabel(r'ac current', size=label_size)
+    plt.ylabel(r'MC', size=label_size)
+    plt.show()

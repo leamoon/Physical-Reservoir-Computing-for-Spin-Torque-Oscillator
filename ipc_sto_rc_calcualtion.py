@@ -7,6 +7,8 @@ import sys
 from scipy.interpolate import interp1d
 from multiprocessing import Pool
 import itertools
+from rich.progress import track
+import matplotlib.pyplot as plt
 
 def ipc_target(length_input, task, ratio, delay, washtime, degree_ipc, max_delay_ipc, scale_factor=3):
     s_in, train_signal = mtj_module.real_time_generator(
@@ -35,12 +37,6 @@ def ipc_target(length_input, task, ratio, delay, washtime, degree_ipc, max_delay
     print('degree', degree_ipc, 'delay', max_delay_ipc, 'ipc', np.sum(ipc_list))
 
 def ipc_mtj(degree_delay_sets, ratio=0.5, evolution_time=4e-9, ac_current=0, node=20):
-
-    # # avoid repeat calcualtion
-    # for degree_ipc, max_delay_ipc in degree_delay_sets: 
-    #     if os.path.exists(f'ipc_data_mtj/{evolution_time}/{ratio}/test_degree_{degree_ipc}_delay_{max_delay_ipc}_bernoulli_ac_{ac_current}_node{node}.csv'):
-    #         print('data exits, pass')
-    #         return True
 
     file_name = f'radom_input_data/input_ratio_{ratio}_{evolution_time}_{ac_current}.csv'
     if not os.path.exists(file_name):
@@ -123,15 +119,50 @@ if __name__ == '__main__':
     delay_degree_list = [[1, 200], [2, 100], [3, 20], [4, 20], [5, 10], [6, 10], [7, 10], [8, 10]]
     ac_list = np.linspace(1, 100, 100, dtype=int)
     posibility_list = np.round(np.linspace(0.1, 0.9, 9), 1)
-    nodes = [2, 5, 10, 16, 20, 30]
+    nodes = [16, 20, 30, 10, 5]
     # ipc_mtj(degree_delay_sets=delay_degree_list, ac_current=20, node=20, ratio=0.5, evolution_time=4e-9)
     # degree_delay_sets, ratio=0.5, evolution_time=4e-9, ac_current=0, node=20
     for node in nodes:
         for posibility in posibility_list:
-            with Pool(5) as pool:
+            with Pool(10) as pool:
                 pool.starmap(ipc_mtj, 
-                            zip(itertools.repeat(delay_degree_list), itertools.repeat(posibility), itertools.repeat(4e-9), ac_list, itertools.repeat(node)))
+                            zip(itertools.repeat(delay_degree_list), itertools.repeat(posibility), itertools.repeat(3e-9), ac_list, itertools.repeat(node)))
 
     # delay_degree_list = [[1, 100]]
     # for degree, max_delay in delay_degree_list:
     #     ipc_target(length_input=500, task='Parity', delay=3 ,ratio=0.5, washtime=500, degree_ipc=degree, max_delay_ipc=max_delay, scale_factor=1.2)
+
+    # #####################################################################################
+    # analyze the calculation of ipc in STO-RC
+    # #####################################################################################
+    # delay_degree_list = [[1, 200], [2, 100], [3, 20], [4, 20], [5, 10], [6, 10], [7, 10], [8, 10]]
+    # ac_list = np.linspace(1, 100, 100, dtype=int)
+    # posibility_list = np.round(np.linspace(0.1, 0.9, 9), 1)
+    # nodes = [16, 20, 30, 10, 5]
+    # node = 16
+    # c_list_degree_rc = np.zeros((len(ac_list), len(delay_degree_list)))
+    # for degree, delay in delay_degree_list:
+    #     for ac_value_index in track(range(len(ac_list))):
+    #         ac_value = ac_list[ac_value_index]
+    #         file_name = f'ipc_data_mtj/4e-09/0.5/summary_test_degree_{degree}_delay_{delay}_bernoulli_ac_{ac_value}_node{node}.csv'
+    #         df = pd.read_csv(file_name)
+    #         c_list_degree_rc[ac_value_index, degree-1] = np.sum(df['c_thresold_list'])
+
+    # print(c_list_degree_rc)
+    # data = pd.DataFrame({
+    #     'degree_1': c_list_degree_rc[:, 1],
+    #     'degree_2': c_list_degree_rc[:, 2],
+    #     'degree_3': c_list_degree_rc[:, 3],
+    #     'degree_4': c_list_degree_rc[:, 4],
+    #     })
+    # data.to_csv('data_ipc_temp.csv', index=False)
+
+    # data = pd.read_csv('data_ipc_temp.csv')
+    # plt.figure(f'degree_1')
+    # for i in range(1, 5):
+        
+    #     plt.plot(ac_list, data[f'degree_{i}'], label='degree 1')
+    #     label_size = 16
+    #     plt.xlabel(r'ac current', size=label_size)
+    #     plt.ylabel(r'IPC', size=label_size)
+    # plt.show()
