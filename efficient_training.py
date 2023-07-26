@@ -10,7 +10,6 @@ from multiprocessing import Pool
 import itertools
 from scipy.interpolate import interp1d
 
-
 np.random.seed(110)
 
 def save_random_reservoir(length=10000, ratio=0.5, consuming_time=4e-9, ac_current=0.0, save_path='radom_input_data'):
@@ -43,7 +42,6 @@ def save_random_reservoir(length=10000, ratio=0.5, consuming_time=4e-9, ac_curre
     data.to_csv(f'{save_path}/input_ratio_{ratio}_{consuming_time}_{ac_current}.csv')
     print('save data successfully!')
     # mtj_module.email_alert(f'The {consuming_time} {ratio} task is finished.')
-
 
 def efficient_training(save_path='radom_input_data', consuming_time=4e-9, ac_current=0.0, retrain=False):
     if not os.path.exists(save_path):
@@ -162,7 +160,6 @@ def efficient_training(save_path='radom_input_data', consuming_time=4e-9, ac_cur
                     print(f'train error: {error_learning}, ratio: {ratio}, task: {task}, delay: {superposition}, ac: {ac_current}')
                     
                     np.save(f'{file_path}/STM_{task}_{superposition}_node_{node}_ac_{ac_current}.npy', weight_out)
-
 
 def efficient_test(input_path='test_random_input', consuming_time=3e-9, ac_current=0.0, save_path='test_results'):
     if not os.path.exists(input_path):
@@ -504,65 +501,3 @@ def efficient_test_narma(input_path='test_random_input', consuming_time=3e-9, ac
             save_data.to_csv(f'{data_save_path}', index_label='number')
 
     return y_test_list, test_singal_split
-
-if __name__ == '__main__':
-    # time_list = [2e-9, 3e-9, 4e-9, 6e-9, 7e-9, 10e-9, 20e-9]
-    time_list = [4e-9]
-    ac_list = np.linspace(0, 100, 101, dtype=int)
-    # ac_list = [100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90]
-    # ac_list = [51]
-    # superposition_list = np.linspace(11, 30, 20, dtype=int)
-    print(ac_list)
-    # ac_list = [0]
-    # posibility_list = np.round(np.linspace(0.1, 0.9, 9), 1) 
-    # for time in time_list:
-    #     with Pool() as pool:
-    #         pool.starmap(save_random_reservoir, 
-    #                     zip(itertools.repeat(1000), posibility_list, itertools.repeat(time), itertools.repeat(0), itertools.repeat('test_random_input')))
-
-    # mtj_module.email_alert('Test input data is ready!')
-    # time_list = [4e-9]
-
-    # with Pool(8) as pool:
-    #     pool.starmap(efficient_training, zip(itertools.repeat('radom_input_data'), itertools.repeat(4e-9), ac_list, itertools.repeat(False)))
-
-    # #####################################################################
-    # test for code
-    # #####################################################################
-    # ac_list = [1, 30, 50, 80, 100]
-    # task_list = ['Narma3, Narma5, Narma2']
-    # for task in task_list:
-    #     with Pool(5) as pool:
-    #         pool.starmap(
-    #             efficient_training_narma, zip(
-    #                 itertools.repeat('radom_input_data'), itertools.repeat(4e-9), ac_list, itertools.repeat(False), itertools.repeat(task)))
-
-    # for ac_value in ac_list:
-    #     efficient_training_narma('radom_input_data', 4e-9, ac_current=ac_value, retrain=False, task='Narma3')
-    #     efficient_training_narma('radom_input_data', 4e-9, ac_current=ac_value, retrain=False, task='Narma5')
-    #     efficient_training_narma('radom_input_data', 4e-9, ac_current=ac_value, retrain=False, task='Narma2')
-        # efficient_test_narma(consuming_time=4e-9, ac_current=ac_value, task=task)
-
-
-    for ac_current in track(ac_list):
-        efficient_test_narma(consuming_time=4e-9, ac_current=ac_current, task='Narma2')
-        efficient_test_narma(consuming_time=4e-9, ac_current=ac_current, task='Narma5')
-        efficient_test_narma(consuming_time=4e-9, ac_current=ac_current, task='Narma3')
-
-    # performance_list = []
-    # for ac_current in ac_list:
-    #     file_name = f'Narma101_node30_ratio0.6_ac{ac_current}.csv'
-    #     performance = pd.read_csv(file_name)['NMSE'].mean()
-    #     performance_list.append(performance)
-    # plt.figure()
-    # plt.plot(ac_list, performance_list)
-    # plt.scatter(ac_list, performance_list)
-    # plt.show()
-
-    # multi-test
-    # with Pool(1) as pool:
-    #     pool.starmap(
-    #         efficient_test,
-    #         zip(itertools.repeat('test_random_input'), itertools.repeat(4e-9), ac_list, itertools.repeat('test_results')))
-    # efficient_test('test_random_input', 4e-9, ac_current=0, save_path='test_results')
-    # mtj_module.email_alert('Test results are ready !')
