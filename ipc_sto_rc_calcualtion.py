@@ -43,7 +43,7 @@ def ipc_mtj(degree_delay_sets, ratio=0.5, evolution_time=4e-9, ac_current=0, nod
         return f'no such file: {file_name}'
     input_data_file = pd.read_csv(file_name)
     s_in = input_data_file['s_in']
-    washtime = int(len(s_in)/2)
+    washtime = int(len(s_in)/10)
     reservoir_states = np.zeros(((len(s_in) - washtime), node))
 
     # construct reservoir states
@@ -55,27 +55,27 @@ def ipc_mtj(degree_delay_sets, ratio=0.5, evolution_time=4e-9, ac_current=0, nod
         sampling_x_values = np.linspace(1, len(mz_amplitude), node)
         f = interp1d(xp, fp, kind='quadratic')
         reservoir_states[row_index, :] = f(sampling_x_values)
-    
-    # calculate ipc
-    for degree_ipc, max_delay_ipc in degree_delay_sets:
-        ipc_analyze = ipc_module.ipc(
-            washtime=washtime, s_in=s_in, reservoir_states=reservoir_states, N_binomial=1, p_binomial=ratio,
-            distribution_in='bernoulli', degree=degree_ipc, max_delay=max_delay_ipc, scale_factor=1.2
-            )
-        ipc_list = ipc_analyze.thresold()
-        ipc_analyze.save_ipc(path=f'ipc_data_mtj/{evolution_time}/{ratio}', remark=f'ac_{ac_current}_node{node}')
-        # info about the max and min
-        ipc_temp = []
-        for i in ipc_list:
-            if i != 0:
-                ipc_temp.append(i)    
-        print('max', np.max(ipc_list))
-        if len(ipc_temp) != 0:
-            print('min', np.min(ipc_temp))
-        else:
-            print('no min value')
-        # print('max', np.max(ipc_list), 'min', np.min(ipc_list))
-        print('ac', ac_current, 'degree', degree_ipc, 'delay', max_delay_ipc, 'ipc', np.sum(ipc_list))
+    print('rank of reservoir', np.linalg.matrix_rank(reservoir_states))
+    # # calculate ipc
+    # for degree_ipc, max_delay_ipc in degree_delay_sets:
+    #     ipc_analyze = ipc_module.ipc(
+    #         washtime=washtime, s_in=s_in, reservoir_states=reservoir_states, N_binomial=1, p_binomial=ratio,
+    #         distribution_in='bernoulli', degree=degree_ipc, max_delay=max_delay_ipc, scale_factor=3
+    #         )
+    #     ipc_list = ipc_analyze.thresold()
+    #     ipc_analyze.save_ipc(path=f'ipc_data_mtj/{evolution_time}/{ratio}', remark=f'ac_{ac_current}_node{node}')
+    #     # info about the max and min
+    #     ipc_temp = []
+    #     for i in ipc_list:
+    #         if i != 0:
+    #             ipc_temp.append(i)    
+    #     print('max', np.max(ipc_list))
+    #     if len(ipc_temp) != 0:
+    #         print('min', np.min(ipc_temp))
+    #     else:
+    #         print('no min value')
+    #     # print('max', np.max(ipc_list), 'min', np.min(ipc_list))
+    #     print('ac', ac_current, 'degree', degree_ipc, 'delay', max_delay_ipc, 'ipc', np.sum(ipc_list))
     return 0
 
 if __name__ == '__main__':
@@ -116,17 +116,20 @@ if __name__ == '__main__':
     # #####################################################################################
     # calculation of ipc in STO-RC
     # #####################################################################################
-    delay_degree_list = [[1, 200], [2, 100], [3, 20], [4, 20], [5, 10], [6, 10], [7, 10], [8, 10]]
-    ac_list = np.linspace(1, 100, 100, dtype=int)
+    delay_degree_list = [[1, 50], [2, 10], [3, 10], [4, 10], [5, 10], [6, 10], [7, 10], [8, 10]]
+    delay_degree_list = [[1, 10]]
+    ac_list = np.linspace(0, 100, 101, dtype=int)
     posibility_list = np.round(np.linspace(0.1, 0.9, 9), 1)
-    nodes = [16, 20, 30, 10, 5]
-    # ipc_mtj(degree_delay_sets=delay_degree_list, ac_current=20, node=20, ratio=0.5, evolution_time=4e-9)
+    # posibility_list = [0.1, 0.9]
+    nodes = [100]
+    for ratio in posibility_list:
+        ipc_mtj(degree_delay_sets=delay_degree_list, ac_current=10, node=100, ratio=ratio, evolution_time=4e-9)
     # degree_delay_sets, ratio=0.5, evolution_time=4e-9, ac_current=0, node=20
-    for node in nodes:
-        for posibility in posibility_list:
-            with Pool(10) as pool:
-                pool.starmap(ipc_mtj, 
-                            zip(itertools.repeat(delay_degree_list), itertools.repeat(posibility), itertools.repeat(3e-9), ac_list, itertools.repeat(node)))
+    # for node in nodes:
+    #     for posibility in posibility_list:
+    #         with Pool(10) as pool:
+    #             pool.starmap(ipc_mtj, 
+    #                         zip(itertools.repeat(delay_degree_list), itertools.repeat(posibility), itertools.repeat(4e-9), ac_list, itertools.repeat(node)))
 
     # delay_degree_list = [[1, 100]]
     # for degree, max_delay in delay_degree_list:
@@ -139,7 +142,7 @@ if __name__ == '__main__':
     # ac_list = np.linspace(1, 100, 100, dtype=int)
     # posibility_list = np.round(np.linspace(0.1, 0.9, 9), 1)
     # nodes = [16, 20, 30, 10, 5]
-    # node = 16
+    # node = 100
     # c_list_degree_rc = np.zeros((len(ac_list), len(delay_degree_list)))
     # for degree, delay in delay_degree_list:
     #     for ac_value_index in track(range(len(ac_list))):

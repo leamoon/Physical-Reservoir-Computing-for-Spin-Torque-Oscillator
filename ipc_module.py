@@ -46,8 +46,8 @@ class ipc:
                 self.reservoir_states[:, index_mean_reservoir])
         
         self.svd_rc_states, _, _ = np.linalg.svd(self.reservoir_states, full_matrices=False)
+        print('rank of reservoir', np.linalg.matrix_rank(self.reservoir_states))
         print('initialize ...')
-
 
     def polynomial_match(self):
         # generate the corresponding polynomial chaos
@@ -218,6 +218,6 @@ class ipc:
             'c_thresold_list': self.c_thresold_list, 'degree_delay_sets': self.degree_delay_sets})
 
         # save
-        self.total_ipc_frame.to_csv(f'{save_path}/test_degree_{self.degree}_delay_{self.max_delay}_{self.polynomial}_{remark}.csv', index=False)
+        # self.total_ipc_frame.to_csv(f'{save_path}/test_degree_{self.degree}_delay_{self.max_delay}_{self.polynomial}_{remark}.csv', index=False)
         summary_ipc_frame.to_csv(f'{save_path}/summary_test_degree_{self.degree}_delay_{self.max_delay}_{self.polynomial}_{remark}.csv', index=False)
         print('data save successfully!')
