@@ -1,41 +1,19 @@
 <div id="top"></div>
-
-<!-- PROJECT LOGO -->
 <br />
 <div align="center">
   <a href="https://github.com/leamoon/ESN_mtj"></a>
-
-  <h3 align="center">Physical Reservoir Computing</h3>
-
-  <p align="center">
-    Using different regions of Magnetic Tunnel Junction to build functional echo state network
+  <h3 align="center"> Optimizing Reservoir Computing Based on an Alternating Input-Driven Spin-Torque Oscillator</h3>
+  <p align="center"></p>
+    Xuezhao WU (lemoon)
+  </p>
+  <p align="center"></p>
+    The Hong Kong University of Science and Technology
   </p>
 </div>
 
-<!-- ABOUT THE PROJECT -->
-## Information
+## Statement
 
-There are many dynamical regions in magnetic tunnel junction, and we also call them as stable switching MTJ, oscillator MTJ and chaotic MTJ following their diversified linear or nonlinear performances. Physical reservoir computing is a novelty field attracting more and more researchers, especially for prediction of chaotic function and hardware acceleration.
-
-Here's branches of our project:
-* `Stable switching MTJ`
-* `Oscillator MTJ`
-* `Weaker-Chaotic MTJ`
-
-Of course, we apply these different system running on _**parity check task**, **classification task** and **delay task**_. 
-
-
-
-### Built With
-* [Scipy](https://www.scipy.org/)
-* [Numpy](https://numpy.org/)
-
-
-<!-- LICENSE -->
-## License
-
-Distributed under the MIT License.
-
+I decide to share the code of my first paper titled [***'Optimizing Reservoir Computing Based on an Alternating Input-Driven Spin-Torque Oscillator.'***](https://journals.aps.org/prapplied/abstract/10.1103/PhysRevApplied.20.024069) The code includes dynamic simulations of a magnetic tunnel junction driven by various current configurations, a spin-torque oscillator-based reservoir computing framework, Lyapunov exponent calculations, quantification of the echo-state property, and estimation of the information processing capacity. I hope this 'useless' code can contribute to the development of the scientific community, especially for the in-memory computing with MRAM and physical reservoir computing. I welcome any feedback or questions regarding my project. Please feel free to contact me via email.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

@@ -164,3 +164,13 @@ NMSE*
 weight*
 Figures
 
+# cunstom data saving path
+.history/
+input_configuration_data/
+error_data/
+weight*
+*.csv
+test_results/
+test_random_input/
+data_stochastic_/
+radom_input_data/
