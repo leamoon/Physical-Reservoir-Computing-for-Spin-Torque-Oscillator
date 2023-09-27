@@ -1,41 +1,17 @@
 <div id="top"></div>
-
-<!-- PROJECT LOGO -->
 <br />
 <div align="center">
   <a href="https://github.com/leamoon/ESN_mtj"></a>
-
-  <h3 align="center">Physical Reservoir Computing</h3>
-
-  <p align="center">
-    Using different regions of Magnetic Tunnel Junction to build functional echo state network
+  <h3 align="center"> Optimizing Reservoir Computing Based on an Alternating Input-Driven Spin-Torque Oscillator</h3>
+  <p align="center"></p>
+    Xuezhao WU (lemoon)
+  </p>
+  <p align="center"></p>
+    The Hong Kong University of Science and Technology
   </p>
 </div>
 
-<!-- ABOUT THE PROJECT -->
-## Information
+## Statement
 
-There are many dynamical regions in magnetic tunnel junction, and we also call them as stable switching MTJ, oscillator MTJ and chaotic MTJ following their diversified linear or nonlinear performances. Physical reservoir computing is a novelty field attracting more and more researchers, especially for prediction of chaotic function and hardware acceleration.
-
-Here's branches of our project:
-* `Stable switching MTJ`
-* `Oscillator MTJ`
-* `Weaker-Chaotic MTJ`
-
-Of course, we apply these different system running on _**parity check task**, **classification task** and **delay task**_. 
-
-
-
-### Built With
-* [Scipy](https://www.scipy.org/)
-* [Numpy](https://numpy.org/)
-
-
-<!-- LICENSE -->
-## License
-
-Distributed under the MIT License.
-
-
-<p align="right">(<a href="#top">back to top</a>)</p>
+This is an old version of this project, including many unrelative codes. You may find a lot of fun in it, such as some bugs :stuck_out_tongue_closed_eyes:. Please check the major code relative to the paper in 'master' branch.
 
