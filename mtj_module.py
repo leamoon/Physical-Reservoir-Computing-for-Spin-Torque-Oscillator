@@ -16,30 +16,6 @@ from scipy.signal import argrelmax
     This module is built by Xuezhao for simulating the baisc MTJ class.
 """
 
-def email_alert(subject='Default', receiver='1060014562@qq.com'):
-    """
-    a function sends an alert message to my email.
-    :param subject: content of email
-    :param receiver: email of receiver
-    """
-    mail_host = "smtp.qq.com"
-    mail_user = "1060014562"
-    mail_pass = "dwwsklhrgaoybbjh"
-    sender = '1060014562@qq.com'
-    message = MIMEText('Training successfully!', 'plain', 'utf-8')
-    message['From'] = Header("Robot_Training", 'utf-8')
-    message['To'] = Header("Dear Master", 'utf-8')
-    message['Subject'] = Header(subject, 'utf-8')
-
-    smtp = SMTP_SSL(mail_host)
-    smtp.ehlo(mail_host)
-    smtp.login(mail_user, mail_pass)
-    print('sending !')
-
-    smtp.sendmail(sender, receiver, message.as_string())
-    return 0
-
-
 def real_time_generator(task='Delay', superposition_number=1, length_signals=100, posibility_0=0.5):
     """
     a function used to associate training delay task and Parity check task
@@ -361,9 +337,9 @@ class Mtj:
             plt.xlabel('Time')
             plt.show()
 
-        # notification
-        if alert_index:
-            email_alert(subject='Training Successfully !')
+        # notification (no avariable after open access)
+        # if alert_index:
+        #     email_alert(subject='Training Successfully !')
 
     def real_time_test(self, test_number=80, nodes_stm=80, file_path='weight_matrix_oscillator_xuezhao',
                        visual_index=True,
@@ -508,8 +484,8 @@ class Mtj:
         print(f'$Cor^{2}$: {capacity}')
         print('----------------------------------------------------------------')
 
-        if alert_index:
-            email_alert(subject='error of STM : {}'.format(error_learning))
+        # if alert_index:
+        #     email_alert(subject='error of STM : {}'.format(error_learning))
 
         # FIGURES
         if visual_index:
